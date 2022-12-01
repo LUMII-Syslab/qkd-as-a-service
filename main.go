@@ -2,12 +2,11 @@ package main
 
 import (
 	"log"
-	"time"
 
 	zmq "github.com/pebbe/zmq4"
 )
 
-const ClavisKeyUrl = "tcp://*:5555" //"tcp://192.168.10.101:5560"
+const ClavisKeyUrl = "tcp://192.168.10.101:5560"
 
 func main() {
 	zctx, err := zmq.NewContext()
@@ -19,13 +18,16 @@ func main() {
 	if err != nil {
 		log.Panicln(err)
 	}
+	zs.SetSubscribe("")
+	defer zs.Close()
 	log.Println("created a new zeromq socket")
 
-	err = zs.Bind(ClavisKeyUrl)
+	log.Println("attempting to connect to", ClavisKeyUrl)
+	err = zs.Connect(ClavisKeyUrl)
 	if err != nil {
 		log.Panicln(err)
 	}
-	log.Println("binded zeromq socket to", ClavisKeyUrl)
+	log.Println("connected zeromq to", ClavisKeyUrl)
 
 	for {
 		// Wait for next request from client
@@ -35,8 +37,5 @@ func main() {
 		}
 
 		log.Printf("Received %s\n", msg)
-
-		// Do some 'work'
-		time.Sleep(time.Second * 1)
 	}
 }
