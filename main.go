@@ -38,8 +38,5 @@ func main() {
 
 		// Do some 'work'
 		time.Sleep(time.Second * 1)
-
-		// Send reply back to client
-		zs.Send("World", 0)
 	}
 }
