@@ -4,6 +4,7 @@ import (
 	"log"
 
 	zmq "github.com/pebbe/zmq4"
+	"github.com/vmihailenco/msgpack/v5"
 )
 
 const ClavisKeyUrl = "tcp://192.168.10.101:5560"
@@ -30,12 +31,18 @@ func main() {
 	log.Println("connected zeromq to", ClavisKeyUrl)
 
 	for {
-		// Wait for next request from client
-		msg, err := zs.Recv(0)
+		msg_b, err := zs.RecvBytes(0)
 		if err != nil {
-			log.Panicln(err)
+			log.Panic(err)
 		}
-
-		log.Printf("Received %s\n", msg)
+		var msg []interface{}
+		err = msgpack.Unmarshal(msg_b, &msg)
+		if err != nil {
+			log.Panic(err)
+		}
+		if len(msg) != 2 {
+			continue
+		}
+		log.Printf("message: %v\n", msg)
 	}
 }
