@@ -9,7 +9,7 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-func gatherKeys(keys KeyManager, config Configuration) {
+func gatherClavisKeys(keys KeyManager, url string) {
 	zctx, err := zmq.NewContext()
 	if err != nil {
 		log.Panicln(err)
@@ -23,12 +23,12 @@ func gatherKeys(keys KeyManager, config Configuration) {
 	defer zs.Close()
 	log.Println("created a new zeromq socket")
 
-	log.Println("attempting to connect to", config.ClavisURL)
-	err = zs.Connect(config.ClavisURL)
+	log.Println("attempting to connect to", url)
+	err = zs.Connect(url)
 	if err != nil {
 		log.Panicln(err)
 	}
-	log.Println("connected zeromq to", config.ClavisURL)
+	log.Println("connected zeromq to", url)
 
 	for i := 0; i < 10; i++ {
 		msg_b, err := zs.RecvBytes(0)
@@ -44,10 +44,10 @@ func gatherKeys(keys KeyManager, config Configuration) {
 			continue
 		}
 
-		var key string
+		var keyId string
 		switch t := msg[0].(type) {
 		case string:
-			key = t
+			keyId = t
 		}
 
 		var vals []uint8
@@ -64,10 +64,16 @@ func gatherKeys(keys KeyManager, config Configuration) {
 			}
 		}
 
-		valsStr := base64.RawStdEncoding.EncodeToString(vals)
-		fmt.Printf("\tk: %v \r", valsStr)
+		keyVal := base64.RawStdEncoding.EncodeToString(vals)
+		fmt.Printf("\tk: %v \r", keyVal)
 
-		keys.add(key, valsStr)
+		keys.add(keyId, keyVal)
 	}
 
+}
+
+func gatherRandomKeys(keys KeyManager) {
+	for {
+		fmt.Printf("\tk: %v \r", keyVal)
+	}
 }
