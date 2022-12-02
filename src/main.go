@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	config := LoadConfig()
-	keys := InitKeyManager(config)
+	config := loadConfig()
+	keys := initKeyManager(config)
 
 	if config.ClavisURL != "" {
 		gatherClavisKeys(keys, config.ClavisURL)

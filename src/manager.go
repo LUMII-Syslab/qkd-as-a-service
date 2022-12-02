@@ -15,6 +15,6 @@ func (k *KeyManager) getAll() map[string]string {
 	return k.data
 }
 
-func InitKeyManager(config Configuration) KeyManager {
+func initKeyManager(config Configuration) KeyManager {
 	return KeyManager{}
 }

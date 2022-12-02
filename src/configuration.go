@@ -11,7 +11,7 @@ type Configuration struct {
 	MaxKeyCount int    `mapstructure:"max_key_cnt"`
 }
 
-func LoadConfig() Configuration {
+func loadConfig() Configuration {
 	res := Configuration{}
 	viper.SetConfigFile("config.toml")
 	confFile := viper.ConfigFileUsed()

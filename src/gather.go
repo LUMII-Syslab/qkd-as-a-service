@@ -1,9 +1,12 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"fmt"
 	"log"
+	math_rand "math/rand"
+	"time"
 
 	zmq "github.com/pebbe/zmq4"
 	"github.com/vmihailenco/msgpack/v5"
@@ -72,8 +75,22 @@ func gatherClavisKeys(keys KeyManager, url string) {
 
 }
 
+func generateRandomBytes(n int) ([]byte, error) {
+	b := make([]byte, n)
+	rand.Read(b)
+	return b, nil
+}
+
+func genRandomBase64Str(n int) string {
+	b, _ := generateRandomBytes(n)
+	return base64.RawStdEncoding.EncodeToString(b)
+}
+
 func gatherRandomKeys(keys KeyManager) {
 	for {
+		keyId, keyVal := genRandomBase64Str(5), genRandomBase64Str(10)
 		fmt.Printf("\tk: %v \r", keyVal)
+		time.Sleep(time.Duration(math_rand.Float32() * 1000000000))
+		keys.add(keyId, keyVal)
 	}
 }
