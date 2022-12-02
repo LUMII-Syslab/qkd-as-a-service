@@ -1,0 +1,5 @@
+# if clavis url is not set fake key generation will be used instead
+clavis_url = "tcp://192.168.10.101:5560"
+
+# maximum number of keys stored in memory
+max_key_cnt = 1000
