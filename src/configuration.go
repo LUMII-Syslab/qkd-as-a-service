@@ -16,14 +16,28 @@ func loadConfig() Configuration {
 	viper.SetConfigFile("config.toml")
 	confFile := viper.ConfigFileUsed()
 	viper.ConfigFileUsed()
-	viper.ReadInConfig()
-	err := viper.Unmarshal(&res)
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Panic(err)
+	}
+	err = viper.Unmarshal(&res)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	log.Printf("loaded \"%v\" as ClavisURL from %v\n", res.ClavisURL, confFile)
-	log.Printf("loaded \"%v\" as MaxKeyCount from %v\n", res.MaxKeyCount, confFile)
+	if viper.IsSet("clavis_url") {
+		log.Printf("loaded \"%v\" as ClavisURL from %v\n", res.ClavisURL, confFile)
+	} else {
+		log.Printf("\"clavis_url\" not found in config")
+		log.Printf("set \"%v\" as ClavisURL", res.ClavisURL)
+	}
 
+	if viper.IsSet("max_key_cnt") {
+		log.Printf("loaded %v as MaxKeyCount from %v\n", res.MaxKeyCount, confFile)
+	} else {
+		log.Printf("\"max_key_cnt\" not found in config")
+		res.MaxKeyCount = 1000
+		log.Printf("set %v as MaxKeyCount", res.MaxKeyCount)
+	}
 	return res
 }
