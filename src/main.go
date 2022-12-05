@@ -7,7 +7,7 @@ import (
 
 func main() {
 	config := loadConfig()
-	keys := initKeyManager(config)
+	keys := initKeyManager(config.MaxKeyCount)
 
 	if config.ClavisURL != "" {
 		gatherClavisKeys(keys, config.ClavisURL)

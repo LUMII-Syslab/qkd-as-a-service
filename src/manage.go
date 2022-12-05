@@ -5,7 +5,8 @@ import (
 )
 
 type KeyManager struct {
-	data map[string]string
+	data        map[string]string
+	maxKeyCount int
 }
 
 func (k *KeyManager) add(id, val string) error {
@@ -29,6 +30,6 @@ func (k *KeyManager) getAll() map[string]string {
 	return k.data
 }
 
-func initKeyManager(config Configuration) KeyManager {
-	return KeyManager{make(map[string]string)}
+func initKeyManager(maxKeyCount int) KeyManager {
+	return KeyManager{make(map[string]string), maxKeyCount}
 }
