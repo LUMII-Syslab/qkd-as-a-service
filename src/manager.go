@@ -1,6 +1,8 @@
 package main
 
-import "errors"
+import (
+	"errors"
+)
 
 type KeyManager struct {
 	data map[string]string
@@ -28,5 +30,5 @@ func (k *KeyManager) getAll() map[string]string {
 }
 
 func initKeyManager(config Configuration) KeyManager {
-	return KeyManager{}
+	return KeyManager{make(map[string]string)}
 }
