@@ -3,15 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 50%;
+            margin: auto;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align:center;
+        }
+
+    </style>
 </head>
 <body>
+    <table id="my-table">
+
+    </table>
     <script>
         let socket = new WebSocket("ws://localhost:8080/ws")
         console.log("attempting WebSocket Connection")
 
         socket.onopen = () => {
             console.log("successfully connected")
-            socket.send("reserve")
+            function add_key() {
+                socket.onmessage = (msg) => {
+                    let key_id = msg.data
+                    console.log("key_id: ", key_id)
+                    socket.onmessage = (msg) => {
+                        let key_left = msg.data
+                        let table = document.getElementById("my-table")
+                        let row = table.insertRow(0)
+                        row.innerHTML = `<td>${key_id}</td><td>${key_left}</td>`
+                        if (table.rows.length > 10)
+                            table.rows[10].remove()
+                        add_key()
+                    }
+                    socket.send(`get_left ${key_id}`)
+                }
+                socket.send("reserve")
+            }
+            add_key()
         }
 
         socket.onclose = (event) => {
@@ -20,12 +55,6 @@
 
         socket.onerror = (error) => {
             console.log("socket error: ",error)
-        }
-
-        socket.onmessage = (msg) => {
-            console.log(msg.data)
-            let key_id = msg.data
-            socket.send(`get_left ${key_id}`)
         }
     </script>
 </body>
