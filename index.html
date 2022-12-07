@@ -11,7 +11,7 @@
 
         socket.onopen = () => {
             console.log("successfully connected")
-            socket.send("hi from the client!")
+            socket.send("reserve")
         }
 
         socket.onclose = (event) => {
@@ -23,7 +23,9 @@
         }
 
         socket.onmessage = (msg) => {
-            console.log(msg)
+            console.log(msg.data)
+            let key_id = msg.data
+            socket.send(`get_left ${key_id}`)
         }
     </script>
 </body>

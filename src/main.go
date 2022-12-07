@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 )
 
@@ -10,13 +9,11 @@ func main() {
 	keys := initKeyManager(config.MaxKeyCount)
 
 	if config.ClavisURL != "" {
-		gatherClavisKeys(keys, config.ClavisURL)
+		go gatherClavisKeys(keys, config.ClavisURL)
 	} else {
 		log.Println("clavis url is empty. generating pseudo random keys")
-		gatherRandomKeys(keys)
+		go gatherRandomKeys(keys)
 	}
 
-	for key, val := range keys.getAll() {
-		fmt.Println(key, val)
-	}
+	listenAndServe(keys)
 }
