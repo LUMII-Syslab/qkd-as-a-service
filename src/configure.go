@@ -9,6 +9,7 @@ import (
 type Configuration struct {
 	ClavisURL   string `mapstructure:"clavis_url"`
 	MaxKeyCount int    `mapstructure:"max_key_cnt"`
+	Aija        bool   `mapstructure:"aija"`
 }
 
 func loadConfig() Configuration {
@@ -38,6 +39,14 @@ func loadConfig() Configuration {
 		log.Printf("\"max_key_cnt\" not found in config")
 		res.MaxKeyCount = 1000
 		log.Printf("set %v as MaxKeyCount", res.MaxKeyCount)
+	}
+
+	if viper.IsSet("aija") {
+		log.Printf("loaded %v as Aija from %v\n", res.Aija, confFile)
+	} else {
+		log.Printf("\"aija\" not found in config")
+		res.Aija = true
+		log.Printf("set %v as aija", res.Aija)
 	}
 	return res
 }

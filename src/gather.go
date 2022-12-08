@@ -70,7 +70,7 @@ func gatherClavisKeys(keys KeyManager, url string) {
 		keyVal := base64.RawStdEncoding.EncodeToString(vals)
 		fmt.Printf("\tk: %v \r", keyVal)
 
-		keys.add(keyId, keyVal)
+		keys.add([]byte(keyId), []byte(keyVal)) // TODO the conversion to base64 has to be removed
 	}
 
 }
@@ -91,6 +91,6 @@ func gatherRandomKeys(keys KeyManager) {
 		keyId, keyVal := genRandomBase64Str(5), genRandomBase64Str(10)
 		fmt.Printf("\tk: %v \r", keyVal)
 		time.Sleep(time.Duration(math_rand.Float32() * 1000000000))
-		keys.add(keyId, keyVal)
+		keys.add([]byte(keyId), []byte(keyVal)) // TODO the conversion to base64 has to be removed
 	}
 }
