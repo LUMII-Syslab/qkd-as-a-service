@@ -40,22 +40,29 @@ function stop_watching_keys() {
     watching_keys = false
 }
 
-function reserve_key_and_get_half() {
-    const res = new Uint8Array(13)
-    res[0] = 0x30; res[1] = 0x0B // a sequence of 11 bytes will follow
-    res[2] = 0x02; res[3] = 0x01 // an integer of 1 byte will follow
-    res[4] = 0x01 // reserveKeyAndGetKeyHalf request
-    res[5] = 0x02; res[6] = 0x02 // an integer of 2 bytes will follow
-    res[7] = 0x01; res[8] = 0x00 // requested key length (256)
-    res[9] = 0x02; res[10] = 0x02 // an integer of 2 bytes will follow
-    res[11] = 0x30; res[12] = 0x39 // call id
-    return res
+function reserve_key_and_get_half(socket) {
+    const req = new Uint8Array(13)
+    req[0] = 0x30; req[1] = 0x0B // a sequence of 11 bytes will follow
+    req[2] = 0x02; req[3] = 0x01 // an integer of 1 byte will follow
+    req[4] = 0x01 // reserveKeyAndGetKeyHalf request
+    req[5] = 0x02; req[6] = 0x02 // an integer of 2 bytes will follow
+    req[7] = 0x01; req[8] = 0x00 // requested key length (256)
+    req[9] = 0x02; req[10] = 0x02 // an integer of 2 bytes will follow
+    req[11] = 0x30; req[12] = 0x39 // call id
+    socket.send(req)
 }
 
 function send_asn_request() {
     let socket = new WebSocket("ws://localhost:8080/ws")
     socket.onopen = () => {
-        socket.send(reserve_key_and_get_half())
+        socket.onmessage = (msg) => {
+            console.log(msg.data)
+            for(let i=0;i<msg.data.size;i++)
+                console.log(msg.data[i])
+            const res = new Uint8Array(msg.data)
+            console.log(res)
+        }
+        reserve_key_and_get_half(socket)
     }
     socket.onclose = (event) =>  console.log("socket closed connection: ", event)
     socket.onerror = (error) => console.log("socket error: ",error)
