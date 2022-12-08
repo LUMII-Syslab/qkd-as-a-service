@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/hex"
-	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
 var upgrader = websocket.Upgrader{
@@ -26,21 +26,31 @@ func listenAndServe(manager KeyManager) {
 		for {
 			msgType, body, err := conn.ReadMessage() // msgType https://www.rfc-editor.org/rfc/rfc6455.html#section-11.8
 			if err != nil {
-				//log.Println(err)
 				return
 			}
 
 			req := body[2 : 2+body[1]] // trim sequence indicator and trailing bytes
-			log.Println(fmt.Sprintf("body: %v", hex.EncodeToString(req)))
+			log.Printf("body: %v\n", hex.EncodeToString(req))
 
-			addByteArray := func(s int, t byte, res []byte, src []byte) int {
-				res[s] = t
-				res[s+1] = byte(len(src))
+			addByteArray := func(strt int, res []byte, typ byte, src []byte) int {
+				res[strt] = typ
+				res[strt+1] = byte(len(src))
 				for i := 0; i < len(src); i++ {
-					res[s+2+i] = src[i]
+					res[strt+2+i] = src[i]
 				}
-				s += len(src) + 2
-				return s
+				strt += len(src) + 2
+				return strt
+			}
+
+			addInteger := func(strt int, res []byte, val uint64, len int) int {
+				res[strt] = 0x02
+				res[strt+1] = byte(len)
+				for i := 0; i < len; i++ {
+					x := val >> ((len - i - 1) * 8)
+					res[strt+2+i] = byte(x)
+				}
+				strt += len + 2
+				return strt
 			}
 
 			switch req[2] {
@@ -48,6 +58,7 @@ func listenAndServe(manager KeyManager) {
 				keyLength := uint(req[5])*256 + uint(req[6])
 				callId := uint(req[9])*256 + uint(req[10])
 				keyId, thisHalf, otherHash := manager.reserveKeyAndGetHalf(keyLength)
+				errCode, funcId := 0, 0xff
 				resBytes := 2                        // sequence + its length
 				resBytes += 3                        // integer + its length + function id (-1 for reserveKeyAndGetKeyHalf result)
 				resBytes += 4                        // integer + its length + call id
@@ -57,23 +68,16 @@ func listenAndServe(manager KeyManager) {
 				resBytes += 2 + len(otherHash)       // byte array + its lenght + other hash
 				resBytes += 2 + len(hashAlgorithmId) // object identifier + its length + hashAlgorithmId
 				res := make([]byte, resBytes)
-				res[0] = 0x30                  // sequence
-				res[1] = byte(resBytes - 2)    // length after first two bytes
-				res[2] = 0x02                  // integer
-				res[3] = 0x01                  // length of integer
-				res[4] = 0xff                  // reserveKeyAndGetHalf result (-1)
-				res[5] = 0x02                  // integer
-				res[6] = 0x02                  // length of integer
-				res[7] = byte(callId & 0xff00) // callId first part
-				res[8] = byte(callId & 0x00ff) // callId second part
-				res[9] = 0x02                  // integer
-				res[10] = 0x01                 // length of integer
-				res[11] = 0x00                 // error code (zero for now)
-				s := 12
-				s = addByteArray(s, 0x04, res, keyId)
-				s = addByteArray(s, 0x04, res, thisHalf)
-				s = addByteArray(s, 0x04, res, otherHash)
-				s = addByteArray(s, 0x06, res, hashAlgorithmId)
+				res[0] = 0x30               // sequence
+				res[1] = byte(resBytes - 2) // length after first two bytes
+				s := 2
+				s = addInteger(s, res, uint64(funcId), 1)  // reserveKeyAndGetHalf result (-1)
+				s = addInteger(s, res, uint64(callId), 2)  // callId
+				s = addInteger(s, res, uint64(errCode), 1) // error code (zero for now)
+				s = addByteArray(s, res, 0x04, keyId)
+				s = addByteArray(s, res, 0x04, thisHalf)
+				s = addByteArray(s, res, 0x04, otherHash)
+				s = addByteArray(s, res, 0x06, hashAlgorithmId)
 				err = conn.WriteMessage(msgType, res)
 			case 0x02: // getKeyHalf(id, ...)
 				err = conn.WriteMessage(msgType, []byte(manager.reserveKey()))
