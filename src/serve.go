@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/hex"
 	"log"
 	"net/http"
 
@@ -30,7 +29,7 @@ func listenAndServe(manager KeyManager) {
 			}
 
 			req := body[2 : 2+body[1]] // trim sequence indicator and trailing bytes
-			log.Printf("body: %v\n", hex.EncodeToString(req))
+			//log.Printf("body: %v\n", hex.EncodeToString(req))
 
 			addByteArray := func(strt int, res []byte, typ byte, src []byte) int {
 				res[strt] = typ

@@ -55,12 +55,20 @@ function reserve_key_and_get_half(socket) {
 function send_asn_request() {
     let socket = new WebSocket("ws://localhost:8080/ws")
     socket.onopen = () => {
-        socket.onmessage = (msg) => {
-            console.log(msg.data)
-            for(let i=0;i<msg.data.size;i++)
-                console.log(msg.data[i])
-            const res = new Uint8Array(msg.data)
+        socket.onmessage = async (msg) => {
+            const res = new Uint8Array(await msg.data.arrayBuffer())
             console.log(res)
+            let res_str = "";
+            for(let i=0;i<res.length;i++) {
+                let x = res[i].toString(16)
+                if(x.length===1) x="0"+x
+                res_str += x+" "
+            }
+            console.log(res_str)
+            // for(let i=0;i<msg.data.size;i++)
+            //     console.log(msg.data[i])
+            // const res = new Uint8Array(msg.data)
+            // console.log(res)
         }
         reserve_key_and_get_half(socket)
     }
