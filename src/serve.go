@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
@@ -29,7 +30,9 @@ func listenAndServe(manager KeyManager) {
 				return
 			}
 
-			log.Println(fmt.Sprintf("msgType: %v", msgType), fmt.Sprintf("body: %v", string(body)))
+			//log.Println(fmt.Sprintf("msgType: %v", msgType), fmt.Sprintf("body: %v", string(body)))
+			log.Println(fmt.Sprintf("msgType: %v", msgType), fmt.Sprintf("body: %v", hex.EncodeToString(body)))
+			//req := body[:2+body[1]]
 
 			args := strings.Fields(string(body))
 			action := args[0]
