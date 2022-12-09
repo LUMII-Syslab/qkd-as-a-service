@@ -15,5 +15,5 @@ func main() {
 		go gatherRandomKeys(keys)
 	}
 
-	listenAndServe(keys)
+	listenAndServe(keys, config.APIPort)
 }
