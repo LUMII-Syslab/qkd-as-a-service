@@ -65,10 +65,6 @@ function send_asn_request() {
                 res_str += x+" "
             }
             console.log(res_str)
-            // for(let i=0;i<msg.data.size;i++)
-            //     console.log(msg.data[i])
-            // const res = new Uint8Array(msg.data)
-            // console.log(res)
         }
         reserve_key_and_get_half(socket)
     }
