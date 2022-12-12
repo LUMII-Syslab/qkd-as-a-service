@@ -42,13 +42,45 @@ function stop_watching_keys() {
 
 function reserve_key_and_get_half(socket) {
     const req = new Uint8Array(13)
+    // sequence
     req[0] = 0x30; req[1] = 0x0B    // a sequence of 11 bytes will follow
+
+    // reserveKeyAndGetKeyHalf request
     req[2] = 0x02; req[3] = 0x01    // an integer of 1 byte will follow
-    req[4] = 0x01                   // reserveKeyAndGetKeyHalf request
+    req[4] = 0x01
+    
+    // requested key length (256)
+    req[5] = 0x02; req[6] = 0x02    // an integer of 2 bytes will follow
+    req[7] = 0x01; req[8] = 0x00
+
+    // call#
+    req[9] = 0x02; req[10] = 0x02   // an integer of 2 bytes will follow
+    req[11] = 0x30; req[12] = 0x39
+    socket.send(req)
+}
+
+function get_key_half(socket, key_id) {
+    const req = new Uint8Array(13)
+    // sequence
+    req[0] = 0x30; req[1] = 0x0B    // a sequence of 11 bytes will follow
+
+    // getKeyHalf request
+    req[2] = 0x02; req[3] = 0x01    // an integer of 1 byte will follow
+    req[4] = 0x01
+
+    // key legnth
     req[5] = 0x02; req[6] = 0x02    // an integer of 2 bytes will follow
     req[7] = 0x01; req[8] = 0x00    // requested key length (256)
-    req[9] = 0x02; req[10] = 0x02   // an integer of 2 bytes will follow
-    req[11] = 0x30; req[12] = 0x39  // call id
+
+    // key id
+    req[9] = 0x04; req[10] = key_id.length  // a byte array of key_id.length bytes will follow
+    for(let i=0;i<key_id.length;i++)
+        req[i+11] = key_id[i];
+    
+    // call#
+    req[11+key_id.length] = 0x02; req[12+key_id.length] = 0x02   // an integer of 2 bytes will follow
+    req[13+key_id.length] = 0x30; req[14+key_id.length] = 0x39
+
     socket.send(req)
 }
 
@@ -88,17 +120,13 @@ function parse_first_result(msg_arr) {
     data = ASN_DER_to_list(msg_arr);
     return {
         "state_id": data[0],
-        "nonce": data[1],
+        "call#": data[1],
         "errors": data[2],
         "key_id": data[3],
         "key_half": data[4],
         "other_hash": data[5],
         "hash_id": data[6]
     };
-}
-
-function get_key_half(socket, key_id) {
-
 }
 
 function send_asn_request() {
@@ -112,8 +140,10 @@ function send_asn_request() {
             console.log(res)
 
             let key_id = res["key_id"];
+            socket.onmessage = (msg) => {
 
-            console.log(key_id);
+            }
+            get_key_half(socket, key_id);
         }
         reserve_key_and_get_half(socket)
 

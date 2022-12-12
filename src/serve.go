@@ -81,6 +81,7 @@ func listenAndServe(manager KeyManager, APIPort int) {
 				s = addByteArray(s, res, 0x06, hashAlgorithmId)
 				err = conn.WriteMessage(msgType, res)
 			case 0x02: // getKeyHalf(id, ...)
+				log.Println("getKeyHalf req received")
 				err = conn.WriteMessage(msgType, []byte(manager.reserveKey()))
 			}
 			if err != nil {
