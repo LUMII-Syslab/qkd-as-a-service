@@ -6,7 +6,7 @@ func IntToBytes(x int) []byte {
 	for i := 3; i >= 0; i-- {
 		shiftedMask := mask << (8 * i)
 		maskedValue := x & shiftedMask
-		if maskedValue != 0 {
+		if maskedValue != 0 || shiftedMask < x {
 			maskedValue >>= 8 * i
 			res = append(res, byte(maskedValue))
 		}
