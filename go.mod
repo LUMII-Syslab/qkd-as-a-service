@@ -1,4 +1,4 @@
-module qkd-server
+module qkdc-service
 
 go 1.19
 
