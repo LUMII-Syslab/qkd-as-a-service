@@ -10,6 +10,6 @@ func TestIntToBytes(t *testing.T) {
 	want := []byte{0b111}
 	result := IntToBytes(param)
 	if !reflect.DeepEqual(want, result) {
-		t.Fatalf(`IntToBytes(7) = %v, want match for %v`, result, want)
+		t.Fatalf(`IntToBytes(%v) = %v, wanted %v`, param, result, want)
 	}
 }
