@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"qkdc-service/src/utils"
 )
 
 const (
@@ -16,6 +17,10 @@ type SequenceElement struct {
 	value []byte
 }
 
+func (e SequenceElement) AsInt() int {
+	return utils.BytesToInt(e.value)
+}
+
 func (e SequenceElement) encode() []byte {
 	res := make([]byte, 2, 2+len(e.value))
 	res[0] = e.id
@@ -27,8 +32,7 @@ func (e SequenceElement) encode() []byte {
 func CreateIntSeqElement(x uint32) SequenceElement {
 	res := SequenceElement{}
 	res.id = INT_ID
-	res.value = make([]byte, 0)
-	//var mask uint = (1 << 8) - 1
+	res.value = utils.IntToBytes(int(x))
 	return res
 }
 

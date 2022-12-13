@@ -13,3 +13,12 @@ func IntToBytes(x int) []byte {
 	}
 	return res
 }
+
+func BytesToInt(b []byte) int {
+	res := 0
+	for _, v := range b {
+		res <<= 8
+		res += int(v)
+	}
+	return res
+}
