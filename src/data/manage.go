@@ -45,7 +45,7 @@ func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, error) {
 	}
 }
 
-func (k *KeyManager) GetKeyHalf(keyId []byte, length int) (thisHalf []byte, otherHash []byte, err error) {
+func (k *KeyManager) GetKeyHalf(keyId []byte) (thisHalf []byte, otherHash []byte, err error) {
 	thisHalf, err = k.getThisHalf(keyId)
 	if err != nil {
 		return
@@ -54,9 +54,9 @@ func (k *KeyManager) GetKeyHalf(keyId []byte, length int) (thisHalf []byte, othe
 	return
 }
 
-func (k *KeyManager) ReserveKeyAndGetHalf(length int) (keyId []byte, thisHalf []byte, otherHash []byte, err error) {
+func (k *KeyManager) ReserveKeyAndGetHalf() (keyId []byte, thisHalf []byte, otherHash []byte, err error) {
 	keyId = k.ReserveKey()
-	thisHalf, otherHash, err = k.GetKeyHalf(keyId, length)
+	thisHalf, otherHash, err = k.GetKeyHalf(keyId)
 	return
 }
 
