@@ -60,15 +60,15 @@ function reserve_key_and_get_half(socket) {
 }
 
 function get_key_half(socket, key_id) {
-    const req = new Uint8Array(13)
+    const req = new Uint8Array(15+key_id.length)
     // sequence
-    req[0] = 0x30; req[1] = 0x0B    // a sequence of 11 bytes will follow
+    req[0] = 0x30; req[1] = 13+key_id.length    // a sequence of 13+len(key_id) bytes will follow
 
     // getKeyHalf request
     req[2] = 0x02; req[3] = 0x01    // an integer of 1 byte will follow
     req[4] = 0x02
 
-    // key legnth
+    // key length
     req[5] = 0x02; req[6] = 0x02    // an integer of 2 bytes will follow
     req[7] = 0x01; req[8] = 0x00    // requested key length (256)
 
@@ -117,7 +117,7 @@ function ASN_DER_to_list(seq) {
 
 // parses reserve_key_and_get_half result
 function parse_first_result(msg_arr) {
-    data = ASN_DER_to_list(msg_arr);
+    let data = ASN_DER_to_list(msg_arr);
     return {
         "state_id": data[0],
         "call#": data[1],
@@ -129,20 +129,32 @@ function parse_first_result(msg_arr) {
     };
 }
 
+function parse_second_result(msg_arr) {
+    let data = ASN_DER_to_list(msg_arr);
+    return {
+        "state_id": data[0],
+        "call#": data[1],
+        "errors": data[2],
+        "key_half": data[3],
+        "other_hash": data[4],
+        "hash_id": data[5]
+    }
+}
+
 function send_asn_request() {
     let socket = new WebSocket("ws://localhost:8080/ws")
     socket.onopen = () => {
 
         socket.onmessage = async (msg) => {
-            console.log("first function called")
-            const msg_arr = new Uint8Array(await msg.data.arrayBuffer())
-            const res = parse_first_result(msg_arr);
-            console.log(res)
+            const first_msg_arr = new Uint8Array(await msg.data.arrayBuffer())
+            const first_res = parse_first_result(first_msg_arr);
+            console.log(first_res)
 
-            let key_id = res["key_id"];
+            let key_id = first_res["key_id"];
             socket.onmessage = async (msg) => {
-                console.log("second function called")
-                console.log(await msg.data.arrayBuffer());
+                const second_msg_arr = new Uint8Array(await msg.data.arrayBuffer())
+                const second_res = parse_second_result(second_msg_arr);
+                console.log(second_res)
             }
             get_key_half(socket, key_id);
         }
