@@ -1,4 +1,4 @@
-package main
+package data
 
 import (
 	"errors"
@@ -24,21 +24,21 @@ func (k *KeyManager) add(id, val []byte) error {
 }
 
 // returns key id and marks it as reserved
-func (k *KeyManager) reserveKey() []byte {
+func (k *KeyManager) ReserveKey() []byte {
 	key := <-k.queue
 	k.reserved[string(key)] = true
 	return key
 }
 
-func (k *KeyManager) reserveKeyAndGetHalf(length uint) (keyId []byte, thisHalf []byte, otherHash []byte) {
-	keyId = k.reserveKey()
+func (k *KeyManager) ReserveKeyAndGetHalf(length uint) (keyId []byte, thisHalf []byte, otherHash []byte) {
+	keyId = k.ReserveKey()
 	var err error
 	if k.aija {
-		thisHalf, err = k.getKeyLeft(keyId)
-		otherHash, err = k.getKeyRightHash(keyId)
+		thisHalf, err = k.GetKeyLeft(keyId)
+		otherHash, err = k.GetKeyRightHash(keyId)
 	} else {
-		thisHalf, err = k.getKeyRight(keyId)
-		otherHash, err = k.getKeyLeftHash(keyId)
+		thisHalf, err = k.GetKeyRight(keyId)
+		otherHash, err = k.GetKeyLeftHash(keyId)
 	}
 	if err != nil {
 		log.Panic(err)
@@ -46,7 +46,7 @@ func (k *KeyManager) reserveKeyAndGetHalf(length uint) (keyId []byte, thisHalf [
 	return
 }
 
-func (k *KeyManager) getKeyValue(id []byte) ([]byte, error) {
+func (k *KeyManager) GetKeyValue(id []byte) ([]byte, error) {
 	val, ok := k.data[string(id)]
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("key %v not found in data", id))
@@ -54,34 +54,34 @@ func (k *KeyManager) getKeyValue(id []byte) ([]byte, error) {
 	return val, nil
 }
 
-func (k *KeyManager) getKeyLeft(id []byte) ([]byte, error) {
-	res, err := k.getKeyValue(id)
+func (k *KeyManager) GetKeyLeft(id []byte) ([]byte, error) {
+	res, err := k.GetKeyValue(id)
 	if err != nil {
 		return nil, err
 	}
 	return res[:len(res)/2+1], nil
 }
 
-func (k *KeyManager) getKeyLeftHash(id []byte) ([]byte, error) {
-	return k.getKeyLeft(id) // TODO fix this
+func (k *KeyManager) GetKeyLeftHash(id []byte) ([]byte, error) {
+	return k.GetKeyLeft(id) // TODO fix this
 }
 
-func (k *KeyManager) getKeyRight(id []byte) ([]byte, error) {
-	res, err := k.getKeyValue(id)
+func (k *KeyManager) GetKeyRight(id []byte) ([]byte, error) {
+	res, err := k.GetKeyValue(id)
 	if err != nil {
 		return nil, err
 	}
 	return res[len(res)/2+1:], nil
 }
 
-func (k *KeyManager) getKeyRightHash(id []byte) ([]byte, error) {
-	return k.getKeyRight(id) // TODO fix this
+func (k *KeyManager) GetKeyRightHash(id []byte) ([]byte, error) {
+	return k.GetKeyRight(id) // TODO fix this
 }
 
 func (k *KeyManager) getAllKeys() map[string][]byte {
 	return k.data
 }
 
-func initKeyManager(maxKeyCount int, aija bool) KeyManager {
+func InitKeyManager(maxKeyCount int, aija bool) KeyManager {
 	return KeyManager{make(map[string][]byte), make(map[string]bool), make(chan []byte, maxKeyCount), maxKeyCount, aija}
 }

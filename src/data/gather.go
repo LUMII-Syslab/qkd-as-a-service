@@ -1,4 +1,4 @@
-package main
+package data
 
 import (
 	"crypto/rand"
@@ -12,7 +12,7 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-func gatherClavisKeys(keys KeyManager, url string) {
+func GatherClavisKeys(keys KeyManager, url string) {
 	zctx, err := zmq.NewContext()
 	if err != nil {
 		log.Panicln(err)
@@ -86,7 +86,7 @@ func genRandomBase64Str(n int) string {
 	return base64.RawStdEncoding.EncodeToString(b)
 }
 
-func gatherRandomKeys(keys KeyManager) {
+func GatherRandomKeys(keys KeyManager) {
 	for {
 		keyId, keyVal := genRandomBase64Str(5), genRandomBase64Str(10)
 		fmt.Printf("\tk: %v \r", keyVal)

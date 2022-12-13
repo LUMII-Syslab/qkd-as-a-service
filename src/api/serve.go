@@ -1,10 +1,11 @@
-package main
+package api
 
 import (
 	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"qkdc-service/src/data"
 
 	"github.com/gorilla/websocket"
 )
@@ -16,7 +17,7 @@ var upgrader = websocket.Upgrader{
 
 var hashAlgorithmId = []byte{0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x11}
 
-func listenAndServe(manager KeyManager, APIPort int) {
+func ListenAndServe(manager data.KeyManager, APIPort int) {
 	http.Handle("/", http.FileServer(http.Dir("./client")))
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
@@ -64,7 +65,7 @@ func listenAndServe(manager KeyManager, APIPort int) {
 			case 0x01: // reserveKeyAndGetHalf(...)
 				keyLength := uint(req[5])*256 + uint(req[6])
 				callId := uint(req[9])*256 + uint(req[10])
-				keyId, thisHalf, otherHash := manager.reserveKeyAndGetHalf(keyLength)
+				keyId, thisHalf, otherHash := manager.ReserveKeyAndGetHalf(keyLength)
 				errCode, funcId := 0, 0xff
 				resBytes := 2                        // sequence + its length
 				resBytes += 3                        // integer + its length + function id (-1 for reserveKeyAndGetKeyHalf result)
@@ -88,7 +89,7 @@ func listenAndServe(manager KeyManager, APIPort int) {
 				err = conn.WriteMessage(msgType, res)
 			case 0x02: // getKeyHalf(id, ...)
 				log.Println("getKeyHalf req received")
-				err = conn.WriteMessage(msgType, []byte(manager.reserveKey()))
+				err = conn.WriteMessage(msgType, []byte(manager.ReserveKey()))
 			}
 			if err != nil {
 				log.Println(err)

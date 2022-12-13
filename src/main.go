@@ -2,18 +2,20 @@ package main
 
 import (
 	"log"
+	"qkdc-service/src/api"
+	"qkdc-service/src/data"
 )
 
 func main() {
 	config := loadConfig()
-	keys := initKeyManager(config.MaxKeyCount, config.Aija)
+	keys := data.InitKeyManager(config.MaxKeyCount, config.Aija)
 
 	if config.ClavisURL != "" {
-		go gatherClavisKeys(keys, config.ClavisURL)
+		go data.GatherClavisKeys(keys, config.ClavisURL)
 	} else {
 		log.Println("clavis url is empty. generating pseudo random keys")
-		go gatherRandomKeys(keys)
+		go data.GatherRandomKeys(keys)
 	}
 
-	listenAndServe(keys, config.APIPort)
+	api.ListenAndServe(keys, config.APIPort)
 }
