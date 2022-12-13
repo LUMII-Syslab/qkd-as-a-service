@@ -3,7 +3,6 @@ package data
 import (
 	"errors"
 	"fmt"
-	"log"
 )
 
 type KeyManager struct {
@@ -30,19 +29,29 @@ func (k *KeyManager) ReserveKey() []byte {
 	return key
 }
 
-func (k *KeyManager) ReserveKeyAndGetHalf(length uint) (keyId []byte, thisHalf []byte, otherHash []byte) {
-	keyId = k.ReserveKey()
-	var err error
+func (k *KeyManager) getThisHalf(keyId []byte) ([]byte, error) {
 	if k.aija {
-		thisHalf, err = k.GetKeyLeft(keyId)
-		otherHash, err = k.GetKeyRightHash(keyId)
+		return k.GetKeyLeft(keyId)
 	} else {
-		thisHalf, err = k.GetKeyRight(keyId)
-		otherHash, err = k.GetKeyLeftHash(keyId)
+		return k.GetKeyRight(keyId)
 	}
+}
+
+func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, error) {
+	if k.aija {
+		return k.GetKeyRightHash(keyId)
+	} else {
+		return k.GetKeyLeftHash(keyId)
+	}
+}
+
+func (k *KeyManager) ReserveKeyAndGetHalf(length uint) (keyId []byte, thisHalf []byte, otherHash []byte, err error) {
+	keyId = k.ReserveKey()
+	thisHalf, err = k.getThisHalf(keyId)
 	if err != nil {
-		log.Panic(err)
+		return
 	}
+	otherHash, err = k.getOtherHash(keyId)
 	return
 }
 
@@ -80,11 +89,6 @@ func (k *KeyManager) GetKeyRightHash(id []byte) ([]byte, error) {
 
 func (k *KeyManager) getAllKeys() map[string][]byte {
 	return k.data
-}
-
-// returns the key id of a key, it's half and the hash of the other half
-func (k *KeyManager) ReserveKeyAndGetHalf(keyLength int) (keyId []byte,key []byte,hashOther []byte, error) {
-	keyId 
 }
 
 func InitKeyManager(maxKeyCount int, aija bool) KeyManager {
