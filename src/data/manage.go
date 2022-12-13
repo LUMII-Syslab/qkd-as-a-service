@@ -82,6 +82,11 @@ func (k *KeyManager) getAllKeys() map[string][]byte {
 	return k.data
 }
 
+// returns the key id of a key, it's half and the hash of the other half
+func (k *KeyManager) ReserveKeyAndGetHalf(keyLength int) (keyId []byte,key []byte,hashOther []byte, error) {
+	keyId 
+}
+
 func InitKeyManager(maxKeyCount int, aija bool) KeyManager {
 	return KeyManager{make(map[string][]byte), make(map[string]bool), make(chan []byte, maxKeyCount), maxKeyCount, aija}
 }
