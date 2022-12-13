@@ -21,6 +21,10 @@ func (e SequenceElement) AsInt() int {
 	return utils.BytesToInt(e.value)
 }
 
+func (e SequenceElement) AsBytes() []byte {
+	return e.value
+}
+
 func (e SequenceElement) encode() []byte {
 	res := make([]byte, 2, 2+len(e.value))
 	res[0] = e.id

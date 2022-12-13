@@ -19,6 +19,7 @@ var hashAlgorithmId = []byte{0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x1
 
 func ListenAndServe(manager data.KeyManager, APIPort int) {
 	http.Handle("/", http.FileServer(http.Dir("./client")))
+
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -37,7 +38,7 @@ func ListenAndServe(manager data.KeyManager, APIPort int) {
 			stateId := seq[0].AsInt()
 			switch stateId {
 			case 0x01: // reserveKeyAndGetHalf
-
+				log.Println("reserveKeyAndHalf request: ", seq.ToString())
 				keyLength, callId := seq[1].AsInt(), seq[2].AsInt()
 				keyId, thisHalf, otherHash, err := manager.ReserveKeyAndGetHalf(keyLength)
 				errCode := 0
@@ -54,14 +55,26 @@ func ListenAndServe(manager data.KeyManager, APIPort int) {
 				res = append(res, CreateObjSeqElement(hashAlgorithmId))
 				err = conn.WriteMessage(msgType, res.ToByteArray())
 			case 0x02: // getKeyHalf
-				log.Println("getKeyHalf req received")
+				log.Println("getKeyHalf request: ", seq.ToString())
+				keyLength, keyId, callId := seq[1].AsInt(), seq[2].AsBytes(), seq[3].AsInt()
+				thisHalf, otherHash, err := manager.GetKeyHalf(keyId, keyLength)
+				errCode := 0
+				if err != nil {
+					errCode = 1
+				}
+				res := DERSequence{}
+				res = append(res, CreateIntSeqElement(0xfe)) // getKeyHalf result
+				res = append(res, CreateIntSeqElement(callId))
+				res = append(res, CreateIntSeqElement(errCode))
+				res = append(res, CreateArrSeqElement(thisHalf))
+				res = append(res, CreateArrSeqElement(otherHash))
+				res = append(res, CreateObjSeqElement(hashAlgorithmId))
 				err = conn.WriteMessage(msgType, []byte(manager.ReserveKey()))
 			}
 			if err != nil {
 				log.Println(err)
 				return
 			}
-
 		}
 	})
 
