@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	SEQ_ID = 0x30
-	INT_ID = 0x02
-	ARR_ID = 0x04
-	OBJ_ID = 0x06
+	SeqId = 0x30
+	IntId = 0x02
+	ArrId = 0x04
+	ObjId = 0x06
 )
 
 type SequenceElement struct {
@@ -29,10 +29,24 @@ func (e SequenceElement) encode() []byte {
 	return res
 }
 
-func CreateIntSeqElement(x uint32) SequenceElement {
+func CreateIntSeqElement(x int) SequenceElement {
 	res := SequenceElement{}
-	res.id = INT_ID
+	res.id = IntId
 	res.value = utils.IntToBytes(int(x))
+	return res
+}
+
+func CreateObjSeqElement(o []byte) SequenceElement {
+	res := SequenceElement{}
+	res.id = ObjId
+	res.value = o
+	return res
+}
+
+func CreateArrSeqElement(a []byte) SequenceElement {
+	res := SequenceElement{}
+	res.id = ArrId
+	res.value = a
 	return res
 }
 
@@ -40,7 +54,7 @@ type DERSequence []SequenceElement
 
 func (s DERSequence) ToByteArray() []byte {
 	res := make([]byte, 2)
-	res[0] = SEQ_ID
+	res[0] = SeqId
 	defer func() { res[1] = byte(len(res) - 2) }()
 
 	for _, v := range s {
@@ -63,7 +77,7 @@ func (s DERSequence) ToString() string {
 }
 
 func DecodeDERSequence(arr []byte) (DERSequence, error) {
-	if arr[0] != SEQ_ID {
+	if arr[0] != SeqId {
 		return nil, fmt.Errorf("first element should be sequence identifier")
 	}
 	length := uint(arr[1])
@@ -72,7 +86,7 @@ func DecodeDERSequence(arr []byte) (DERSequence, error) {
 	}
 	res := DERSequence{}
 	for i := uint(2); i < 2+length; {
-		if arr[i] != INT_ID && arr[i] != ARR_ID && arr[i] != OBJ_ID {
+		if arr[i] != IntId && arr[i] != ArrId && arr[i] != ObjId {
 			return nil, fmt.Errorf("expected identifier, received %v at pos %v", arr[i], i)
 		}
 		elem := SequenceElement{arr[i], arr[i+2 : i+2+uint(arr[i+1])]}

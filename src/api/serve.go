@@ -37,9 +37,22 @@ func ListenAndServe(manager data.KeyManager, APIPort int) {
 			stateId := seq[0].AsInt()
 			switch stateId {
 			case 0x01: // reserveKeyAndGetHalf
-				keyLength := seq[1].AsInt()
-				callId := seq[2].AsInt()
-				err = conn.WriteMessage(msgType, []byte(manager.ReserveKey()))
+
+				keyLength, callId := seq[1].AsInt(), seq[2].AsInt()
+				keyId, thisHalf, otherHash, err := manager.ReserveKeyAndGetHalf(keyLength)
+				errCode := 0
+				if err != nil {
+					errCode = 1
+				}
+				res := DERSequence{}
+				res = append(res, CreateIntSeqElement(0xff)) // reserveKeyAndGetHalf result
+				res = append(res, CreateIntSeqElement(callId))
+				res = append(res, CreateIntSeqElement(errCode))
+				res = append(res, CreateArrSeqElement(keyId))
+				res = append(res, CreateArrSeqElement(thisHalf))
+				res = append(res, CreateArrSeqElement(otherHash))
+				res = append(res, CreateObjSeqElement(hashAlgorithmId))
+				err = conn.WriteMessage(msgType, res.ToByteArray())
 			case 0x02: // getKeyHalf
 				log.Println("getKeyHalf req received")
 				err = conn.WriteMessage(msgType, []byte(manager.ReserveKey()))
