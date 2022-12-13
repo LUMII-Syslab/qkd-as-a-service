@@ -22,7 +22,7 @@ func (k *KeyManager) add(id, val []byte) error {
 	return nil
 }
 
-// returns key id and marks it as reserved
+// ReserveKey returns key id and marks it as reserved
 func (k *KeyManager) ReserveKey() []byte {
 	key := <-k.queue
 	k.reserved[string(key)] = true
@@ -90,10 +90,6 @@ func (k *KeyManager) GetKeyRight(id []byte) ([]byte, error) {
 
 func (k *KeyManager) GetKeyRightHash(id []byte) ([]byte, error) {
 	return k.GetKeyRight(id) // TODO fix this
-}
-
-func (k *KeyManager) getAllKeys() map[string][]byte {
-	return k.data
 }
 
 func InitKeyManager(maxKeyCount int, aija bool) KeyManager {
