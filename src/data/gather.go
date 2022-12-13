@@ -22,7 +22,10 @@ func GatherClavisKeys(keys KeyManager, url string) {
 	if err != nil {
 		log.Panicln(err)
 	}
-	zs.SetSubscribe("")
+	err = zs.SetSubscribe("")
+	if err != nil {
+		log.Panicln(err)
+	}
 	defer zs.Close()
 	log.Println("created a new zeromq socket")
 
@@ -90,7 +93,7 @@ func GatherRandomKeys(keys KeyManager) {
 	for {
 		keyId, keyVal := genRandomBase64Str(5), genRandomBase64Str(10)
 		fmt.Printf("\tk: %v \r", keyVal)
-		time.Sleep(time.Duration(math_rand.Float32() * 1000000000))
+		time.Sleep(time.Duration(math_rand.Float32() * 3000000000))
 		keys.add([]byte(keyId), []byte(keyVal)) // TODO the conversion to base64 has to be removed
 	}
 }

@@ -1,45 +1,3 @@
-let watch_keys = false
-let watching_keys = false
-
-function start_watching_keys() {
-    if (watching_keys) return
-    watching_keys = true
-    watch_keys = true
-    let socket = new WebSocket("ws://localhost:8080/ws")
-    console.log("attempting WebSocket Connection")
-
-    socket.onopen = () => {
-        console.log("successfully connected")
-        function add_key() {
-            socket.onmessage = (msg) => {
-                let key_id = msg.data
-                console.log("key_id: ", key_id)
-                socket.onmessage = (msg) => {
-                    let key_left = msg.data
-                    let table = document.getElementById("my-table")
-                    let row = table.insertRow(0)
-                    row.innerHTML = `<td>${key_id}</td><td>${key_left}</td>`
-                    if (table.rows.length > 10)
-                        table.rows[10].remove()
-                    if(watch_keys)
-                        add_key()
-                }
-                socket.send(`get_left ${key_id}`)
-            }
-            socket.send("reserve")
-        }
-        add_key()
-    }
-
-    socket.onclose = (event) =>  console.log("socket closed connection: ", event)
-    socket.onerror = (error) => console.log("socket error: ",error)
-}
-
-function stop_watching_keys() {
-    watch_keys = false
-    watching_keys = false
-}
-
 function reserve_key_and_get_half(socket) {
     const req = new Uint8Array(13)
     // sequence
@@ -163,4 +121,51 @@ function send_asn_request() {
     }
     socket.onclose = (event) =>  console.log("socket closed connection: ", event)
     socket.onerror = (error) => console.log("socket error: ",error)
+}
+
+let watch_keys = false
+let watching_keys = false
+
+function add_to_table(key_id, key_left, key_right, hash_left, hash_right) {
+    let table = document.getElementById("my-table")
+    let row = table.insertRow(0)
+    row.innerHTML = `<td>${key_id}</td><td>${key_left}</td><td>${key_right}</td><td>${hash_left}</td><td>${hash_right}</td>`
+    if (table.rows.length > 15)
+        table.rows[10].remove()
+}
+
+function start_watching_keys() {
+    if (watching_keys) return
+    watching_keys = true
+    watch_keys = true
+    let aija = new WebSocket("ws://localhost:8080/ws")
+    console.log("attempting WebSocket Connection")
+
+    aija.onopen = () => {
+        function add_keys() {
+            aija.onmessage = async (msg) => {
+                const first_msg_arr = new Uint8Array(await msg.data.arrayBuffer())
+                const first_res = parse_first_result(first_msg_arr);
+                let key_id = first_res["key_id"];
+                aija.onmessage = async (msg) => {
+                    const second_msg_arr = new Uint8Array(await msg.data.arrayBuffer())
+                    const second_res = parse_second_result(second_msg_arr);
+                    add_to_table(first_res["key_id"], first_res["key_half"], second_res["key_half"], second_res["other_hash"], first_res["other_hash"])
+                    if(watch_keys)
+                        add_keys()
+                }
+                get_key_half(aija, key_id);
+            }
+            reserve_key_and_get_half(aija)
+        }
+        add_keys()
+    }
+
+    aija.onclose = (event) =>  console.log("socket closed connection: ", event)
+    aija.onerror = (error) => console.log("socket error: ",error)
+}
+
+function stop_watching_keys() {
+    watch_keys = false
+    watching_keys = false
 }
