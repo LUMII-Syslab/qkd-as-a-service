@@ -24,6 +24,14 @@ func (e SequenceElement) encode() []byte {
 	return res
 }
 
+func CreateIntSeqElement(x uint32) SequenceElement {
+	res := SequenceElement{}
+	res.id = INT_ID
+	res.value = make([]byte, 0)
+	//var mask uint = (1 << 8) - 1
+	return res
+}
+
 type DERSequence []SequenceElement
 
 func (s DERSequence) ToByteArray() []byte {
