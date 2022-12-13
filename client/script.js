@@ -66,7 +66,7 @@ function get_key_half(socket, key_id) {
 
     // getKeyHalf request
     req[2] = 0x02; req[3] = 0x01    // an integer of 1 byte will follow
-    req[4] = 0x01
+    req[4] = 0x02
 
     // key legnth
     req[5] = 0x02; req[6] = 0x02    // an integer of 2 bytes will follow
@@ -134,14 +134,15 @@ function send_asn_request() {
     socket.onopen = () => {
 
         socket.onmessage = async (msg) => {
-
+            console.log("first function called")
             const msg_arr = new Uint8Array(await msg.data.arrayBuffer())
             const res = parse_first_result(msg_arr);
             console.log(res)
 
             let key_id = res["key_id"];
-            socket.onmessage = (msg) => {
-
+            socket.onmessage = async (msg) => {
+                console.log("second function called")
+                console.log(await msg.data.arrayBuffer());
             }
             get_key_half(socket, key_id);
         }

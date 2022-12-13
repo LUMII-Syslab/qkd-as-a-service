@@ -29,6 +29,12 @@ func listenAndServe(manager KeyManager, APIPort int) {
 			if err != nil {
 				return
 			}
+			seq, err := DecodeDERSequence(body)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			log.Println("request: ", seq.ToString())
 
 			req := body[2 : 2+body[1]] // trim sequence indicator and trailing bytes
 			//log.Printf("body: %v\n", hex.EncodeToString(req))
