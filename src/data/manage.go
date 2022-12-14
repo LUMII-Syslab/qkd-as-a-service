@@ -13,9 +13,13 @@ type KeyManager struct {
 	aija        bool // true <-> returns left of key ( otherwise returns right )
 }
 
+func InitKeyManager(maxKeyCount int, aija bool) KeyManager {
+	return KeyManager{make(map[string][]byte), make(map[string]bool), make(chan []byte, maxKeyCount), maxKeyCount, aija}
+}
+
 func (k *KeyManager) add(id, val []byte) error {
 	if _, ok := k.data[string(id)]; ok {
-		return errors.New("key already exists")
+		return errors.New(fmt.Sprintf("key %v already exists", string(id)))
 	}
 	k.data[string(id)] = val
 	k.queue <- id
@@ -90,8 +94,4 @@ func (k *KeyManager) GetKeyRight(id []byte) ([]byte, error) {
 
 func (k *KeyManager) GetKeyRightHash(id []byte) ([]byte, error) {
 	return k.GetKeyRight(id) // TODO fix this
-}
-
-func InitKeyManager(maxKeyCount int, aija bool) KeyManager {
-	return KeyManager{make(map[string][]byte), make(map[string]bool), make(chan []byte, maxKeyCount), maxKeyCount, aija}
 }

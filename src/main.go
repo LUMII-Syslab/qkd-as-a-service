@@ -8,14 +8,27 @@ import (
 
 func main() {
 	config := loadConfig()
-	keys := data.InitKeyManager(config.MaxKeyCount, config.Aija)
 
-	if config.ClavisURL != "" {
-		go data.GatherClavisKeys(keys, config.ClavisURL)
-	} else {
-		log.Println("clavis url is empty. generating pseudo random keys")
-		go data.GatherRandomKeys(keys)
+	if config.AijaAPIPort == config.BrencisAPiPort {
+		log.Fatalln("aija_port and brencis_port should be different")
 	}
 
-	api.ListenAndServe(keys, config.APIPort)
+	gatherer := data.InitKeyGatherer()
+
+	if config.AijaAPIPort != -1 {
+		aijaKeys := data.InitKeyManager(config.MaxKeyCount, true)
+		gatherer.Subscribe(aijaKeys)
+		go api.ListenAndServe(aijaKeys, config.AijaAPIPort)
+	}
+
+	if config.BrencisAPiPort != -1 {
+		brencisKeys := data.InitKeyManager(config.MaxKeyCount, true)
+		gatherer.Subscribe(brencisKeys)
+		go api.ListenAndServe(brencisKeys, config.BrencisAPiPort)
+	}
+
+	err := gatherer.Start(config.ClavisURL)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

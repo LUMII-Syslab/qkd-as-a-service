@@ -18,9 +18,9 @@ var upgrader = websocket.Upgrader{
 var hashAlgorithmId = []byte{0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x11}
 
 func ListenAndServe(manager data.KeyManager, APIPort int) {
-	http.Handle("/", http.FileServer(http.Dir("./client")))
-
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	mux.Handle("/", http.FileServer(http.Dir("./client")))
+	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Println(err)
@@ -92,5 +92,5 @@ func ListenAndServe(manager data.KeyManager, APIPort int) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	log.Printf("server listening at %v", lis.Addr())
-	log.Panic(http.Serve(lis, http.DefaultServeMux))
+	log.Panic(http.Serve(lis, mux))
 }

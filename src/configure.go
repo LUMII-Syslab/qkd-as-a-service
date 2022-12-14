@@ -7,10 +7,10 @@ import (
 )
 
 type Configuration struct {
-	ClavisURL   string `mapstructure:"clavis_url"`
-	MaxKeyCount int    `mapstructure:"max_key_cnt"`
-	Aija        bool   `mapstructure:"aija"`
-	APIPort     int    `mapstructure:"api_port"`
+	ClavisURL      string `mapstructure:"clavis_url"`
+	MaxKeyCount    int    `mapstructure:"max_key_cnt"`
+	AijaAPIPort    int    `mapstructure:"aija_port"`
+	BrencisAPiPort int    `mapstructure:"brencis_port"`
 }
 
 func loadConfig() Configuration {
@@ -40,18 +40,18 @@ func loadConfig() Configuration {
 		log.Printf("loaded MaxKeyCount = %v from %v\n", res.MaxKeyCount, "defaults")
 	}
 
-	if viper.IsSet("aija") {
-		log.Printf("loaded Aija = %v from %v\n", res.Aija, confFile)
+	if viper.IsSet("aija_port") {
+		log.Printf("loaded Aija = %v from %v\n", res.AijaAPIPort, confFile)
 	} else {
-		res.Aija = true
-		log.Printf("loaded Aija = %v from %v\n", res.Aija, "defaults")
+		res.AijaAPIPort = -1
+		log.Printf("loaded Aija = %v from %v\n", res.AijaAPIPort, "defaults")
 	}
 
-	if viper.IsSet("api_port") {
-		log.Printf("loaded APIPort = %v from %v\n", res.APIPort, confFile)
+	if viper.IsSet("brencis_port") {
+		log.Printf("loaded APIPort = %v from %v\n", res.BrencisAPiPort, confFile)
 	} else {
-		res.APIPort = 8080
-		log.Printf("loaded APIPort = %v from %v\n", res.APIPort, "defaults")
+		res.BrencisAPiPort = -1
+		log.Printf("loaded APIPort = %v from %v\n", res.BrencisAPiPort, "defaults")
 	}
 	return res
 }

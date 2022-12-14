@@ -2,7 +2,6 @@ package data
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 	"fmt"
 	"log"
 	math_rand "math/rand"
@@ -12,13 +11,44 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-func GatherClavisKeys(keys KeyManager, url string) {
-	zctx, err := zmq.NewContext()
+type KeyGatherer struct {
+	subscribers []KeyManager
+}
+
+func InitKeyGatherer() KeyGatherer {
+	return KeyGatherer{make([]KeyManager, 0)}
+}
+
+func (kg *KeyGatherer) Subscribe(manager KeyManager) {
+	kg.subscribers = append(kg.subscribers, manager)
+}
+
+func (kg *KeyGatherer) Start(url string) error {
+	if url != "" {
+		return kg.gatherClavisKeys(url)
+	} else {
+		return kg.gatherRandomKeys()
+	}
+}
+
+func (kg *KeyGatherer) distributeKey(keyId, keyVal []byte) error {
+	fmt.Printf("\tk: %v \r", keyVal)
+	for _, v := range kg.subscribers {
+		err := v.add(keyId, keyVal)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (kg *KeyGatherer) gatherClavisKeys(url string) error {
+	zCtx, err := zmq.NewContext()
 	if err != nil {
 		log.Panicln(err)
 	}
 
-	zs, err := zctx.NewSocket(zmq.SUB)
+	zs, err := zCtx.NewSocket(zmq.SUB)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -26,7 +56,7 @@ func GatherClavisKeys(keys KeyManager, url string) {
 	if err != nil {
 		log.Panicln(err)
 	}
-	defer zs.Close()
+	defer func() { err = zs.Close() }()
 	log.Println("created a new zeromq socket")
 
 	log.Println("attempting to connect to", url)
@@ -37,12 +67,12 @@ func GatherClavisKeys(keys KeyManager, url string) {
 	log.Println("connected zeromq to", url)
 
 	for i := 0; i < 10; i++ {
-		msg_b, err := zs.RecvBytes(0)
+		msgB, err := zs.RecvBytes(0)
 		if err != nil {
 			log.Panic(err)
 		}
 		var msg []interface{}
-		err = msgpack.Unmarshal(msg_b, &msg)
+		err = msgpack.Unmarshal(msgB, &msg)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -56,26 +86,23 @@ func GatherClavisKeys(keys KeyManager, url string) {
 			keyId = t
 		}
 
-		var vals []uint8
+		var keyVal []uint8
 
 		switch t := msg[1].(type) {
 		case []interface{}:
 			for _, v := range t {
 				switch t2 := v.(type) {
 				case int8:
-					vals = append(vals, uint8(t2))
+					keyVal = append(keyVal, uint8(t2))
 				case uint8:
-					vals = append(vals, t2)
+					keyVal = append(keyVal, t2)
 				}
 			}
 		}
 
-		keyVal := base64.RawStdEncoding.EncodeToString(vals)
-		fmt.Printf("\tk: %v \r", keyVal)
-
-		keys.add([]byte(keyId), []byte(keyVal)) // TODO the conversion to base64 has to be removed
+		kg.distributeKey([]byte(keyId), keyVal)
 	}
-
+	return nil
 }
 
 func generateRandomBytes(n int) ([]byte, error) {
@@ -84,16 +111,17 @@ func generateRandomBytes(n int) ([]byte, error) {
 	return b, nil
 }
 
-func genRandomBase64Str(n int) string {
-	b, _ := generateRandomBytes(n)
-	return base64.RawStdEncoding.EncodeToString(b)
-}
-
-func GatherRandomKeys(keys KeyManager) {
+func (kg *KeyGatherer) gatherRandomKeys() error {
 	for {
-		keyId, keyVal := genRandomBase64Str(5), genRandomBase64Str(10)
-		fmt.Printf("\tk: %v \r", keyVal)
+		keyId, keyVal := make([]byte, 0), make([]byte, 0)
+		rand.Read(keyId)
+		rand.Read(keyVal)
+		log.Println(keyId, keyVal)
+		err := kg.distributeKey(keyId, keyVal)
+		if err != nil {
+			return err
+		}
 		time.Sleep(time.Duration(math_rand.Float32() * 3000000000))
-		keys.add([]byte(keyId), []byte(keyVal)) // TODO the conversion to base64 has to be removed
 	}
+	return nil
 }
