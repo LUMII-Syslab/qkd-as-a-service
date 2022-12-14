@@ -123,5 +123,4 @@ func (kg *KeyGatherer) gatherRandomKeys() error {
 		}
 		time.Sleep(time.Duration(math_rand.Float32() * 3000000000))
 	}
-	return nil
 }
