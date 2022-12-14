@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"log"
-	math_rand "math/rand"
+	mathRand "math/rand"
 	"time"
 
 	zmq "github.com/pebbe/zmq4"
@@ -100,27 +100,28 @@ func (kg *KeyGatherer) gatherClavisKeys(url string) error {
 			}
 		}
 
-		kg.distributeKey([]byte(keyId), keyVal)
+		err = kg.distributeKey([]byte(keyId), keyVal)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
-}
-
-func generateRandomBytes(n int) ([]byte, error) {
-	b := make([]byte, n)
-	rand.Read(b)
-	return b, nil
 }
 
 func (kg *KeyGatherer) gatherRandomKeys() error {
 	for {
 		keyId, keyVal := make([]byte, 0), make([]byte, 0)
-		rand.Read(keyId)
-		rand.Read(keyVal)
+		if _, err := rand.Read(keyId); err != nil {
+			return err
+		}
+		if _, err := rand.Read(keyVal); err != nil {
+			return err
+		}
 		log.Println(keyId, keyVal)
 		err := kg.distributeKey(keyId, keyVal)
 		if err != nil {
 			return err
 		}
-		time.Sleep(time.Duration(math_rand.Float32() * 3000000000))
+		time.Sleep(time.Duration(mathRand.Float32() * 3000000000))
 	}
 }
