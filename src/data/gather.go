@@ -3,24 +3,21 @@ package data
 import (
 	"crypto/rand"
 	"fmt"
-	"log"
-	mathRand "math/rand"
-	"qkdc-service/src/utils"
-	"time"
-
 	zmq "github.com/pebbe/zmq4"
 	"github.com/vmihailenco/msgpack/v5"
+	"log"
+	"qkdc-service/src/utils"
 )
 
 type KeyGatherer struct {
-	subscribers []KeyManager
+	subscribers []*KeyManager
 }
 
 func InitKeyGatherer() KeyGatherer {
-	return KeyGatherer{make([]KeyManager, 0)}
+	return KeyGatherer{make([]*KeyManager, 0)}
 }
 
-func (kg *KeyGatherer) Subscribe(manager KeyManager) {
+func (kg *KeyGatherer) Subscribe(manager *KeyManager) {
 	kg.subscribers = append(kg.subscribers, manager)
 }
 
@@ -35,7 +32,7 @@ func (kg *KeyGatherer) Start(url string) error {
 func (kg *KeyGatherer) distributeKey(keyId, keyVal []byte) error {
 	fmt.Printf("\tk: %v\r", utils.BytesToHexOctets(keyVal))
 	for _, v := range kg.subscribers {
-		err := v.add(keyId, keyVal)
+		err := v.AddKey(keyId, keyVal)
 		if err != nil {
 			return err
 		}
@@ -122,6 +119,6 @@ func (kg *KeyGatherer) gatherRandomKeys(keyIdLength, keyValLength int) error {
 		if err != nil {
 			return err
 		}
-		time.Sleep(time.Duration(mathRand.Float32() * 5000000000))
+		//time.Sleep(time.Duration(mathRand.Float32() * 5000000000))
 	}
 }

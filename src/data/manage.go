@@ -4,33 +4,43 @@ import (
 	"errors"
 	"fmt"
 	"golang.org/x/crypto/sha3"
+	"sync"
 )
 
 type KeyManager struct {
-	data        map[string][]byte
-	reserved    map[string]bool
-	queue       chan []byte
-	maxKeyCount int
-	aija        bool // true <-> returns left of key ( otherwise returns right )
+	data     map[string][]byte
+	dataMu   sync.Mutex
+	queue    chan []byte
+	mxKeyCnt int
+	aija     bool // true <-> returns left of key ( otherwise returns right )
 }
 
 func InitKeyManager(maxKeyCount int, aija bool) KeyManager {
-	return KeyManager{make(map[string][]byte), make(map[string]bool), make(chan []byte, maxKeyCount), maxKeyCount, aija}
+	return KeyManager{
+		data:     make(map[string][]byte),
+		queue:    make(chan []byte, maxKeyCount),
+		mxKeyCnt: maxKeyCount,
+		aija:     aija,
+	}
 }
 
-func (k *KeyManager) add(id, val []byte) error {
-	if _, ok := k.data[string(id)]; ok {
+func (k *KeyManager) AddKey(id, val []byte) error {
+	k.dataMu.Lock()
+	_, ok := k.data[string(id)]
+	k.dataMu.Unlock()
+	if ok {
 		return errors.New(fmt.Sprintf("key %v already exists", string(id)))
 	}
+	k.dataMu.Lock()
 	k.data[string(id)] = val
 	k.queue <- id
+	k.dataMu.Unlock()
 	return nil
 }
 
 // ReserveKey returns key id and marks it as reserved
 func (k *KeyManager) ReserveKey() []byte {
 	key := <-k.queue
-	k.reserved[string(key)] = true
 	return key
 }
 
@@ -66,7 +76,9 @@ func (k *KeyManager) ReserveKeyAndGetHalf() (keyId []byte, thisHalf []byte, othe
 }
 
 func (k *KeyManager) GetKeyValue(id []byte) ([]byte, error) {
+	k.dataMu.Lock()
 	val, ok := k.data[string(id)]
+	k.dataMu.Unlock()
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("key %v not found in data", id))
 	}

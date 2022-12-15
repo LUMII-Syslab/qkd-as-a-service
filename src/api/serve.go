@@ -20,7 +20,7 @@ var upgrader = websocket.Upgrader{
 
 var hashAlgorithmId = []byte{0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x11}
 
-func ListenAndServe(manager data.KeyManager, APIPort int) {
+func ListenAndServe(manager *data.KeyManager, APIPort int) {
 	mux := http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir("./client")))
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {

@@ -1,7 +1,7 @@
 # if clavis url is not set fake key generation will be used instead
 # clavis_url = "tcp://192.168.10.101:5560"
 
-max_key_cnt = 2000
+max_key_cnt = 200000
 
 # both aija and brencis qkdc services
 # can be hosted from the same process
