@@ -3,6 +3,7 @@ package data
 import (
 	"errors"
 	"fmt"
+	"golang.org/x/crypto/sha3"
 )
 
 type KeyManager struct {
@@ -81,7 +82,15 @@ func (k *KeyManager) GetKeyLeft(id []byte) ([]byte, error) {
 }
 
 func (k *KeyManager) GetKeyLeftHash(id []byte) ([]byte, error) {
-	return k.GetKeyLeft(id)
+	data, err := k.GetKeyLeft(id)
+	if err != nil {
+		return nil, err
+	}
+	h := sha3.NewShake128()
+	res := make([]byte, 128)
+	h.Write(data)
+	h.Read(res)
+	return res, nil
 }
 
 func (k *KeyManager) GetKeyRight(id []byte) ([]byte, error) {
@@ -93,5 +102,13 @@ func (k *KeyManager) GetKeyRight(id []byte) ([]byte, error) {
 }
 
 func (k *KeyManager) GetKeyRightHash(id []byte) ([]byte, error) {
-	return k.GetKeyRight(id) // TODO fix this
+	data, err := k.GetKeyRight(id)
+	if err != nil {
+		return nil, err
+	}
+	h := sha3.NewShake128()
+	res := make([]byte, 128)
+	h.Write(data)
+	h.Read(res)
+	return res, nil
 }

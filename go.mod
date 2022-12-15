@@ -7,6 +7,7 @@ require (
 	github.com/pebbe/zmq4 v1.2.9
 	github.com/spf13/viper v1.14.0
 	github.com/vmihailenco/msgpack/v5 v5.3.5
+	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
 )
 
 require (
