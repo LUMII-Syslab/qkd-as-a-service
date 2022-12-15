@@ -122,6 +122,6 @@ func (kg *KeyGatherer) gatherRandomKeys(keyIdLength, keyValLength int) error {
 		if err != nil {
 			return err
 		}
-		time.Sleep(time.Duration(mathRand.Float32() * 3000000000))
+		time.Sleep(time.Duration(mathRand.Float32() * 5000000000))
 	}
 }

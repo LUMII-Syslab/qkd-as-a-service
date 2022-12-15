@@ -157,6 +157,7 @@ function start_watching_keys() {
     watching_keys = true
     watch_keys = true
     let aija = new WebSocket("ws://localhost:8080/ws")
+    let brencis = new WebSocket("ws://localhost:8081/ws")
     console.log("attempting WebSocket Connection")
 
     aija.onopen = () => {
@@ -165,14 +166,14 @@ function start_watching_keys() {
                 const first_msg_arr = new Uint8Array(await msg.data.arrayBuffer())
                 const first_res = parse_first_result(first_msg_arr);
                 let key_id = first_res["key_id"];
-                aija.onmessage = async (msg) => {
+                brencis.onmessage = async (msg) => {
                     const second_msg_arr = new Uint8Array(await msg.data.arrayBuffer())
                     const second_res = parse_second_result(second_msg_arr);
                     add_to_table(first_res["key_id"], first_res["key_half"], second_res["key_half"], second_res["other_hash"], first_res["other_hash"])
                     if(watch_keys)
                         add_keys()
                 }
-                get_key_half(aija, key_id);
+                get_key_half(brencis, key_id);
             }
             reserve_key_and_get_half(aija)
         }

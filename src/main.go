@@ -23,7 +23,7 @@ func main() {
 	}
 
 	if config.BrencisAPiPort != -1 {
-		brencisKeys := data.InitKeyManager(config.MaxKeyCount, true)
+		brencisKeys := data.InitKeyManager(config.MaxKeyCount, false)
 		gatherer.Subscribe(brencisKeys)
 		go api.ListenAndServe(brencisKeys, config.BrencisAPiPort)
 	}

@@ -81,7 +81,7 @@ func (k *KeyManager) GetKeyLeft(id []byte) ([]byte, error) {
 }
 
 func (k *KeyManager) GetKeyLeftHash(id []byte) ([]byte, error) {
-	return k.GetKeyLeft(id) // TODO fix this
+	return k.GetKeyLeft(id)
 }
 
 func (k *KeyManager) GetKeyRight(id []byte) ([]byte, error) {
