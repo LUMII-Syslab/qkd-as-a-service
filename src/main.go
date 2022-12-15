@@ -4,6 +4,7 @@ import (
 	"log"
 	"qkdc-service/src/api"
 	"qkdc-service/src/data"
+	"time"
 )
 
 func main() {
@@ -26,6 +27,8 @@ func main() {
 		gatherer.Subscribe(brencisKeys)
 		go api.ListenAndServe(brencisKeys, config.BrencisAPiPort)
 	}
+
+	time.Sleep(time.Millisecond * 100)
 
 	err := gatherer.Start(config.ClavisURL)
 	if err != nil {

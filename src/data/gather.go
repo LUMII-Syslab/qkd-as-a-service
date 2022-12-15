@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	mathRand "math/rand"
+	"qkdc-service/src/utils"
 	"time"
 
 	zmq "github.com/pebbe/zmq4"
@@ -27,12 +28,12 @@ func (kg *KeyGatherer) Start(url string) error {
 	if url != "" {
 		return kg.gatherClavisKeys(url)
 	} else {
-		return kg.gatherRandomKeys()
+		return kg.gatherRandomKeys(16, 16)
 	}
 }
 
 func (kg *KeyGatherer) distributeKey(keyId, keyVal []byte) error {
-	fmt.Printf("\tk: %v \r", keyVal)
+	fmt.Printf("\tk: %v\r", utils.BytesToHexOctets(keyVal))
 	for _, v := range kg.subscribers {
 		err := v.add(keyId, keyVal)
 		if err != nil {
@@ -108,16 +109,15 @@ func (kg *KeyGatherer) gatherClavisKeys(url string) error {
 	return nil
 }
 
-func (kg *KeyGatherer) gatherRandomKeys() error {
+func (kg *KeyGatherer) gatherRandomKeys(keyIdLength, keyValLength int) error {
 	for {
-		keyId, keyVal := make([]byte, 0), make([]byte, 0)
+		keyId, keyVal := make([]byte, keyIdLength), make([]byte, keyValLength)
 		if _, err := rand.Read(keyId); err != nil {
 			return err
 		}
 		if _, err := rand.Read(keyVal); err != nil {
 			return err
 		}
-		log.Println(keyId, keyVal)
 		err := kg.distributeKey(keyId, keyVal)
 		if err != nil {
 			return err

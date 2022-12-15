@@ -38,7 +38,7 @@ func ListenAndServe(manager data.KeyManager, APIPort int) {
 			stateId := seq[0].AsInt()
 			switch stateId {
 			case 0x01: // reserveKeyAndGetHalf
-				log.Println("reserveKeyAndHalf request: ", seq.ToString())
+				// log.Println("reserveKeyAndHalf request: ", seq.ToString())
 				if len(seq) != 3 {
 					log.Println("sequence of length 3 was expected")
 					continue
@@ -59,7 +59,7 @@ func ListenAndServe(manager data.KeyManager, APIPort int) {
 				res = append(res, CreateObjSeqElement(hashAlgorithmId))
 				err = conn.WriteMessage(msgType, res.ToByteArray())
 			case 0x02: // getKeyHalf
-				log.Println("getKeyHalf request: ", seq.ToString())
+				// log.Println("getKeyHalf request: ", seq.ToString())
 				if len(seq) != 4 {
 					log.Println("sequence of length 4 was expected")
 					continue

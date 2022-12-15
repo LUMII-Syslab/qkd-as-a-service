@@ -1,5 +1,7 @@
 package utils
 
+import "strconv"
+
 func IntToBytes(x int) []byte {
 	res := make([]byte, 0)
 	mask := (1 << 8) - 1
@@ -19,6 +21,21 @@ func BytesToInt(b []byte) int {
 	for _, v := range b {
 		res <<= 8
 		res += int(v)
+	}
+	return res
+}
+
+func BytesToHexOctets(b []byte) string {
+	res := ""
+	for i, v := range b {
+		if i > 0 {
+			res += " "
+		}
+		tmp := strconv.FormatInt(int64(v), 16)
+		for len(tmp) < 2 {
+			tmp = "0" + tmp
+		}
+		res += tmp
 	}
 	return res
 }

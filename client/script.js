@@ -126,9 +126,27 @@ function send_asn_request() {
 let watch_keys = false
 let watching_keys = false
 
+function hex_octets(data) {
+    let res = ""
+    for(let i=0;i<data.length;i++) {
+        if(i) res+="|";
+        let tmp = data[i].toString(16)
+        while(tmp.length<2) {
+            tmp = "0"+tmp;
+        }
+        res += tmp;
+    }
+    return res
+}
+
 function add_to_table(key_id, key_left, key_right, hash_left, hash_right) {
     let table = document.getElementById("my-table")
     let row = table.insertRow(0)
+    key_id = hex_octets(key_id)
+    key_left = hex_octets(key_left)
+    key_right = hex_octets(key_right)
+    hash_left = hex_octets(hash_left)
+    hash_right = hex_octets(hash_right)
     row.innerHTML = `<td>${key_id}</td><td>${key_left}</td><td>${key_right}</td><td>${hash_left}</td><td>${hash_right}</td>`
     if (table.rows.length > 15)
         table.rows[10].remove()
