@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"qkdc-service/src/data"
+	"qkdc-service/data"
 
 	"github.com/gorilla/websocket"
 )

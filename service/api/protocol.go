@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"qkdc-service/src/utils"
+	"qkdc-service/utils"
 )
 
 const (

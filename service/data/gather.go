@@ -6,7 +6,7 @@ import (
 	zmq "github.com/pebbe/zmq4"
 	"github.com/vmihailenco/msgpack/v5"
 	"log"
-	"qkdc-service/src/utils"
+	"qkdc-service/utils"
 )
 
 type KeyGatherer struct {

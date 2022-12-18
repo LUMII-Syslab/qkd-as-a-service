@@ -161,6 +161,7 @@ function start_watching_keys() {
     console.log("attempting WebSocket Connection")
 
     aija.onopen = () => {
+        console.log("WebSocket Connection opened")
         function add_keys() {
             aija.onmessage = async (msg) => {
                 const first_msg_arr = new Uint8Array(await msg.data.arrayBuffer())

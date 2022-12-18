@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"qkdc-service/src/api"
-	"qkdc-service/src/data"
+	"qkdc-service/api"
+	"qkdc-service/data"
 	"time"
 )
 
