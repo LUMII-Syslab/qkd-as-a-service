@@ -161,24 +161,28 @@ function start_watching_keys() {
     console.log("attempting WebSocket Connection")
 
     aija.onopen = () => {
-        console.log("WebSocket Connection opened")
-        function add_keys() {
-            aija.onmessage = async (msg) => {
-                const first_msg_arr = new Uint8Array(await msg.data.arrayBuffer())
-                const first_res = parse_first_result(first_msg_arr);
-                let key_id = first_res["key_id"];
-                brencis.onmessage = async (msg) => {
-                    const second_msg_arr = new Uint8Array(await msg.data.arrayBuffer())
-                    const second_res = parse_second_result(second_msg_arr);
-                    add_to_table(first_res["key_id"], first_res["key_half"], second_res["key_half"], second_res["other_hash"], first_res["other_hash"])
-                    if(watch_keys)
-                        add_keys()
+        brencis.onopen = () => {
+            console.log("WebSocket Connection opened")
+
+            function add_keys() {
+                aija.onmessage = async (msg) => {
+                    const first_msg_arr = new Uint8Array(await msg.data.arrayBuffer())
+                    const first_res = parse_first_result(first_msg_arr);
+                    let key_id = first_res["key_id"];
+                    brencis.onmessage = async (msg) => {
+                        const second_msg_arr = new Uint8Array(await msg.data.arrayBuffer())
+                        const second_res = parse_second_result(second_msg_arr);
+                        add_to_table(first_res["key_id"], first_res["key_half"], second_res["key_half"], second_res["other_hash"], first_res["other_hash"])
+                        if (watch_keys)
+                            add_keys()
+                    }
+                    get_key_half(brencis, key_id);
                 }
-                get_key_half(brencis, key_id);
+                reserve_key_and_get_half(aija)
             }
-            reserve_key_and_get_half(aija)
+
+            add_keys()
         }
-        add_keys()
     }
 
     aija.onclose = (event) =>  console.log("socket closed connection: ", event)

@@ -24,17 +24,22 @@ func InitKeyManager(maxKeyCount int, aija bool) KeyManager {
 	}
 }
 
-func (k *KeyManager) AddKey(id, val []byte) error {
+func (k *KeyManager) keyExists(id []byte) bool {
 	k.dataMu.Lock()
 	_, ok := k.data[string(id)]
 	k.dataMu.Unlock()
-	if ok {
+	return ok
+}
+
+func (k *KeyManager) AddKey(id, val []byte) error {
+	if k.keyExists(id) {
 		return errors.New(fmt.Sprintf("key %v already exists", string(id)))
 	}
+	// it is important to save the key and then add it to queue
 	k.dataMu.Lock()
 	k.data[string(id)] = val
-	k.queue <- id
 	k.dataMu.Unlock()
+	k.queue <- id
 	return nil
 }
 
