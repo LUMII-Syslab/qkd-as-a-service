@@ -7,6 +7,7 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 	"log"
 	"qkdc-service/utils"
+	"sync"
 )
 
 type KeyGatherer struct {
@@ -31,13 +32,22 @@ func (kg *KeyGatherer) Start(url string) error {
 
 func (kg *KeyGatherer) distributeKey(keyId, keyVal []byte) error {
 	fmt.Printf("\tk: %v\r", utils.BytesToHexOctets(keyVal))
-	for _, v := range kg.subscribers {
-		err := v.AddKey(keyId, keyVal)
-		if err != nil {
-			return err
-		}
+	var wg sync.WaitGroup
+	var result error
+	for _, manager := range kg.subscribers {
+		wg.Add(1)
+		go func(manager *KeyManager) {
+			log.Printf("adding key %v to %v", utils.BytesToHexOctets(keyId), manager.aija)
+			err := manager.addKey(keyId, keyVal)
+			if err != nil {
+				result = err
+			}
+			log.Printf("added key %v to %v", utils.BytesToHexOctets(keyId), manager.aija)
+			wg.Done()
+		}(manager)
 	}
-	return nil
+	wg.Wait()
+	return result
 }
 
 func (kg *KeyGatherer) gatherClavisKeys(url string) error {

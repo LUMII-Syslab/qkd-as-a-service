@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"golang.org/x/crypto/sha3"
+	"log"
+	"qkdc-service/utils"
 	"sync"
 )
 
@@ -31,21 +33,39 @@ func (k *KeyManager) keyExists(id []byte) bool {
 	return ok
 }
 
-func (k *KeyManager) AddKey(id, val []byte) error {
+func (k *KeyManager) getKeyValue(id []byte) ([]byte, error) {
+	k.dataMu.Lock()
+	val, ok := k.data[string(id)]
+	k.dataMu.Unlock()
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("key %v not found in data", id))
+	}
+	return val, nil
+}
+
+func (k *KeyManager) addKey(id, val []byte) error {
 	if k.keyExists(id) {
-		return errors.New(fmt.Sprintf("key %v already exists", string(id)))
+		return errors.New(fmt.Sprintf("key %v already exists", utils.BytesToHexOctets(id)))
 	}
 	// it is important to save the key and then add it to queue
 	k.dataMu.Lock()
 	k.data[string(id)] = val
 	k.dataMu.Unlock()
-	k.queue <- id
+	sum := 0
+	for _, v := range val {
+		sum += int(v)
+	}
+	if k.aija == (sum%2 == 0) {
+		k.queue <- id
+	}
 	return nil
 }
 
 // ReserveKey returns key id and marks it as reserved
 func (k *KeyManager) ReserveKey() []byte {
+	log.Println(len(k.queue))
 	key := <-k.queue
+	log.Println(len(k.queue), utils.BytesToHexOctets(key))
 	return key
 }
 
@@ -65,7 +85,7 @@ func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, error) {
 	}
 }
 
-func (k *KeyManager) GetKeyHalf(keyId []byte) (thisHalf []byte, otherHash []byte, err error) {
+func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, otherHash []byte, err error) {
 	thisHalf, err = k.getThisHalf(keyId)
 	if err != nil {
 		return
@@ -76,22 +96,23 @@ func (k *KeyManager) GetKeyHalf(keyId []byte) (thisHalf []byte, otherHash []byte
 
 func (k *KeyManager) ReserveKeyAndGetHalf() (keyId []byte, thisHalf []byte, otherHash []byte, err error) {
 	keyId = k.ReserveKey()
-	thisHalf, otherHash, err = k.GetKeyHalf(keyId)
+	thisHalf, otherHash, err = k.GetKeyThisHalfOtherHash(keyId)
 	return
 }
 
-func (k *KeyManager) GetKeyValue(id []byte) ([]byte, error) {
-	k.dataMu.Lock()
-	val, ok := k.data[string(id)]
-	k.dataMu.Unlock()
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("key %v not found in data", id))
+func (k *KeyManager) getShake128Hash(data []byte) (hash []byte, err error) {
+	h := sha3.NewShake128()
+	hash = make([]byte, 128)
+	_, err = h.Write(data)
+	if err != nil {
+		return
 	}
-	return val, nil
+	_, err = h.Read(hash)
+	return
 }
 
 func (k *KeyManager) GetKeyLeft(id []byte) ([]byte, error) {
-	res, err := k.GetKeyValue(id)
+	res, err := k.getKeyValue(id)
 	if err != nil {
 		return nil, err
 	}
@@ -103,15 +124,11 @@ func (k *KeyManager) GetKeyLeftHash(id []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	h := sha3.NewShake128()
-	res := make([]byte, 128)
-	h.Write(data)
-	h.Read(res)
-	return res, nil
+	return k.getShake128Hash(data)
 }
 
 func (k *KeyManager) GetKeyRight(id []byte) ([]byte, error) {
-	res, err := k.GetKeyValue(id)
+	res, err := k.getKeyValue(id)
 	if err != nil {
 		return nil, err
 	}
@@ -123,9 +140,5 @@ func (k *KeyManager) GetKeyRightHash(id []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	h := sha3.NewShake128()
-	res := make([]byte, 128)
-	h.Write(data)
-	h.Read(res)
-	return res, nil
+	return k.getShake128Hash(data)
 }

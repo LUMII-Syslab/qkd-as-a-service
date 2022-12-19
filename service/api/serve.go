@@ -67,7 +67,7 @@ func ListenAndServe(manager *data.KeyManager, APIPort int) {
 					continue
 				}
 				_, keyId, callId := seq[1].AsInt(), seq[2].AsBytes(), seq[3].AsInt()
-				thisHalf, otherHash, err := manager.GetKeyHalf(keyId)
+				thisHalf, otherHash, err := manager.GetKeyThisHalfOtherHash(keyId)
 				errCode := 0
 				if err != nil {
 					log.Println(err)
