@@ -1,4 +1,4 @@
-# Quantum Key Distribution Centre darbība
+# QKD centra darbība
 
 Es `reserveKeyAndGetKeyHalf` un `getKeyHalf` apzīmēšu ar attiecīgi $X$ un $Y$.
 
