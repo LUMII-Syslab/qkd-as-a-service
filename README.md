@@ -8,7 +8,7 @@ Gan $A$, gan $B$ ir `dequeue` datu struktūras, kurām var pievienot elementus g
 
 $A$ izmērs jeb $|A|$ ir ierobežots. Maksimālo $|A|$ apzīmēšu ar $W$. Skaidrs, ka $|B|\leq|A|$ pie korektas programmas darbības. 
 
-$QKDC$ darbību var iedalīt trīs notikumos.
+$QKDC$ darbību var iedalīt trīs notikumos: jaunas atslēgas saņemšana, $X$ pieprasījuma apstrāde, $Y$ pieprasījuma apstrāde.
 
 ## Jaunas atslēgas saņemšana
 
