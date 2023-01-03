@@ -37,12 +37,12 @@ func (kg *KeyGatherer) distributeKey(keyId, keyVal []byte) error {
 	for _, manager := range kg.subscribers {
 		wg.Add(1)
 		go func(manager *KeyManager) {
-			log.Printf("adding key %v to %v", utils.BytesToHexOctets(keyId), manager.aija)
+			log.Printf("adding key %v to %v", utils.BytesToHexOctets(keyId), manager.L)
 			err := manager.addKey(keyId, keyVal)
 			if err != nil {
 				result = err
 			}
-			log.Printf("added key %v to %v", utils.BytesToHexOctets(keyId), manager.aija)
+			log.Printf("added key %v to %v", utils.BytesToHexOctets(keyId), manager.L)
 			wg.Done()
 		}(manager)
 	}

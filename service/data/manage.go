@@ -3,7 +3,6 @@ package data
 import (
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/sha3"
 	"log"
 	"qkdc-service/utils"
 )
@@ -14,20 +13,22 @@ type Key struct {
 }
 
 type KeyManager struct {
-	A SyncDeque[Key]       // all keys
-	B SyncDeque[Key]       // reservable keys
-	C SyncDeque[Key]       // queue into B
-	D SyncMap[string, Key] // key id, val dictionary
-	W int                  // maximum A size
-	L bool                 // true <-> returns left of key and serves even ( otherwise returns right and serves odd)
+	A *SyncDeque[Key]       // all keys
+	B *SyncDeque[Key]       // reservable keys
+	C *SyncDeque[Key]       // queue into B
+	D *SyncMap[string, Key] // key id, val dictionary
+	W int                   // maximum A size
+	L bool                  // true <-> returns left of key and serves even ( otherwise returns right and serves odd)
 }
 
-func InitKeyManager(maxKeyCount int, aija bool) KeyManager {
-	return KeyManager{
-		data:     make(map[string][]byte),
-		queue:    make(chan []byte, maxKeyCount),
-		mxKeyCnt: maxKeyCount,
-		aija:     aija,
+func InitKeyManager(maxKeyCount int, aija bool) *KeyManager {
+	return &KeyManager{
+		A: NewSyncDeque[Key](),
+		B: NewSyncDeque[Key](),
+		C: NewSyncDeque[Key](),
+		D: NewSyncMap[string, Key](),
+		W: maxKeyCount,
+		L: aija,
 	}
 }
 
@@ -72,78 +73,4 @@ func (k *KeyManager) ReserveKey() []byte {
 	key := <-k.queue
 	log.Println(len(k.queue), utils.BytesToHexOctets(key))
 	return key
-}
-
-func (k *KeyManager) getThisHalf(keyId []byte) ([]byte, error) {
-	if k.aija {
-		return k.GetKeyLeft(keyId)
-	} else {
-		return k.GetKeyRight(keyId)
-	}
-}
-
-func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, error) {
-	if k.aija {
-		return k.GetKeyRightHash(keyId)
-	} else {
-		return k.GetKeyLeftHash(keyId)
-	}
-}
-
-func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, otherHash []byte, err error) {
-	thisHalf, err = k.getThisHalf(keyId)
-	if err != nil {
-		return
-	}
-	otherHash, err = k.getOtherHash(keyId)
-	return
-}
-
-func (k *KeyManager) ReserveKeyAndGetHalf() (keyId []byte, thisHalf []byte, otherHash []byte, err error) {
-	keyId = k.ReserveKey()
-	thisHalf, otherHash, err = k.GetKeyThisHalfOtherHash(keyId)
-	return
-}
-
-func (k *KeyManager) getShake128Hash(data []byte) (hash []byte, err error) {
-	h := sha3.NewShake128()
-	hash = make([]byte, 128)
-	_, err = h.Write(data)
-	if err != nil {
-		return
-	}
-	_, err = h.Read(hash)
-	return
-}
-
-func (k *KeyManager) GetKeyLeft(id []byte) ([]byte, error) {
-	res, err := k.getKeyValue(id)
-	if err != nil {
-		return nil, err
-	}
-	return res[:len(res)/2+1], nil
-}
-
-func (k *KeyManager) GetKeyLeftHash(id []byte) ([]byte, error) {
-	data, err := k.GetKeyLeft(id)
-	if err != nil {
-		return nil, err
-	}
-	return k.getShake128Hash(data)
-}
-
-func (k *KeyManager) GetKeyRight(id []byte) ([]byte, error) {
-	res, err := k.getKeyValue(id)
-	if err != nil {
-		return nil, err
-	}
-	return res[len(res)/2+1:], nil
-}
-
-func (k *KeyManager) GetKeyRightHash(id []byte) ([]byte, error) {
-	data, err := k.GetKeyRight(id)
-	if err != nil {
-		return nil, err
-	}
-	return k.getShake128Hash(data)
 }
