@@ -6,15 +6,20 @@ import (
 	"golang.org/x/crypto/sha3"
 	"log"
 	"qkdc-service/utils"
-	"sync"
 )
 
+type Key struct {
+	KeyId  []byte
+	KeyVal []byte
+}
+
 type KeyManager struct {
-	data     map[string][]byte
-	dataMu   sync.Mutex
-	queue    chan []byte
-	mxKeyCnt int
-	aija     bool // true <-> returns left of key ( otherwise returns right )
+	A SyncDeque[Key]       // all keys
+	B SyncDeque[Key]       // reservable keys
+	C SyncDeque[Key]       // queue into B
+	D SyncMap[string, Key] // key id, val dictionary
+	W int                  // maximum A size
+	L bool                 // true <-> returns left of key and serves even ( otherwise returns right and serves odd)
 }
 
 func InitKeyManager(maxKeyCount int, aija bool) KeyManager {
