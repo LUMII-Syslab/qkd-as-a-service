@@ -39,3 +39,11 @@ func BytesToHexOctets(b []byte) string {
 	}
 	return res
 }
+
+func ByteSum(b []byte) int {
+	sum := 0
+	for _, v := range b {
+		sum += int(v)
+	}
+	return sum
+}

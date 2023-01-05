@@ -1,75 +1,73 @@
 package data
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"log"
 	"qkdc-service/utils"
+	"time"
 )
 
 type Key struct {
-	KeyId  []byte
-	KeyVal []byte
+	KeyId   []byte
+	KeyVal  []byte
+	Created time.Time
 }
 
 type KeyManager struct {
 	A *SyncDeque[Key]       // all keys
 	B *SyncDeque[Key]       // reservable keys
 	C *SyncDeque[Key]       // queue into B
+	Z int                   // key lifetime in C ( milliseconds )
 	D *SyncMap[string, Key] // key id, val dictionary
 	W int                   // maximum A size
 	L bool                  // true <-> returns left of key and serves even ( otherwise returns right and serves odd)
 }
 
-func InitKeyManager(maxKeyCount int, aija bool) *KeyManager {
-	return &KeyManager{
-		A: NewSyncDeque[Key](),
-		B: NewSyncDeque[Key](),
-		C: NewSyncDeque[Key](),
-		D: NewSyncMap[string, Key](),
-		W: maxKeyCount,
-		L: aija,
-	}
-}
-
-func (k *KeyManager) keyExists(id []byte) bool {
-	k.dataMu.Lock()
-	_, ok := k.data[string(id)]
-	k.dataMu.Unlock()
-	return ok
-}
-
-func (k *KeyManager) getKeyValue(id []byte) ([]byte, error) {
-	k.dataMu.Lock()
-	val, ok := k.data[string(id)]
-	k.dataMu.Unlock()
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("key %v not found in data", id))
+func (k *KeyManager) getKey(id []byte) (Key, error) {
+	val, exists := k.D.Get(string(id))
+	if !exists {
+		return Key{}, errors.New(fmt.Sprintf("key %v not found in data", id))
 	}
 	return val, nil
 }
 
-func (k *KeyManager) addKey(id, val []byte) error {
-	if k.keyExists(id) {
+// refreshC ensures that no key in C is older than Z milliseconds
+func (k *KeyManager) refreshC() {
+	now := time.Now()
+	front := k.C.Front()
+	for now.Sub(front.Created).Milliseconds() >= int64(k.Z) {
+		k.B.PushBack(front)
+		k.C.PopFront()
+		if k.C.Size() > 0 {
+			front = k.C.Front()
+		}
+	}
+}
+
+func (k *KeyManager) addKey(key Key) error {
+	if k.D.Exists(string(key.KeyId)) {
 		return errors.New(fmt.Sprintf("key %v already exists", utils.BytesToHexOctets(id)))
 	}
-	// it is important to save the key and then add it to queue
-	k.dataMu.Lock()
-	k.data[string(id)] = val
-	k.dataMu.Unlock()
-	sum := 0
-	for _, v := range val {
-		sum += int(v)
+	k.refreshC() // moves keys into B
+	rem, remKey := k.A.AddWithW(key, k.W)
+	if rem {
+		k.D.Erase(string(remKey.KeyId))
+		if k.B.Size() > 0 && bytes.Compare(k.B.Front().KeyId, remKey.KeyId) == 0 {
+			_, _ = k.B.PopFront()
+		}
 	}
-	if k.aija == (sum%2 == 0) {
-		k.queue <- id
+	k.D.Add(string(key.KeyId), key)
+	if k.L == (utils.ByteSum(key.KeyVal)%2 == 0) {
+		k.C.PushBack(key)
 	}
 	return nil
 }
 
-// ReserveKey returns key id and marks it as reserved
-func (k *KeyManager) ReserveKey() []byte {
-	log.Println(len(k.queue))
+// ReserveKey extracts key and removes it from queue
+func (k *KeyManager) ReserveKey() (key Key, err error) {
+	key
 	key := <-k.queue
 	log.Println(len(k.queue), utils.BytesToHexOctets(key))
 	return key

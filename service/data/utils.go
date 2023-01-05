@@ -30,11 +30,11 @@ func (k *KeyManager) getShake128Hash(data []byte) (hash []byte, err error) {
 }
 
 func (k *KeyManager) GetKeyLeft(id []byte) ([]byte, error) {
-	res, err := k.getKeyValue(id)
+	res, err := k.getKey(id)
 	if err != nil {
 		return nil, err
 	}
-	return res[:len(res)/2+1], nil
+	return res.KeyVal[:len(res.KeyVal)/2+1], nil
 }
 
 func (k *KeyManager) GetKeyLeftHash(id []byte) ([]byte, error) {
@@ -46,11 +46,11 @@ func (k *KeyManager) GetKeyLeftHash(id []byte) ([]byte, error) {
 }
 
 func (k *KeyManager) GetKeyRight(id []byte) ([]byte, error) {
-	res, err := k.getKeyValue(id)
+	res, err := k.getKey(id)
 	if err != nil {
 		return nil, err
 	}
-	return res[len(res)/2+1:], nil
+	return res.KeyVal[len(res.KeyVal)/2+1:], nil
 }
 
 func (k *KeyManager) GetKeyRightHash(id []byte) ([]byte, error) {
