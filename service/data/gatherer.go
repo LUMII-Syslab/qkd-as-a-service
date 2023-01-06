@@ -8,6 +8,7 @@ import (
 	"log"
 	"qkdc-service/utils"
 	"sync"
+	"time"
 )
 
 type KeyGatherer struct {
@@ -22,7 +23,16 @@ func (kg *KeyGatherer) Subscribe(manager *KeyManager) {
 	kg.subscribers = append(kg.subscribers, manager)
 }
 
+var addedKeys = 0
+
 func (kg *KeyGatherer) Start(url string) error {
+	go func() {
+		for {
+			time.Sleep(time.Second)
+			log.Printf("added %v keys to subscribers", addedKeys)
+			addedKeys = 0
+		}
+	}()
 	if url != "" {
 		return kg.gatherClavisKeys(url)
 	} else {
@@ -37,16 +47,17 @@ func (kg *KeyGatherer) distributeKey(keyId, keyVal []byte) error {
 	for _, manager := range kg.subscribers {
 		wg.Add(1)
 		go func(manager *KeyManager) {
-			log.Printf("adding key %v to %v", utils.BytesToHexOctets(keyId), manager.L)
+			//log.Printf("adding key %v to %v", utils.BytesToHexOctets(keyId), manager.L)
 			err := manager.addKey(keyId, keyVal)
 			if err != nil {
 				result = err
 			}
-			log.Printf("added key %v to %v", utils.BytesToHexOctets(keyId), manager.L)
+			//log.Printf("added key %v to %v", utils.BytesToHexOctets(keyId), manager.L)
 			wg.Done()
 		}(manager)
 	}
 	wg.Wait()
+	addedKeys += 1
 	return result
 }
 

@@ -1,20 +1,22 @@
 package data
 
-import "golang.org/x/crypto/sha3"
+import (
+	"golang.org/x/crypto/sha3"
+)
 
 func (k *KeyManager) getThisHalf(keyId []byte) ([]byte, error) {
 	if k.L {
-		return k.GetKeyLeft(keyId)
+		return k.getKeyLeft(keyId)
 	} else {
-		return k.GetKeyRight(keyId)
+		return k.getKeyRight(keyId)
 	}
 }
 
 func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, error) {
 	if k.L {
-		return k.GetKeyRightHash(keyId)
+		return k.getKeyRightHash(keyId)
 	} else {
-		return k.GetKeyLeftHash(keyId)
+		return k.getKeyLeftHash(keyId)
 	}
 }
 
@@ -29,7 +31,7 @@ func (k *KeyManager) getShake128Hash(data []byte) (hash []byte, err error) {
 	return
 }
 
-func (k *KeyManager) GetKeyLeft(id []byte) ([]byte, error) {
+func (k *KeyManager) getKeyLeft(id []byte) ([]byte, error) {
 	res, err := k.getKey(id)
 	if err != nil {
 		return nil, err
@@ -37,15 +39,15 @@ func (k *KeyManager) GetKeyLeft(id []byte) ([]byte, error) {
 	return res.KeyVal[:len(res.KeyVal)/2+1], nil
 }
 
-func (k *KeyManager) GetKeyLeftHash(id []byte) ([]byte, error) {
-	data, err := k.GetKeyLeft(id)
+func (k *KeyManager) getKeyLeftHash(id []byte) ([]byte, error) {
+	data, err := k.getKeyLeft(id)
 	if err != nil {
 		return nil, err
 	}
 	return k.getShake128Hash(data)
 }
 
-func (k *KeyManager) GetKeyRight(id []byte) ([]byte, error) {
+func (k *KeyManager) getKeyRight(id []byte) ([]byte, error) {
 	res, err := k.getKey(id)
 	if err != nil {
 		return nil, err
@@ -53,8 +55,8 @@ func (k *KeyManager) GetKeyRight(id []byte) ([]byte, error) {
 	return res.KeyVal[len(res.KeyVal)/2+1:], nil
 }
 
-func (k *KeyManager) GetKeyRightHash(id []byte) ([]byte, error) {
-	data, err := k.GetKeyRight(id)
+func (k *KeyManager) getKeyRightHash(id []byte) ([]byte, error) {
+	data, err := k.getKeyRight(id)
 	if err != nil {
 		return nil, err
 	}

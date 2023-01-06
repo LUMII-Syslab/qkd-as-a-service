@@ -1,11 +1,17 @@
 package data
 
+import (
+	"github.com/gammazero/deque"
+)
+
 func InitKeyManager(maxKeyCount int, aija bool) *KeyManager {
 	return &KeyManager{
-		A: NewSyncDeque[Key](),
-		B: NewSyncDeque[Key](),
-		C: NewSyncDeque[Key](),
-		D: NewSyncMap[string, Key](),
+		A: deque.New[Key](),
+		B: deque.New[Key](),
+		C: make(map[string]bool),
+		S: make(chan int),
+		Z: 500,
+		D: make(map[string]Key),
 		W: maxKeyCount,
 		L: aija,
 	}
@@ -21,7 +27,7 @@ func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, oth
 }
 
 func (k *KeyManager) ReserveKeyAndGetHalf() (keyId []byte, thisHalf []byte, otherHash []byte, err error) {
-	keyId = k.ReserveKey().KeyVal
+	keyId = k.extractKey().KeyId
 	thisHalf, otherHash, err = k.GetKeyThisHalfOtherHash(keyId)
 	return
 }
