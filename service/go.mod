@@ -3,6 +3,7 @@ module qkdc-service
 go 1.19
 
 require (
+	github.com/gammazero/deque v0.2.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/pebbe/zmq4 v1.2.9
 	github.com/spf13/viper v1.14.0
@@ -12,7 +13,6 @@ require (
 
 require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/gammazero/deque v0.2.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
