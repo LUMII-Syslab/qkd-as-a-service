@@ -39,17 +39,30 @@ fieldset {
     margin: 20px 0;
 }
 
-.inline-input-group {
+.responsive-input-group {
     display:inline;
-    margin: 10px;
+    margin: 1rem;
 }
 
-.inline-label {
-    display:inline;
-    margin: 0 5px;
+.responsive-input-group label{
+  margin-right: 5px;
 }
 
+@media screen and (max-width: 1500px) {
+    .responsive-input-group {
+        display:block;
+    }
+}
+ 
 input, select {
   padding: 5px;
   font-family: IBM;
+}
+
+.req-resp {
+  margin: 1rem 0;
+}
+
+.req-resp code{
+  margin: 20px;
 }

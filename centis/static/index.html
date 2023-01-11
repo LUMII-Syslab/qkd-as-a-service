@@ -3,7 +3,7 @@
 
 <head>
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="table.css" />
+    <link rel="stylesheet" href="tables.css" />
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,12 +20,12 @@
         <!-- KDC config (KDCC) -->
         <fieldset>
             <legend>KDC config</legend>
-            <div class="inline-input-group">
-                <label for="kdcc-aija-url" class="inline-label">Aija URL</label>
+            <div class="responsive-input-group">
+                <label for="kdcc-aija-url">Aija URL</label>
                 <input type="text" id="kdcc-aija-url" value="http://localhost:8080" class="form-control" size="30" />
             </div>
-            <div class="inline-input-group">
-                <label for="kdcc-brencis-url" class="inline-label">Brencis URL</label>
+            <div class="responsive-input-group">
+                <label for="kdcc-brencis-url">Brencis URL</label>
                 <input type="text" id="kdcc-brencis-url" value="http://localhost:8081" class="form-control" size="30" />
             </div>
         </fieldset>
@@ -34,57 +34,115 @@
             <!-- reserveKeyAndGetKeyHalf  (RKAGKH)-->
             <fieldset>
                 <legend><code>reserveKeyAndGetKeyHalf</code> request</legend>
-                <div class="inline-input-group">
-                    <label for="rkagkh-kdc" class="inline-label">QKDC</label>
+                <div class="responsive-input-group">
+                    <label for="rkagkh-kdc">QKDC</label>
                     <select id="rkagkh-kdc" class="form-control">
                         <option value="Aija">Aija</option>
                         <option value="Brencis">Brencis</option>
                     </select>
                 </div>
-                <div class="inline-input-group">
-                    <label for="rkagkh-key-length" class="inline-label">Key Length</label>
-                    <input type="number" id="rkagkh-key-length" value="256"/>
+                <div class="responsive-input-group">
+                    <label for="rkagkh-key-length">Key Length</label>
+                    <input type="number" id="rkagkh-key-length" value="256" disabled />
                 </div>
-                <div class="inline-input-group">
-                    <label for="rkagkh-c-nonce" class="inline-label">Crypto Nonce</label>
-                    <input type="number" id="rkagkh-c-nonce" value="0"/>
+                <div class="responsive-input-group">
+                    <label for="rkagkh-c-nonce">Crypto Nonce</label>
+                    <input type="number" id="rkagkh-c-nonce" value="0" />
                 </div>
-                <div class="inline-input-group">
+                <div class="responsive-input-group">
                     <input type="button" onclick="alert(123)" value="SEND reserveKeyAndGetKeyHalf" class="btn" />
                 </div>
+                <div style="margin-top: 1rem;">
+                    <div class="responsive-input-group">
+                        ASN.1 encoded request: <code>?</code>
+                    </div>
+                </div>
+                <!--
+                    				res = append(res, CreateIntSeqElement(callId))
+				res = append(res, CreateIntSeqElement(errCode))
+				res = append(res, CreateArrSeqElement(keyId))
+				res = append(res, CreateArrSeqElement(thisHalf))
+				res = append(res, CreateArrSeqElement(otherHash))
+				res = append(res, CreateObjSeqElement(hashAlgorithmId))
+                -->
+                <fieldset>
+                    <legend>response</legend>
+                    <!--move the fields below into a table-->
+                    <table class="response-table">
+                        <tr>
+                            <td>crypto nonce</td>
+                            <td><code id="rkagkh-resp-c-nonce">?</code></td>
+                        </tr>
+                        <tr>
+                            <td>err code</td>
+                            <td><code id="rkagkh-resp-err-code">?</code></td>
+                        </tr>
+                        <tr>
+                            <td>key id</td>
+                            <td><code id="rkagkh-resp-key-id">0410000102030405060708090A0B0C0D0E0F</code></td>
+                        </tr>
+                        <tr>
+                            <td>this half</td>
+                            <td><code id="rkagkh-resp-this-half">?</code></td>
+                        </tr>
+                        <tr>
+                            <td>other hash</td>
+                            <td><code id="rkagkh-resp-other-hash">?</code></td>
+                        </tr>
+                        <tr>
+                            <td>hash alg id</td>
+                            <td><code id="rkagkh-resp-alg-id">?</code></td>
+                        </tr>
+                    </table>
+                </fieldset>
             </fieldset>
             <!-- getKeyHalf (GKH)-->
             <fieldset>
                 <legend><code>getKeyHalf</code> request</legend>
-                <div class="inline-input-group">
+                <div class="responsive-input-group">
                     <!-- select element with options Aija and Brencis -->
-                    <label for="gkh-kdc" class="inline-label">QKDC</label>
+                    <label for="gkh-kdc">QKDC</label>
                     <select id="gkh-kdc" class="form-control">
                         <option value="Aija">Aija</option>
                         <option value="Brencis">Brencis</option>
                     </select>
                 </div>
-                <div class="inline-input-group">
-                    <label for="gkh-key-length" class="inline-label">Key Length</label>
-                    <input type="number" id="gkh-key-length" value="256"/>
+                <div class="responsive-input-group">
+                    <label for="gkh-key-length">Key Length</label>
+                    <input type="number" id="gkh-key-length" value="256" />
                 </div>
-                <div class="inline-input-group">
-                    <label for="gkh-key-id" class="inline-label">Key Id</label>
-                    <input type="text" id="gkh-key-id" value="0410000102030405060708090A0B0C0D0E0F"size="36"/>
+                <div class="responsive-input-group">
+                    <label for="gkh-key-id">Key Id</label>
+                    <input type="text" id="gkh-key-id" value="0410000102030405060708090A0B0C0D0E0F" size="36" />
                 </div>
-                <div class="inline-input-group">
-                    <label for="gkh-c-nonce" class="inline-label">Crypto Nonce</label>
-                    <input type="number" id="gkh-c-nonce" value="0"/>
+                <div class="responsive-input-group">
+                    <label for="gkh-c-nonce">Crypto Nonce</label>
+                    <input type="number" id="gkh-c-nonce" value="0" />
                 </div>
-                <div class="inline-input-group">
+                <div class="responsive-input-group">
                     <input type="button" onclick="alert(123)" value="SEND getKeyHalf" class="btn" />
+                </div>
+            </fieldset>
+            <!-- GetState (GS) & SetState (SS)-->
+            <fieldset>
+                <legend><code>getState & setState</code> request</legend>
+                <div class="responsive-input-group">
+                    <!-- select element with options Aija and Brencis -->
+                    <label for="gs-kdc">QKDC</label>
+                    <select id="gs-kdc" class="form-control">
+                        <option value="Aija">Aija</option>
+                        <option value="Brencis">Brencis</option>
+                    </select>
+                </div>
+                <div class="responsive-input-group">
+                    <input type="button" onclick="alert(123)" value="SEND getState" class="btn" />
                 </div>
             </fieldset>
         </section>
 
         <h2>Key Monitoring</h2>
         <input type="button" onclick="toggle_watch_keys()" value="start watching keys" class="btn" />
-        <table style="margin-top: 1rem;">
+        <table style="margin-top: 1rem;" class="key-table">
             <colgroup>
                 <col span="1" style="width: 30%" />
                 <col span="1" style="width: 15%" />
