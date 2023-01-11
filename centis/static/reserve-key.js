@@ -1,11 +1,13 @@
 var rkagkh_request;
 var rkagkh_err_msg;
+var rkagkh_endpoint;
 
 $(() => {
     update_request();
     $('#rkagkh-kdc').change(update_request);
     $('#rkagkh-key-length').change(update_request);
     $('#rkagkh-c-nonce').change(update_request);
+    $('#rkagkh-send').click(send_request);
 });
 
 function update_request() {
@@ -14,6 +16,8 @@ function update_request() {
         rkagkh_err_msg = "KDC must be either Aija or Brencis";
         return;
     }
+    rkagkh_endpoint = kdc == "Aija" ? $("#kdcc-aija-url").val() : $("#kdcc-brencis-url").val();
+
     var key_length = +$('#rkagkh-key-length').val();
     var c_nonce = +$('#rkagkh-c-nonce').val();
     rkagkh_request = encode_request(key_length, c_nonce)
@@ -58,4 +62,14 @@ function encode_request(key_length, c_nonce) {
     rkagkh_err_msg = ""; // reset error message
 
     return req;
+}
+
+async function send_request() {
+    try {
+        let socket = await ws_connect(rkagkh_endpoint);
+        let response = await ws_send_request(socket, rkagkh_request);
+        console.log(response);
+    } catch (error) {
+        alert(`websocket connection to ${rkagkh_endpoint} failed`)
+    }
 }

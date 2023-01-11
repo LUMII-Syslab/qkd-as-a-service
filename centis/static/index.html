@@ -14,7 +14,7 @@
     <main class="container">
         <h1>Centis - QAAS admin panel</h1>
         <p>
-            This is a simple admin panel for Centis. It allows you to send requests to the Centis server and monitor the
+            This is a simple admin panel for QAAS (QKD as a service). It allows you to send requests to the KDCs (key distribution centers) and monitor the
             keys.
         </p>
         <!-- KDC config (KDCC) -->
@@ -22,11 +22,11 @@
             <legend>KDC config</legend>
             <div class="responsive-input-group">
                 <label for="kdcc-aija-url">Aija URL</label>
-                <input type="text" id="kdcc-aija-url" value="http://localhost:8080" class="form-control" size="30" />
+                <input type="text" id="kdcc-aija-url" value="ws://localhost:8080/ws" class="form-control" size="30" />
             </div>
             <div class="responsive-input-group">
                 <label for="kdcc-brencis-url">Brencis URL</label>
-                <input type="text" id="kdcc-brencis-url" value="http://localhost:8081" class="form-control" size="30" />
+                <input type="text" id="kdcc-brencis-url" value="ws://localhost:8081/ws" class="form-control" size="30" />
             </div>
             <div class="responsive-input-group">
                 <label for="kdcc-password">Password</label>
@@ -61,7 +61,7 @@
                         ASN.1 encoded request: <code>?</code>
                     </div>
                     <div class="responsive-input-group">
-                        <input id="rkagkh-send" type="button" onclick="alert(123)" value="SEND reserveKeyAndGetKeyHalf" class="btn" />
+                        <input id="rkagkh-send" type="button" value="SEND reserveKeyAndGetKeyHalf" class="btn" />
                     </div>
                 </div>
                 <fieldset>
