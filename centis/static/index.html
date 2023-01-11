@@ -66,8 +66,13 @@
                 </div>
                 <fieldset>
                     <legend>response</legend>
-                    <!--move the fields below into a table-->
-                    <table class="response-table">
+                    <!--adjust first column of table so it's shorter-->
+                    
+                    <table class="response-table" style="width: 100%;">
+                        <colgroup>
+                            <col span="1" style="width: 20%" />
+                            <col span="1" style="width: 80%" />
+                        </colgroup>
                         <tr>
                             <td>crypto nonce</td>
                             <td><code id="rkagkh-resp-c-nonce">?</code></td>
@@ -78,7 +83,7 @@
                         </tr>
                         <tr>
                             <td>key id</td>
-                            <td><code id="rkagkh-resp-key-id">0410000102030405060708090A0B0C0D0E0F</code></td>
+                            <td><code id="rkagkh-resp-key-id">?</code></td>
                         </tr>
                         <tr>
                             <td>this half</td>
@@ -86,11 +91,11 @@
                         </tr>
                         <tr>
                             <td>other hash</td>
-                            <td><code id="rkagkh-resp-other-hash">?</code></td>
+                            <td><code style="display:inline-flex;max-width: 100%; overflow:auto;" id="rkagkh-resp-other-hash">?</code></td>
                         </tr>
                         <tr>
                             <td>hash alg id</td>
-                            <td><code id="rkagkh-resp-alg-id">?</code></td>
+                            <td><code id="rkagkh-resp-hash-alg-id">?</code></td>
                         </tr>
                     </table>
                 </fieldset>

@@ -50,8 +50,10 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 		return errors.New(fmt.Sprintf("key %v already exists", utils.BytesToHexOctets(key.KeyId)))
 	}
 	k.A.PushBack(key)
+	k.D[string(key.KeyId)] = key
 	if k.A.Len() > k.W {
 		rem := k.A.PopFront()
+		delete(k.D, string(rem.KeyId))
 		_, exists = k.C[string(rem.KeyId)]
 		if exists {
 			k.C[string(rem.KeyId)] = false

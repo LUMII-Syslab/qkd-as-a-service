@@ -60,6 +60,8 @@ func ListenAndServe(manager *data.KeyManager, APIPort int) {
 				res = append(res, CreateArrSeqElement(otherHash))
 				res = append(res, CreateObjSeqElement(hashAlgorithmId))
 				log.Println("res: ", res.ToByteArray())
+				log.Println("thisHalf: ", thisHalf)
+				log.Println("otherHash: ", otherHash)
 				err = conn.WriteMessage(msgType, res.ToByteArray())
 			case 0x02: // getKeyHalf
 				if len(seq) != 4 {

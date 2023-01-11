@@ -28,7 +28,7 @@ function update_request() {
         $("#rkagkh-send").prop("disabled", true);
     } else {
         console.log(rkagkh_request)
-        $("#rkagkh-encoded code").text(hex_octets(rkagkh_request));
+        $("#rkagkh-encoded code").text(spaced_hex_octets(rkagkh_request));
         $("#rkagkh-error").hide();
         $("#rkagkh-encoded").show();
         $("#rkagkh-send").prop("disabled", false);
@@ -64,11 +64,31 @@ function encode_request(key_length, c_nonce) {
     return req;
 }
 
+function parse_rkagkh_result(msg_arr) {
+    let data = ASN_DER_to_list(msg_arr);
+    return {
+        "state_id": data[0],
+        "call#": data[1],
+        "errors": data[2],
+        "key_id": data[3],
+        "key_half": data[4],
+        "other_hash": data[5],
+        "hash_id": data[6]
+    };
+}
+
 async function send_request() {
     try {
         let socket = await ws_connect(rkagkh_endpoint);
         let response = await ws_send_request(socket, rkagkh_request);
-        console.log(response);
+        let parsed = parse_rkagkh_result(response);
+        console.log(parsed);
+        $("#rkagkh-resp-c-nonce").text(parsed["call#"]);
+        $("#rkagkh-resp-err-code").text(parsed["errors"]);
+        $("#rkagkh-resp-key-id").text(hex_octets(parsed["key_id"]));
+        $("#rkagkh-resp-this-half").text(hex_octets(parsed["key_half"]));
+        $("#rkagkh-resp-other-hash").text(hex_octets(parsed["other_hash"]));
+        $("#rkagkh-resp-hash-alg-id").text(hex_octets(parsed["hash_id"]));
     } catch (error) {
         alert(`websocket connection to ${rkagkh_endpoint} failed`)
     }
