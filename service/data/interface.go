@@ -9,7 +9,7 @@ func InitKeyManager(maxKeyCount int, aija bool) *KeyManager {
 		A: deque.New[Key](),
 		B: deque.New[Key](),
 		C: make(map[string]bool),
-		S: make(chan int),
+		S: make(chan int, maxKeyCount),
 		Z: 500,
 		D: make(map[string]Key),
 		W: maxKeyCount,

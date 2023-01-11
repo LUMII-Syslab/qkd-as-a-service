@@ -2,13 +2,12 @@ package data
 
 import (
 	"crypto/rand"
-	"fmt"
-	zmq "github.com/pebbe/zmq4"
-	"github.com/vmihailenco/msgpack/v5"
 	"log"
-	"qkdc-service/utils"
 	"sync"
 	"time"
+
+	zmq "github.com/pebbe/zmq4"
+	"github.com/vmihailenco/msgpack/v5"
 )
 
 type KeyGatherer struct {
@@ -29,7 +28,6 @@ func (kg *KeyGatherer) Start(url string) error {
 	go func() {
 		for {
 			time.Sleep(time.Second)
-			log.Printf("added %v keys to subscribers", addedKeys)
 			addedKeys = 0
 		}
 	}()
@@ -41,18 +39,16 @@ func (kg *KeyGatherer) Start(url string) error {
 }
 
 func (kg *KeyGatherer) distributeKey(keyId, keyVal []byte) error {
-	fmt.Printf("\tk: %v\r", utils.BytesToHexOctets(keyVal))
+	//fmt.Printf("\tk: %v\r", utils.BytesToHexOctets(keyVal))
 	var wg sync.WaitGroup
 	var result error
 	for _, manager := range kg.subscribers {
 		wg.Add(1)
 		go func(manager *KeyManager) {
-			//log.Printf("adding key %v to %v", utils.BytesToHexOctets(keyId), manager.L)
 			err := manager.addKey(keyId, keyVal)
 			if err != nil {
 				result = err
 			}
-			//log.Printf("added key %v to %v", utils.BytesToHexOctets(keyId), manager.L)
 			wg.Done()
 		}(manager)
 	}
@@ -140,6 +136,6 @@ func (kg *KeyGatherer) gatherRandomKeys(keyIdLength, keyValLength int) error {
 		if err != nil {
 			return err
 		}
-		//time.Sleep(time.Duration(mathRand.Float32() * 5000000000))
+		time.Sleep(time.Millisecond)
 	}
 }

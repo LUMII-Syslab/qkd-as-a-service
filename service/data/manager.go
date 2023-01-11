@@ -3,11 +3,12 @@ package data
 import (
 	"errors"
 	"fmt"
-	"github.com/gammazero/deque"
 	"qkdc-service/utils"
 	"reflect"
 	"sync"
 	"time"
+
+	"github.com/gammazero/deque"
 )
 
 type Key struct {
@@ -59,21 +60,21 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 			k.B.PopFront()
 		}
 	}
-	k.M.Unlock()
-
-	// add key to C after a delay of Z milliseconds
+	// add key to B after a delay of Z milliseconds
 	if k.L == (utils.ByteSum(key.KeyVal)%2 == 0) {
+		k.C[string(key.KeyId)] = true
 		go func() {
 			time.Sleep(time.Duration(k.Z) * time.Millisecond)
 			k.M.Lock()
 			in, e := k.C[string(key.KeyId)]
 			if e && in {
-				k.S <- 1
 				k.B.PushBack(key)
+				k.S <- 1
 			}
 			k.M.Unlock()
 		}()
 	}
+	k.M.Unlock()
 
 	return nil
 }

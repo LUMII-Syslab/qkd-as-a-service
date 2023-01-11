@@ -47,6 +47,7 @@ func ListenAndServe(manager *data.KeyManager, APIPort int) {
 				}
 				_, callId := seq[1].AsInt(), seq[2].AsInt()
 				keyId, thisHalf, otherHash, err := manager.ReserveKeyAndGetHalf()
+				log.Println("key id: ", keyId) // remove this line
 				errCode := 0
 				if err != nil {
 					errCode = 1
