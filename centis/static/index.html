@@ -49,12 +49,15 @@
                     <label for="rkagkh-c-nonce">Crypto Nonce</label>
                     <input type="number" id="rkagkh-c-nonce" value="0" />
                 </div>
-                <div class="responsive-input-group">
-                    <input type="button" onclick="alert(123)" value="SEND reserveKeyAndGetKeyHalf" class="btn" />
-                </div>
                 <div style="margin-top: 1rem;">
+                    <div class="responsive-input-group" id="rkagkh-error">
+                        input status: <code>?</code>
+                    </div>
+                    <div class="responsive-input-group" id="rkagkh-encoded">
+                        ASN.1 encoded request: <code>?</code>
+                    </div>
                     <div class="responsive-input-group">
-                        ASN.1 encoded request: <code  id="rkagkh-encoded">?</code>
+                        <input type="button" onclick="alert(123)" value="SEND reserveKeyAndGetKeyHalf" class="btn" />
                     </div>
                 </div>
                 <fieldset>
