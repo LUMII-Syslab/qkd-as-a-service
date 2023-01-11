@@ -57,7 +57,7 @@ function encode_request(key_length, c_nonce) {
     req[7] = 0x01; req[8] = 0x00
     // crypto nonce
     req[9] = 0x02; req[10] = 0x02   // an integer of 2 bytes will follow
-    req[11] = 0x30; req[12] = 0x39
+    req[11] = c_nonce>>8; req[12] = c_nonce%256
 
     rkagkh_err_msg = ""; // reset error message
 
