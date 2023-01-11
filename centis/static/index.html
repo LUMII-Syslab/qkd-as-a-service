@@ -54,17 +54,9 @@
                 </div>
                 <div style="margin-top: 1rem;">
                     <div class="responsive-input-group">
-                        ASN.1 encoded request: <code>?</code>
+                        ASN.1 encoded request: <code  id="rkagkh-encoded">?</code>
                     </div>
                 </div>
-                <!--
-                    				res = append(res, CreateIntSeqElement(callId))
-				res = append(res, CreateIntSeqElement(errCode))
-				res = append(res, CreateArrSeqElement(keyId))
-				res = append(res, CreateArrSeqElement(thisHalf))
-				res = append(res, CreateArrSeqElement(otherHash))
-				res = append(res, CreateObjSeqElement(hashAlgorithmId))
-                -->
                 <fieldset>
                     <legend>response</legend>
                     <!--move the fields below into a table-->
@@ -162,6 +154,8 @@
             <tbody id="my-table"></tbody>
         </table>
     </main>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="reserve-key.js"></script>
 </body>
 
 </html>
