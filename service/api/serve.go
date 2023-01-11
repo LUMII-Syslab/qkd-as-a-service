@@ -47,7 +47,6 @@ func ListenAndServe(manager *data.KeyManager, APIPort int) {
 				}
 				_, callId := seq[1].AsInt(), seq[2].AsInt()
 				keyId, thisHalf, otherHash, err := manager.ReserveKeyAndGetHalf()
-				log.Println("key id: ", keyId) // remove this line
 				errCode := 0
 				if err != nil {
 					errCode = 1
@@ -60,9 +59,9 @@ func ListenAndServe(manager *data.KeyManager, APIPort int) {
 				res = append(res, CreateArrSeqElement(thisHalf))
 				res = append(res, CreateArrSeqElement(otherHash))
 				res = append(res, CreateObjSeqElement(hashAlgorithmId))
+				log.Println("res: ", res.ToByteArray())
 				err = conn.WriteMessage(msgType, res.ToByteArray())
 			case 0x02: // getKeyHalf
-				// log.Println("getKeyHalf request: ", seq.ToString())
 				if len(seq) != 4 {
 					log.Println("sequence of length 4 was expected")
 					continue

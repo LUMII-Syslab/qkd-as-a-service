@@ -21,8 +21,10 @@ function ws_connect(endpoint) {
 
 function ws_send_request(socket, request) {
     return new Promise((resolve, reject) => {
-        socket.onmessage = (event) => {
-            let response = new Uint8Array(event.data);
+        socket.onmessage = async (event) => {
+            console.log(event);
+            let data = new Uint8Array(await event.data.arrayBuffer());
+            let response = new Uint8Array(data);
             resolve(response);
         };
         socket.onerror = (error) => reject(error);
