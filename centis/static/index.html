@@ -22,11 +22,11 @@
             <legend>KDC config</legend>
             <div class="inline-input-group">
                 <label for="kdcc-aija-url" class="inline-label">Aija URL</label>
-                <input type="text" id="kdcc-aija-url" value="http://localhost:8080" class="form-control" size="30"/>
+                <input type="text" id="kdcc-aija-url" value="http://localhost:8080" class="form-control" size="30" />
             </div>
             <div class="inline-input-group">
                 <label for="kdcc-brencis-url" class="inline-label">Brencis URL</label>
-                <input type="text" id="kdcc-brencis-url" value="http://localhost:8081" class="form-control" size="30"/>
+                <input type="text" id="kdcc-brencis-url" value="http://localhost:8081" class="form-control" size="30" />
             </div>
         </fieldset>
         <section>
@@ -43,11 +43,11 @@
                 </div>
                 <div class="inline-input-group">
                     <label for="rkagkh-key-length" class="inline-label">Key Length</label>
-                    <input type="text" id="rkagkh-key-length" value="256" class="form-control" />
+                    <input type="number" id="rkagkh-key-length" value="256" class="form-control" />
                 </div>
                 <div class="inline-input-group">
                     <label for="rkagkh-c-nonce" class="inline-label">Crypto Nonce</label>
-                    <input type="text" id="rkagkh-c-nonce" />
+                    <input type="number" id="rkagkh-c-nonce" />
                 </div>
                 <div class="inline-input-group">
                     <input type="button" onclick="alert(123)" value="SEND reserveKeyAndGetKeyHalf" class="btn" />
@@ -79,10 +79,8 @@
         </section>
 
         <h2>Key Monitoring</h2>
-        <input type="button" onclick="start_watching_keys()" value="start watching keys" class="btn" />
-        <input type="button" onclick="stop_watching_keys()" value="stop watching keys" class="btn" />
-        <input type="button" onclick="send_asn_request()" value="send asn request" class="btn" />
-        <table>
+        <input type="button" onclick="toggle_watch_keys()" value="start watching keys" class="btn" />
+        <table style="margin-top: 1rem;">
             <colgroup>
                 <col span="1" style="width: 30%" />
                 <col span="1" style="width: 15%" />
