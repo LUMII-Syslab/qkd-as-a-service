@@ -2,6 +2,13 @@ var rkagkh_request;
 var rkagkh_err_msg;
 
 $(() => {
+    update_request();
+    $('#rkagkh-kdc').change(update_request);
+    $('#rkagkh-key-length').change(update_request);
+    $('#rkagkh-c-nonce').change(update_request);
+});
+
+function update_request() {
     var kdc = $('#rkagkh-kdc').val();
     if (kdc != "Aija" && kdc != "Brencis") {
         rkagkh_err_msg = "KDC must be either Aija or Brencis";
@@ -12,17 +19,17 @@ $(() => {
     rkagkh_request = encode_request(key_length, c_nonce)
     if (rkagkh_err_msg) {
         $("#rkagkh-error code").text(rkagkh_err_msg);
-
         $("#rkagkh-error").show();
         $("#rkagkh-encoded").hide();
+        $("#rkagkh-send").prop("disabled", true);
     } else {
         console.log(rkagkh_request)
         $("#rkagkh-encoded code").text(hex_octets(rkagkh_request));
-
         $("#rkagkh-error").hide();
         $("#rkagkh-encoded").show();
+        $("#rkagkh-send").prop("disabled", false);
     }
-});
+}
 
 function encode_request(key_length, c_nonce) {
     if (key_length != 256) {
@@ -48,18 +55,7 @@ function encode_request(key_length, c_nonce) {
     req[9] = 0x02; req[10] = 0x02   // an integer of 2 bytes will follow
     req[11] = 0x30; req[12] = 0x39
 
-    return req;
-}
+    rkagkh_err_msg = ""; // reset error message
 
-function hex_octets(data) {
-    let res = ""
-    for(let i=0;i<data.length;i++) {
-        if(i) res+=" ";
-        let tmp = data[i].toString(16)
-        while(tmp.length<2) {
-            tmp = "0"+tmp;
-        }
-        res += tmp;
-    }
-    return res
+    return req;
 }
