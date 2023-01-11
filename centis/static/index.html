@@ -1,103 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="table.css" />
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Centis</title>
-  </head>
-  <body>
+</head>
+
+<body>
     <main class="container">
-      <h1>Centis - QAAS admin panel</h1>
+        <h1>Centis - QAAS admin panel</h1>
+        <p>
+            This is a simple admin panel for Centis. It allows you to send requests to the Centis server and monitor the
+            keys.
+        </p>
+        <!-- KDC config (KDCC) -->
+        <fieldset>
+            <legend>KDC config</legend>
+            <div class="inline-input-group">
+                <label for="kdcc-aija-url" class="inline-label">Aija URL</label>
+                <input type="text" id="kdcc-aija-url" value="http://localhost:8080" class="form-control" size="30"/>
+            </div>
+            <div class="inline-input-group">
+                <label for="kdcc-brencis-url" class="inline-label">Brencis URL</label>
+                <input type="text" id="kdcc-brencis-url" value="http://localhost:8081" class="form-control" size="30"/>
+            </div>
+        </fieldset>
+        <section>
+            <h2>Requests</h2>
+            <!-- reserveKeyAndGetKeyHalf  (RKAGKH)-->
+            <fieldset>
+                <legend><code>reserveKeyAndGetKeyHalf</code> request</legend>
+                <div class="inline-input-group">
+                    <label for="rkagkh-kdc" class="inline-label">QKDC</label>
+                    <select id="rkagkh-kdc" class="form-control">
+                        <option value="Aija">Aija</option>
+                        <option value="Brencis">Brencis</option>
+                    </select>
+                </div>
+                <div class="inline-input-group">
+                    <label for="rkagkh-key-length" class="inline-label">Key Length</label>
+                    <input type="text" id="rkagkh-key-length" value="256" class="form-control" />
+                </div>
+                <div class="inline-input-group">
+                    <label for="rkagkh-c-nonce" class="inline-label">Crypto Nonce</label>
+                    <input type="text" id="rkagkh-c-nonce" />
+                </div>
+                <div class="inline-input-group">
+                    <input type="button" onclick="alert(123)" value="SEND reserveKeyAndGetKeyHalf" class="btn" />
+                </div>
+            </fieldset>
+            <!-- getKeyHalf (GKH)-->
+            <fieldset>
+                <legend><code>getKeyHalf</code> request</legend>
+                <div class="inline-input-group">
+                    <!-- select element with options Aija and Brencis -->
+                    <label for="gkh-kdc" class="inline-label">QKDC</label>
+                    <select id="gkh-kdc" class="form-control">
+                        <option value="Aija">Aija</option>
+                        <option value="Brencis">Brencis</option>
+                    </select>
+                </div>
+                <div class="inline-input-group">
+                    <label for="gkh-key-length" class="inline-label">Key Length</label>
+                    <input type="text" id="gkh-key-length" value="256" class="form-control" />
+                </div>
+                <div class="inline-input-group">
+                    <label for="gkh-c-nonce" class="inline-label">Crypto Nonce</label>
+                    <input type="text" id="gkh-c-nonce" />
+                </div>
+                <div class="inline-input-group">
+                    <input type="button" onclick="alert(123)" value="SEND getKeyHalf" class="btn" />
+                </div>
+            </fieldset>
+        </section>
 
-      <!-- reserveKeyAndGetKeyHalf  (RKAGKH)-->
-      <fieldset>
-        <legend><code>reserveKeyAndGetKeyHalf</code> request</legend>
-        <div class="inline-input-group">
-            <!-- select element with options Aija and Brencis -->
-            <label for="rkagkh-kdc" class="inline-label">QKDC</label>
-            <select id="rkagkh-kdc" class="form-control">
-                <option value="Aija">Aija</option>
-                <option value="Brencis">Brencis</option>
-            </select>
-        </div>
-        <div class="inline-input-group">
-            <label for="rkagkh-key-length" class="inline-label">Key Length</label>
-            <input type="text" id="rkagkh-key-length" value="256" class="form-control"/>
-        </div>
-        <div class="inline-input-group">
-            <label for="rkagkh-c-nonce" class="inline-label">Crypto Nonce</label>
-            <input type="text" id="rkagkh-c-nonce" />
-        </div>
-        <div class="inline-input-group">
-            <input type="button" onclick="alert(123)" value="SEND reserveKeyAndGetKeyHalf" class="btn"/>
-        </div>
-      </fieldset>
-
-
-      <!-- getKeyHalf (GKH)-->
-      <fieldset>
-        <legend><code>getKeyHalf</code> request</legend>
-        <div class="inline-input-group">
-            <!-- select element with options Aija and Brencis -->
-            <label for="gkh-kdc" class="inline-label">QKDC</label>
-            <select id="gkh-kdc" class="form-control">
-                <option value="Aija">Aija</option>
-                <option value="Brencis">Brencis</option>
-            </select>
-        </div>
-        <div class="inline-input-group">
-            <label for="gkh-key-length" class="inline-label">Key Length</label>
-            <input type="text" id="gkh-key-length" value="256" class="form-control"/>
-        </div>
-        <div class="inline-input-group">
-            <label for="gkh-c-nonce" class="inline-label">Crypto Nonce</label>
-            <input type="text" id="gkh-c-nonce" />
-        </div>
-        <div class="inline-input-group">
-            <input type="button" onclick="alert(123)" value="SEND getKeyHalf" class="btn"/>
-        </div>
-      </fieldset>
-
-      <input
-        type="button"
-        onclick="start_watching_keys()"
-        value="start watching keys"
-        class="btn"
-      />
-      <input
-        type="button"
-        onclick="stop_watching_keys()"
-        value="stop watching keys"
-        class="btn"
-      />
-      <input
-        type="button"
-        onclick="send_asn_request()"
-        value="send asn request"
-        class="btn"
-      />
-      <table>
-        <colgroup>
-          <col span="1" style="width: 30%" />
-          <col span="1" style="width: 15%" />
-          <col span="1" style="width: 15%" />
-          <col span="1" style="width: 20%" />
-          <col span="1" style="width: 20%" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th>key id</th>
-            <th>left</th>
-            <th>right</th>
-            <th>hash(left)</th>
-            <th>hash(right)</th>
-          </tr>
-        </thead>
-        <tbody id="my-table"></tbody>
-      </table>
+        <h2>Key Monitoring</h2>
+        <input type="button" onclick="start_watching_keys()" value="start watching keys" class="btn" />
+        <input type="button" onclick="stop_watching_keys()" value="stop watching keys" class="btn" />
+        <input type="button" onclick="send_asn_request()" value="send asn request" class="btn" />
+        <table>
+            <colgroup>
+                <col span="1" style="width: 30%" />
+                <col span="1" style="width: 15%" />
+                <col span="1" style="width: 15%" />
+                <col span="1" style="width: 20%" />
+                <col span="1" style="width: 20%" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>key id</th>
+                    <th>left</th>
+                    <th>right</th>
+                    <th>hash(left)</th>
+                    <th>hash(right)</th>
+                </tr>
+            </thead>
+            <tbody id="my-table"></tbody>
+        </table>
     </main>
-  </body>
+</body>
+
 </html>
