@@ -3,6 +3,7 @@ package data
 import (
 	"errors"
 	"fmt"
+	"qkdc-service/constants"
 	"qkdc-service/utils"
 	"reflect"
 	"sync"
@@ -26,10 +27,15 @@ type KeyManager struct {
 	D map[string]Key    // key id, val dictionary
 	W int               // maximum A size
 	L bool              // true <-> returns left of key and serves even ( otherwise returns right and serves odd)
-	M sync.Mutex
+	M sync.Mutex        // mutex for A, B, C, D
+	R bool              // running ( keys can be reserved by the users)
 }
 
 func (k *KeyManager) getKey(id []byte) (Key, error) {
+	if !k.R {
+		return Key{}, errors.New("key manager is not running")
+	}
+
 	k.M.Lock()
 	val, exists := k.D[string(id)]
 	if !exists {
@@ -82,7 +88,10 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 }
 
 // extractKey extracts key and removes it from queue
-func (k *KeyManager) extractKey() Key {
+func (k *KeyManager) extractKey() (Key, error) {
+	if !k.R {
+		return Key{}, errors.New("key manager is not running")
+	}
 	retrieved := false
 	result := Key{}
 	for !retrieved {
@@ -94,5 +103,27 @@ func (k *KeyManager) extractKey() Key {
 		}
 		k.M.Unlock()
 	}
-	return result
+	return result, nil
+}
+
+func (k *KeyManager) getManagerState() int {
+	keysAvailable := 0
+	k.M.Lock()
+	keysAvailable = k.B.Len()
+	k.M.Unlock()
+	if keysAvailable == 0 {
+		return constants.EMPTY
+	} else if k.R == false {
+		return constants.RECEIVING
+	} else {
+		return constants.RUNNING
+	}
+}
+
+// getFirstKey returns the first key in the queue that is either even or odd
+func (k *KeyManager) getFirstKey(even bool) ([]byte, error) {
+	k.M.Lock()
+
+	k.M.Unlock()
+	return []byte{}, nil
 }

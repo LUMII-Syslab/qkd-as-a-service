@@ -27,7 +27,24 @@ func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, oth
 }
 
 func (k *KeyManager) ReserveKeyAndGetHalf() (keyId []byte, thisHalf []byte, otherHash []byte, err error) {
-	keyId = k.extractKey().KeyId
+	key, err := k.extractKey()
+	if err != nil {
+		return
+	}
+	keyId = key.KeyId
 	thisHalf, otherHash, err = k.GetKeyThisHalfOtherHash(keyId)
+	return
+}
+
+func (k *KeyManager) GetState() int {
+	return k.getManagerState()
+}
+
+func (k *KeyManager) GetFirstKeys() (evenKey []byte, oddKey []byte, err error) {
+	evenKey, err = k.getFirstKey(true)
+	if err != nil {
+		return
+	}
+	oddKey, err = k.getFirstKey(false)
 	return
 }

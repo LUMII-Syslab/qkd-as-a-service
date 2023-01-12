@@ -92,7 +92,30 @@ func ListenAndServe(manager *data.KeyManager, APIPort int, logRequests bool) {
 					log.Println("getKeyHalf response: ", utils.BytesToHexOctets(res.ToByteArray()))
 				}
 				err = conn.WriteMessage(msgType, res.ToByteArray())
+			case 0x03: // getState
+				if logRequests {
+					log.Println("getState request: ", seq.ToString())
+				}
+				if len(seq) != 0 {
+					log.Println("sequence of length 0 was expected")
+					continue
+				}
+				res := DERSequence{}
+				// i need to get state from manager
+				// i also need to get first keys of each parity
+				err = conn.WriteMessage(msgType, res.ToByteArray())
+			case 0x04: // setState
+				if logRequests {
+					log.Println("setState request: ", seq.ToString())
+				}
+				if len(seq) != 0 {
+					log.Println("sequence of length 0 was expected")
+					continue
+				}
+				res := DERSequence{}
+				err = conn.WriteMessage(msgType, res.ToByteArray())
 			}
+
 			if err != nil {
 				log.Println(err)
 				return
