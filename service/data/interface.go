@@ -14,6 +14,7 @@ func InitKeyManager(maxKeyCount int, aija bool) *KeyManager {
 		D: make(map[string]Key),
 		W: maxKeyCount,
 		L: aija,
+		R: true,
 	}
 }
 

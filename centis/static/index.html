@@ -186,15 +186,51 @@
             <fieldset>
                 <legend><code>getState & setState</code> request</legend>
                 <div class="responsive-input-group">
-                    <!-- select element with options Aija and Brencis -->
-                    <label for="gs-kdc">QKDC</label>
-                    <select id="gs-kdc" class="form-control">
-                        <option value="Aija">Aija</option>
-                        <option value="Brencis">Brencis</option>
-                    </select>
-                </div>
-                <div class="responsive-input-group">
                     <input type="button" onclick="alert(123)" value="SEND getState" class="btn" />
+                </div>
+                <div style="display:flex;justify-content: space-around;">
+                <fieldset style="width:48%;">
+                    <legend>Aija getState response</legend>
+                    <table class="response-table" style="width: 100%;">
+                        <colgroup>
+                            <col span="1" style="width: 20%" />
+                            <col span="1" style="width: 80%" />
+                        </colgroup>
+                        <tr>
+                            <td>KDC state</td>
+                            <td><code id="gs-aija-kdc-state">?</code></td>
+                        </tr>
+                        <tr>
+                            <td>keyID<sub>0</sub></td>
+                            <td><code id="gs-aija-keyid0">?</code></td>
+                        </tr>
+                        <tr>
+                            <td>keyID<sub>1</sub></td>
+                            <td><code id="gs-aija-keyid1">?</code></td>
+                        </tr>
+                    </table>
+                </fieldset>
+                <fieldset style="width:48%;">
+                    <legend>Brencis getState response</legend>
+                    <table class="response-table" style="width: 100%;">
+                        <colgroup>
+                            <col span="1" style="width: 20%" />
+                            <col span="1" style="width: 80%" />
+                        </colgroup>
+                        <tr>
+                            <td>KDC state</td>
+                            <td><code id="gs-brencis-kdc-state">?</code></td>
+                        </tr>
+                        <tr>
+                            <td>keyID<sub>0</sub></td>
+                            <td><code id="gs-brencis-keyid0">?</code></td>
+                        </tr>
+                        <tr>
+                            <td>keyID<sub>1</sub></td>
+                            <td><code id="gs-brencis-keyid1">?</code></td>
+                        </tr>
+                    </table>
+                </fieldset>
                 </div>
             </fieldset>
         </section>
