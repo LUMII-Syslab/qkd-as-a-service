@@ -11,6 +11,7 @@ type Configuration struct {
 	MaxKeyCount    int    `mapstructure:"max_key_cnt"`
 	AijaAPIPort    int    `mapstructure:"aija_port"`
 	BrencisAPiPort int    `mapstructure:"brencis_port"`
+	LogRequests    bool   `mapstructure:"log_requests"`
 }
 
 func loadConfig() Configuration {
@@ -53,5 +54,13 @@ func loadConfig() Configuration {
 		res.BrencisAPiPort = -1
 		log.Printf("loaded APIPort = %v from %v\n", res.BrencisAPiPort, "defaults")
 	}
+
+	if viper.IsSet("log_requests") {
+		log.Printf("loaded LogRequests = %v from %v\n", res.LogRequests, confFile)
+	} else {
+		res.LogRequests = false
+		log.Printf("loaded LogRequests = %v from %v\n", res.LogRequests, "defaults")
+	}
+
 	return res
 }

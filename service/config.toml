@@ -9,3 +9,5 @@ max_key_cnt = 1000000
 # its qkdc service will not be hosted
 aija_port = 8080
 brencis_port = 8081
+
+log_requests = false

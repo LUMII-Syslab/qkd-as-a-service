@@ -58,8 +58,6 @@ function encode_gkh_request(key_length, key_id_str, c_nonce) {
     }
 
     let key_id = hex_octets_to_array(key_id_str);
-    console.log("key id str:", key_id_str);
-    console.log("key id:", key_id);
 
     const req = new Uint8Array(15+key_id.length)
     // sequence

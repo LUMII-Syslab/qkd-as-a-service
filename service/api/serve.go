@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"qkdc-service/data"
+	"qkdc-service/utils"
 
 	"github.com/gorilla/websocket"
 )
@@ -20,7 +21,7 @@ var upgrader = websocket.Upgrader{
 
 var hashAlgorithmId = []byte{0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x11}
 
-func ListenAndServe(manager *data.KeyManager, APIPort int) {
+func ListenAndServe(manager *data.KeyManager, APIPort int, logRequests bool) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
@@ -40,7 +41,9 @@ func ListenAndServe(manager *data.KeyManager, APIPort int) {
 			stateId := seq[0].AsInt()
 			switch stateId {
 			case 0x01: // reserveKeyAndGetHalf
-				log.Println("reserveKeyAndGetKeyHalf request: ", seq.ToString())
+				if logRequests {
+					log.Println("reserveKeyAndGetKeyHalf request: ", seq.ToString())
+				}
 				if len(seq) != 3 {
 					log.Println("sequence of length 3 was expected")
 					continue
@@ -59,9 +62,14 @@ func ListenAndServe(manager *data.KeyManager, APIPort int) {
 				res = append(res, CreateArrSeqElement(thisHalf))
 				res = append(res, CreateArrSeqElement(otherHash))
 				res = append(res, CreateObjSeqElement(hashAlgorithmId))
+				if logRequests {
+					log.Println("reserveKeyAndGetKeyHalf response: ", utils.BytesToHexOctets(res.ToByteArray()))
+				}
 				err = conn.WriteMessage(msgType, res.ToByteArray())
 			case 0x02: // getKeyHalf
-				log.Println("getKeyHalf request: ", seq.ToString())
+				if logRequests {
+					log.Println("getKeyHalf request: ", seq.ToString())
+				}
 				if len(seq) != 4 {
 					log.Println("sequence of length 4 was expected")
 					continue
@@ -80,6 +88,9 @@ func ListenAndServe(manager *data.KeyManager, APIPort int) {
 				res = append(res, CreateArrSeqElement(thisHalf))
 				res = append(res, CreateArrSeqElement(otherHash))
 				res = append(res, CreateObjSeqElement(hashAlgorithmId))
+				if logRequests {
+					log.Println("getKeyHalf response: ", utils.BytesToHexOctets(res.ToByteArray()))
+				}
 				err = conn.WriteMessage(msgType, res.ToByteArray())
 			}
 			if err != nil {

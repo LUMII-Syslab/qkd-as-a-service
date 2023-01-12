@@ -13,18 +13,18 @@
 <body>
     <main class="container">
         <div style="display:inline-flex">
-        <div style="width:40%;">
-            <h1>Centis - QAAS admin panel</h1>
-            <p>
-                This is a simple admin panel for QAAS (QKD as a service). It allows you to send requests to the KDCs
-                (key
-                distribution centers) and monitor the
-                keys.
-            </p>
-        </div>
-        <div style="width:50%;">
-            <img src="butterfly.drawio.png" alt="The Butterfly Protocol" style="padding:30px;">
-        </div>
+            <div style="width:50%;">
+                <h1>Centis - QAAS admin panel</h1>
+                <p>
+                    This is a simple admin panel for QAAS (QKD as a service). It allows you to send requests to the KDCs
+                    (key
+                    distribution centers) and monitor the
+                    keys.
+                </p>
+            </div>
+            <div style="width:50%;">
+                <img src="butterfly.drawio.png" alt="The Butterfly Protocol" style="padding:30px;">
+            </div>
         </div>
         <!-- KDC config (KDCC) -->
         <fieldset>
@@ -200,7 +200,7 @@
         </section>
 
         <h2>Key Monitoring</h2>
-        <input type="button" onclick="toggle_watch_keys()" value="start watching keys" class="btn" />
+        <input type="button" id="toggle-monitor" value="start watching keys" class="btn" />
         <table style="margin: 1rem 0;" class="key-table">
             <colgroup>
                 <col span="1" style="width: 30%" />
@@ -232,6 +232,7 @@
     <script src="utils.js"></script>
     <script src="reserve-key.js"></script>
     <script src="get-key.js"></script>
+    <script src="watch.js"></script>
 
 </body>
 

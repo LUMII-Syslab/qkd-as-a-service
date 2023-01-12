@@ -19,13 +19,13 @@ func main() {
 	if config.AijaAPIPort != -1 {
 		aijaKeys := data.InitKeyManager(config.MaxKeyCount, true)
 		gatherer.Subscribe(aijaKeys)
-		go api.ListenAndServe(aijaKeys, config.AijaAPIPort)
+		go api.ListenAndServe(aijaKeys, config.AijaAPIPort, config.LogRequests)
 	}
 
 	if config.BrencisAPiPort != -1 {
 		brencisKeys := data.InitKeyManager(config.MaxKeyCount, false)
 		gatherer.Subscribe(brencisKeys)
-		go api.ListenAndServe(brencisKeys, config.BrencisAPiPort)
+		go api.ListenAndServe(brencisKeys, config.BrencisAPiPort, config.LogRequests)
 	}
 
 	time.Sleep(time.Millisecond * 100)
