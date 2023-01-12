@@ -26,6 +26,13 @@
     border: solid 1px;
 }
 
+.btn:hover{
+  cursor:pointer;
+}
+.btn[disabled]:hover{
+  cursor:default;
+}
+
 code {
     font-family: IBM !important;
     font-size: 14px;
