@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"qkdc-service/data"
-	"qkdc-service/utils"
 
 	"github.com/gorilla/websocket"
 )
@@ -60,7 +59,6 @@ func ListenAndServe(manager *data.KeyManager, APIPort int) {
 				res = append(res, CreateArrSeqElement(thisHalf))
 				res = append(res, CreateArrSeqElement(otherHash))
 				res = append(res, CreateObjSeqElement(hashAlgorithmId))
-				log.Println("reserveKeyAndGetKeyHalf response: ", utils.BytesToHexOctets(res.ToByteArray()))
 				err = conn.WriteMessage(msgType, res.ToByteArray())
 			case 0x02: // getKeyHalf
 				log.Println("getKeyHalf request: ", seq.ToString())

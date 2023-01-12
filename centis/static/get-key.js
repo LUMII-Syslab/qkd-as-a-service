@@ -6,6 +6,7 @@ $(() => {
     update_gkh_request();
     $('#gkh-kdc').change(update_gkh_request);
     $('#gkh-key-length').change(update_gkh_request);
+    $('#gkh-key-id').change(update_gkh_request);
     $('#gkh-c-nonce').change(update_gkh_request);
     $('#gkh-send').click(send_gkh_request);
 });
@@ -19,8 +20,11 @@ function update_gkh_request() {
     gkh_endpoint = kdc == "Aija" ? $("#kdcc-aija-url").val() : $("#kdcc-brencis-url").val();
 
     var key_length = +$('#gkh-key-length').val();
+    var key_id = $('#gkh-key-id').val();
     var c_nonce = +$('#gkh-c-nonce').val();
-    gkh_request = encode_gkh_request(key_length, c_nonce)
+    // key_length, key_id, c_nonce will be validated by encode_gkh_request
+    gkh_request = encode_gkh_request(key_length, key_id, c_nonce)
+
     if (gkh_err_msg) {
         console.error(gkh_err_msg);
         $("#gkh-error code").text(gkh_err_msg);
@@ -36,7 +40,7 @@ function update_gkh_request() {
     }
 }
 
-function encode_gkh_request(key_length, key_id, c_nonce) {
+function encode_gkh_request(key_length, key_id_str, c_nonce) {
     if (key_length != 256) {
         gkh_err_msg = "Key length must be 256";
         return;
@@ -47,6 +51,15 @@ function encode_gkh_request(key_length, key_id, c_nonce) {
         return;
     }
 
+    // test if key_id matches ^[0-9A-F]+$
+    if (!/^[0-9A-F]+$/i.test(key_id_str)) {
+        gkh_err_msg = "Key ID must be a hexadecimal number";
+        return;
+    }
+
+    let key_id = hex_octets_to_array(key_id_str);
+    console.log("key id str:", key_id_str);
+    console.log("key id:", key_id);
 
     const req = new Uint8Array(15+key_id.length)
     // sequence
@@ -67,7 +80,7 @@ function encode_gkh_request(key_length, key_id, c_nonce) {
     
     // call#
     req[11+key_id.length] = 0x02; req[12+key_id.length] = 0x02   // an integer of 2 bytes will follow
-    req[13+key_id.length] = 0x30; req[14+key_id.length] = 0x39
+    req[13+key_id.length] = c_nonce>>8; req[14+key_id.length] = c_nonce%256
 
     return req;
 }
@@ -90,11 +103,19 @@ async function send_gkh_request() {
         let response = await ws_send_request(socket, gkh_request);
         let parsed = parse_gkh_result(response);
         console.log(parsed);
-        $("#gkh-resp-c-nonce").text(parsed["call#"]);
-        $("#gkh-resp-err-code").text(parsed["errors"]);
-        $("#gkh-resp-this-half").text(hex_octets(parsed["key_half"]));
-        $("#gkh-resp-other-hash").text(hex_octets(parsed["other_hash"]));
-        $("#gkh-resp-hash-alg-id").text(hex_octets(parsed["hash_id"]));
+        if(parsed["errors"] != 0) {
+            $("#gkh-resp-c-nonce").text(parsed["call#"]);
+            $("#gkh-resp-err-code").text(parsed["errors"]);
+            $("#gkh-resp-this-half").text("?");
+            $("#gkh-resp-other-hash").text("?");
+            $("#gkh-resp-hash-alg-id").text("?");
+        }else{
+            $("#gkh-resp-c-nonce").text(parsed["call#"]);
+            $("#gkh-resp-err-code").text(parsed["errors"]);
+            $("#gkh-resp-this-half").text(hex_octets(parsed["key_half"]));
+            $("#gkh-resp-other-hash").text(hex_octets(parsed["other_hash"]));
+            $("#gkh-resp-hash-alg-id").text(hex_octets(parsed["hash_id"]));
+        }
     } catch (error) {
         alert(`websocket connection to ${gkh_endpoint} failed`)
     }

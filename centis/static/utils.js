@@ -74,3 +74,11 @@ function ASN_DER_to_list(seq) {
     }
     return data;
 }
+
+function hex_octets_to_array(hex_octet_string){
+    let res = new Uint8Array(hex_octet_string.length/2);
+    for(let i=0;i<res.length;i++) {
+        res[i] = parseInt(hex_octet_string.substr(i*2,2),16);
+    }
+    return res;
+}
