@@ -3,14 +3,14 @@ var rkagkh_err_msg;
 var rkagkh_endpoint;
 
 $(() => {
-    update_request();
-    $('#rkagkh-kdc').change(update_request);
-    $('#rkagkh-key-length').change(update_request);
-    $('#rkagkh-c-nonce').change(update_request);
-    $('#rkagkh-send').click(send_request);
+    update_rkagkh_request();
+    $('#rkagkh-kdc').change(update_rkagkh_request);
+    $('#rkagkh-key-length').change(update_rkagkh_request);
+    $('#rkagkh-c-nonce').change(update_rkagkh_request);
+    $('#rkagkh-send').click(send_rkagkh_request);
 });
 
-function update_request() {
+function update_rkagkh_request() {
     var kdc = $('#rkagkh-kdc').val();
     if (kdc != "Aija" && kdc != "Brencis") {
         rkagkh_err_msg = "KDC must be either Aija or Brencis";
@@ -20,8 +20,9 @@ function update_request() {
 
     var key_length = +$('#rkagkh-key-length').val();
     var c_nonce = +$('#rkagkh-c-nonce').val();
-    rkagkh_request = encode_request(key_length, c_nonce)
+    rkagkh_request = encode_rkagkh_request(key_length, c_nonce)
     if (rkagkh_err_msg) {
+        console.error(rkagkh_err_msg);
         $("#rkagkh-error code").text(rkagkh_err_msg);
         $("#rkagkh-error").show();
         $("#rkagkh-encoded").hide();
@@ -35,7 +36,7 @@ function update_request() {
     }
 }
 
-function encode_request(key_length, c_nonce) {
+function encode_rkagkh_request(key_length, c_nonce) {
     if (key_length != 256) {
         rkagkh_err_msg = "Key length must be 256";
         return;
@@ -77,7 +78,7 @@ function parse_rkagkh_result(msg_arr) {
     };
 }
 
-async function send_request() {
+async function send_rkagkh_request() {
     try {
         let socket = await ws_connect(rkagkh_endpoint);
         let response = await ws_send_request(socket, rkagkh_request);

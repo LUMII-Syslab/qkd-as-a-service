@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"qkdc-service/data"
+	"qkdc-service/utils"
 
 	"github.com/gorilla/websocket"
 )
@@ -40,7 +41,7 @@ func ListenAndServe(manager *data.KeyManager, APIPort int) {
 			stateId := seq[0].AsInt()
 			switch stateId {
 			case 0x01: // reserveKeyAndGetHalf
-				// log.Println("reserveKeyAndHalf request: ", seq.ToString())
+				log.Println("reserveKeyAndGetKeyHalf request: ", seq.ToString())
 				if len(seq) != 3 {
 					log.Println("sequence of length 3 was expected")
 					continue
@@ -59,8 +60,10 @@ func ListenAndServe(manager *data.KeyManager, APIPort int) {
 				res = append(res, CreateArrSeqElement(thisHalf))
 				res = append(res, CreateArrSeqElement(otherHash))
 				res = append(res, CreateObjSeqElement(hashAlgorithmId))
+				log.Println("reserveKeyAndGetKeyHalf response: ", utils.BytesToHexOctets(res.ToByteArray()))
 				err = conn.WriteMessage(msgType, res.ToByteArray())
 			case 0x02: // getKeyHalf
+				log.Println("getKeyHalf request: ", seq.ToString())
 				if len(seq) != 4 {
 					log.Println("sequence of length 4 was expected")
 					continue
