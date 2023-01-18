@@ -4,7 +4,7 @@ import (
 	"github.com/gammazero/deque"
 )
 
-func InitKeyManager(maxKeyCount int, aija bool) *KeyManager {
+func NewKeyManager(maxKeyCount int, aija bool) *KeyManager {
 	return &KeyManager{
 		A: deque.New[Key](),
 		B: deque.New[Key](),
@@ -16,6 +16,10 @@ func InitKeyManager(maxKeyCount int, aija bool) *KeyManager {
 		L: aija,
 		R: true,
 	}
+}
+
+func (k *KeyManager) AddKey(keyId []byte, keyVal []byte) error {
+	return k.addKey(keyId, keyVal)
 }
 
 func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, otherHash []byte, err error) {

@@ -112,11 +112,11 @@ func (k *KeyManager) getManagerState() int {
 	keysAvailable = k.B.Len()
 	k.M.Unlock()
 	if keysAvailable == 0 {
-		return constants.EMPTY
+		return constants.Empty
 	} else if k.R == false {
-		return constants.RECEIVING
+		return constants.Receiving
 	} else {
-		return constants.RUNNING
+		return constants.Running
 	}
 }
 

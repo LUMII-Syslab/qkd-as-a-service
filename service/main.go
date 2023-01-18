@@ -4,34 +4,28 @@ import (
 	"log"
 	"qkdc-service/api"
 	"qkdc-service/data"
+	"qkdc-service/gatherer"
 	"time"
 )
 
 func main() {
 	config := loadConfig()
 
-	if config.AijaAPIPort == config.BrencisAPiPort {
-		log.Fatalln("aija_port and brencis_port should be different")
+	pseudoRandGatherer := gatherer.NewRandomKeyGatherer()
+
+	if config.AijaEnabled {
+		aijaKeyManager := data.NewKeyManager(config.MaxKeyCount, true)
+		pseudoRandGatherer.PublishTo(aijaKeyManager)
+		go api.ListenAndServe(aijaKeyManager, config.AijaAPIPort, config.LogRequests)
 	}
 
-	gatherer := data.InitKeyGatherer()
-
-	if config.AijaAPIPort != -1 {
-		aijaKeys := data.InitKeyManager(config.MaxKeyCount, true)
-		gatherer.Subscribe(aijaKeys)
-		go api.ListenAndServe(aijaKeys, config.AijaAPIPort, config.LogRequests)
-	}
-
-	if config.BrencisAPiPort != -1 {
-		brencisKeys := data.InitKeyManager(config.MaxKeyCount, false)
-		gatherer.Subscribe(brencisKeys)
-		go api.ListenAndServe(brencisKeys, config.BrencisAPiPort, config.LogRequests)
+	if config.BrencisEnabled {
+		brencisKeyManager := data.NewKeyManager(config.MaxKeyCount, false)
+		pseudoRandGatherer.PublishTo(brencisKeyManager)
+		go api.ListenAndServe(brencisKeyManager, config.BrencisAPiPort, config.LogRequests)
 	}
 
 	time.Sleep(time.Millisecond * 100)
 
-	err := gatherer.Start(config.ClavisURL)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	log.Fatal(pseudoRandGatherer.Start())
 }

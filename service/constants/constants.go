@@ -1,7 +1,8 @@
 package constants
 
 const (
-	EMPTY     = 0
-	RECEIVING = 1
-	RUNNING   = 2
+	Empty     = 0
+	Receiving = 1
+	Running   = 2
+	DefMxReq  = 1000
 )

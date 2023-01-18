@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"qkdc-service/constants"
 
 	"github.com/spf13/viper"
 )
@@ -12,6 +13,8 @@ type Configuration struct {
 	AijaAPIPort    int    `mapstructure:"aija_port"`
 	BrencisAPiPort int    `mapstructure:"brencis_port"`
 	LogRequests    bool   `mapstructure:"log_requests"`
+	AijaEnabled    bool
+	BrencisEnabled bool
 }
 
 func loadConfig() Configuration {
@@ -37,21 +40,23 @@ func loadConfig() Configuration {
 	if viper.IsSet("max_key_cnt") {
 		log.Printf("loaded MaxKeyCount = %v from %v\n", res.MaxKeyCount, confFile)
 	} else {
-		res.MaxKeyCount = 1000
+		res.MaxKeyCount = constants.DefMxReq
 		log.Printf("loaded MaxKeyCount = %v from %v\n", res.MaxKeyCount, "defaults")
 	}
 
 	if viper.IsSet("aija_port") {
+		res.AijaEnabled = true
 		log.Printf("loaded Aija = %v from %v\n", res.AijaAPIPort, confFile)
 	} else {
-		res.AijaAPIPort = -1
+		res.AijaEnabled = false
 		log.Printf("loaded Aija = %v from %v\n", res.AijaAPIPort, "defaults")
 	}
 
 	if viper.IsSet("brencis_port") {
+		res.BrencisEnabled = true
 		log.Printf("loaded APIPort = %v from %v\n", res.BrencisAPiPort, confFile)
 	} else {
-		res.BrencisAPiPort = -1
+		res.BrencisEnabled = false
 		log.Printf("loaded APIPort = %v from %v\n", res.BrencisAPiPort, "defaults")
 	}
 
@@ -60,6 +65,10 @@ func loadConfig() Configuration {
 	} else {
 		res.LogRequests = false
 		log.Printf("loaded LogRequests = %v from %v\n", res.LogRequests, "defaults")
+	}
+
+	if res.AijaAPIPort == res.BrencisAPiPort {
+		log.Panic("Aija and Brencis ports must be different")
 	}
 
 	return res
