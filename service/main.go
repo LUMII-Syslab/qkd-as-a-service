@@ -11,7 +11,7 @@ import (
 func main() {
 	config := loadConfig()
 
-	pseudoRandGatherer := gatherer.NewRandomKeyGatherer()
+	pseudoRandGatherer := gatherer.NewRandomKeyGatherer(32, 32)
 
 	if config.AijaEnabled {
 		aijaKeyManager := data.NewKeyManager(config.MaxKeyCount, true)

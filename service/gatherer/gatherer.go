@@ -13,6 +13,6 @@ func NewClavisKeyGatherer(clavisURL string) KeyGatherer {
 	return &ClavisKeyGatherer{keyGathererBase: keyGathererBase{make([]KeyGathererListener, 0), 0}, clavisURL: clavisURL}
 }
 
-func NewRandomKeyGatherer() KeyGatherer {
-	return &RandomKeyGatherer{keyGathererBase: keyGathererBase{make([]KeyGathererListener, 0), 0}}
+func NewRandomKeyGatherer(keyIdLength, keyValLength int) KeyGatherer {
+	return &RandomKeyGatherer{keyGathererBase{make([]KeyGathererListener, 0), 0}, keyIdLength, keyValLength}
 }
