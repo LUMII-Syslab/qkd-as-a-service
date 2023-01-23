@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"qkdc-service/data"
+	"qkdc-service/manager"
 	"qkdc-service/utils"
 
 	"github.com/gorilla/websocket"
@@ -21,7 +21,7 @@ var upgrader = websocket.Upgrader{
 
 var hashAlgorithmId = []byte{0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x11}
 
-func ListenAndServe(manager *data.KeyManager, APIPort int, logRequests bool) {
+func ListenAndServe(manager *manager.KeyManager, APIPort int, logRequests bool) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)

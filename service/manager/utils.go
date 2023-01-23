@@ -1,4 +1,4 @@
-package data
+package manager
 
 import (
 	"golang.org/x/crypto/sha3"

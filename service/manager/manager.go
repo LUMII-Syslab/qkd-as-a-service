@@ -1,4 +1,4 @@
-package data
+package manager
 
 import (
 	"errors"
@@ -40,7 +40,7 @@ func (k *KeyManager) getKey(id []byte) (Key, error) {
 	val, exists := k.D[string(id)]
 	if !exists {
 		k.M.Unlock()
-		return Key{}, errors.New(fmt.Sprintf("key %v not found in data", id))
+		return Key{}, errors.New(fmt.Sprintf("key %v not found in manager", id))
 	}
 	k.M.Unlock()
 	return val, nil

@@ -1,4 +1,4 @@
-package data
+package manager
 
 import (
 	"github.com/gammazero/deque"

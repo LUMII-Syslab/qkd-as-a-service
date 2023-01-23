@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 	"qkdc-service/api"
-	"qkdc-service/data"
 	"qkdc-service/gatherers"
+	"qkdc-service/manager"
 	"time"
 )
 
@@ -22,13 +22,13 @@ func main() {
 	}
 
 	if config.AijaEnabled {
-		aijaKeyManager := data.NewKeyManager(config.MaxKeyCount, true)
+		aijaKeyManager := manager.NewKeyManager(config.MaxKeyCount, true)
 		gatherer.PublishTo(aijaKeyManager)
 		go api.ListenAndServe(aijaKeyManager, config.AijaAPIPort, config.LogRequests)
 	}
 
 	if config.BrencisEnabled {
-		brencisKeyManager := data.NewKeyManager(config.MaxKeyCount, false)
+		brencisKeyManager := manager.NewKeyManager(config.MaxKeyCount, false)
 		gatherer.PublishTo(brencisKeyManager)
 		go api.ListenAndServe(brencisKeyManager, config.BrencisAPiPort, config.LogRequests)
 	}
