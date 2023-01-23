@@ -12,5 +12,5 @@ brencis_port = 8081
 
 log_requests = false
 
-# possible gatherer values: "pseudorandom", "clavis"
+# possible gatherers values: "pseudorandom", "clavis"
 gatherer = "pseudorandom"

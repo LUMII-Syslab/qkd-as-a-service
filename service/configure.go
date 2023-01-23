@@ -13,7 +13,7 @@ type Configuration struct {
 	AijaAPIPort    int    `mapstructure:"aija_port"`
 	BrencisAPiPort int    `mapstructure:"brencis_port"`
 	LogRequests    bool   `mapstructure:"log_requests"`
-	Gatherer       string `mapstructure:"gatherer"`
+	Gatherer       string `mapstructure:"gatherers"`
 	AijaEnabled    bool
 	BrencisEnabled bool
 }
@@ -72,7 +72,7 @@ func loadConfig() Configuration {
 		log.Panic("Aija and Brencis ports must be different")
 	}
 
-	if viper.IsSet("gatherer") {
+	if viper.IsSet("gatherers") {
 		log.Printf("loaded Gatherer = %v from %v\n", res.Gatherer, confFile)
 	} else {
 		res.Gatherer = "pseudorandom"

@@ -1,4 +1,4 @@
-package gatherer
+package gatherers
 
 import "sync"
 
