@@ -17,6 +17,8 @@ func main() {
 		gatherer = gatherers.NewRandomKeyGatherer(32, 32)
 	case "clavis":
 		gatherer = gatherers.NewClavisKeyGatherer(config.ClavisURL)
+	case "filesystem":
+		gatherer = gatherers.NewFileSystemKeyGatherer(config.FSGathererDir)
 	}
 
 	if config.AijaEnabled {

@@ -5,7 +5,7 @@ type ClavisKeyGatherer struct {
 	clavisURL string
 }
 
-func NewClavisKeyGatherer(clavisURL string) KeyGatherer {
+func NewClavisKeyGatherer(clavisURL string) *ClavisKeyGatherer {
 	return &ClavisKeyGatherer{keyGathererBase: keyGathererBase{make([]KeyGathererListener, 0), 0}, clavisURL: clavisURL}
 }
 

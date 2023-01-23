@@ -1,6 +1,4 @@
-# if clavis url is not set fake key generation will be used instead
-# clavis_url = "tcp://192.168.10.101:5560"
-
+# maximum number of keys to be buffered
 max_key_cnt = 1000000
 
 # both aija and brencis qkdc services
@@ -10,7 +8,15 @@ max_key_cnt = 1000000
 aija_port = 8080
 brencis_port = 8081
 
-log_requests = false
+# possible gatherers values: "pseudorandom", "clavis", "filesystem"
+gatherer = "filesystem"
 
-# possible gatherers values: "pseudorandom", "clavis"
-gatherer = "pseudorandom"
+# if gatherer is set to "clavis" clavis url is required
+# clavis_url = "tcp://192.168.10.101:5560"
+
+# if gatherer is set to "filesystem" directory path is required
+fs_gatherer_dir = "/tmp/qkd-mock"
+
+
+# logging every request may be useful for debugging
+log_requests = false

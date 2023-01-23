@@ -11,7 +11,7 @@ type RandomKeyGatherer struct {
 	keyValLength int
 }
 
-func NewRandomKeyGatherer(keyIdLength, keyValLength int) KeyGatherer {
+func NewRandomKeyGatherer(keyIdLength, keyValLength int) *RandomKeyGatherer {
 	return &RandomKeyGatherer{keyGathererBase{make([]KeyGathererListener, 0), 0}, keyIdLength, keyValLength}
 }
 

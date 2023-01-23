@@ -1,14 +1,14 @@
 package gatherers
 
-type FilesystemKeyGatherer struct {
+type FileSystemKeyGatherer struct {
 	keyGathererBase
 	path string
 }
 
-func NewFilesystemKeyGatherer(path string) KeyGatherer {
-	return &FilesystemKeyGatherer{keyGathererBase: keyGathererBase{make([]KeyGathererListener, 0), 0}, path: path}
+func NewFileSystemKeyGatherer(path string) *FileSystemKeyGatherer {
+	return &FileSystemKeyGatherer{keyGathererBase: keyGathererBase{make([]KeyGathererListener, 0), 0}, path: path}
 }
 
-func (fkg *FilesystemKeyGatherer) Start() error {
+func (fkg *FileSystemKeyGatherer) Start() error {
 	panic("Filesystem key gatherer implementation is not yet implemented.")
 }

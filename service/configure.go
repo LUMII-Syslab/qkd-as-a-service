@@ -8,14 +8,18 @@ import (
 )
 
 type Configuration struct {
-	ClavisURL      string `mapstructure:"clavis_url"`
-	MaxKeyCount    int    `mapstructure:"max_key_cnt"`
-	AijaAPIPort    int    `mapstructure:"aija_port"`
-	BrencisAPiPort int    `mapstructure:"brencis_port"`
-	LogRequests    bool   `mapstructure:"log_requests"`
-	Gatherer       string `mapstructure:"gatherers"`
+	MaxKeyCount int `mapstructure:"max_key_cnt"`
+
+	AijaAPIPort    int `mapstructure:"aija_port"`
+	BrencisAPiPort int `mapstructure:"brencis_port"`
 	AijaEnabled    bool
 	BrencisEnabled bool
+
+	Gatherer      string `mapstructure:"gatherer"`
+	ClavisURL     string `mapstructure:"clavis_url"`
+	FSGathererDir string `mapstructure:"fs_gatherer_dir"`
+
+	LogRequests bool `mapstructure:"log_requests"`
 }
 
 func loadConfig() Configuration {
@@ -72,11 +76,18 @@ func loadConfig() Configuration {
 		log.Panic("Aija and Brencis ports must be different")
 	}
 
-	if viper.IsSet("gatherers") {
+	if viper.IsSet("gatherer") {
 		log.Printf("loaded Gatherer = %v from %v\n", res.Gatherer, confFile)
 	} else {
 		res.Gatherer = "pseudorandom"
 		log.Printf("loaded Gatherer = %v from %v\n", res.Gatherer, "defaults")
+	}
+
+	if viper.IsSet("fs_gatherer_dir") {
+		log.Printf("loaded FSGathererDir = %v from %v\n", res.FSGathererDir, confFile)
+	} else {
+		res.FSGathererDir = "/tmp/qkd-mock"
+		log.Printf("loaded FSGathererDir = %v from %v\n", res.FSGathererDir, "defaults")
 	}
 
 	return res
