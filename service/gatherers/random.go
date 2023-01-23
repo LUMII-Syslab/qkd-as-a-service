@@ -2,6 +2,7 @@ package gatherers
 
 import (
 	"crypto/rand"
+	"log"
 	"time"
 )
 
@@ -16,18 +17,25 @@ func NewRandomKeyGatherer(keyIdLength, keyValLength int) *RandomKeyGatherer {
 }
 
 func (kg *RandomKeyGatherer) Start() error {
+	genTicker := time.NewTicker(10 * time.Millisecond)
+	logTicker := time.NewTicker(5 * time.Second)
 	for {
-		keyId, keyVal := make([]byte, kg.keyIdLength), make([]byte, kg.keyValLength)
-		if _, err := rand.Read(keyId); err != nil {
-			return err
+		select {
+		case <-genTicker.C:
+			keyId, keyVal := make([]byte, kg.keyIdLength), make([]byte, kg.keyValLength)
+			if _, err := rand.Read(keyId); err != nil {
+				return err
+			}
+			if _, err := rand.Read(keyVal); err != nil {
+				return err
+			}
+			err := kg.distributeKey(keyId, keyVal)
+			if err != nil {
+				return err
+			}
+		case <-logTicker.C:
+			log.Println("keys gathered from random: ", kg.keysGathered)
+			kg.keysGathered = 0
 		}
-		if _, err := rand.Read(keyVal); err != nil {
-			return err
-		}
-		err := kg.distributeKey(keyId, keyVal)
-		if err != nil {
-			return err
-		}
-		time.Sleep(time.Millisecond)
 	}
 }

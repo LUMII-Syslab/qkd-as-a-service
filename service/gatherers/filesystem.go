@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"time"
 )
 
 type FileSystemKeyGatherer struct {
@@ -32,6 +33,7 @@ func (fkg *FileSystemKeyGatherer) Start() error {
 		return err
 	}
 
+	ticker := time.NewTicker(5 * time.Second)
 	for {
 		select {
 		case event := <-watcher.Events:
@@ -47,7 +49,11 @@ func (fkg *FileSystemKeyGatherer) Start() error {
 				_ = watcher.Close()
 				return err
 			}
+		case <-ticker.C:
+			log.Println("keys gathered from filesystem: ", fkg.keysGathered)
+			fkg.keysGathered = 0
 		}
+
 	}
 }
 
@@ -75,7 +81,7 @@ func (fkg *FileSystemKeyGatherer) readAndRemoveKeys() error {
 			return fmt.Errorf("directory %s contains a subdirectory %s. This is not supported", fkg.dirPath, entry.Name())
 		}
 
-		log.Println(entry.Name())
+		//log.Println(entry.Name())
 		entryFilePath := filepath.Join(fkg.dirPath, entry.Name())
 
 		keyVal, err := os.ReadFile(entryFilePath)
