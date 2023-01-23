@@ -3,8 +3,10 @@ package gatherers
 import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
+	"log"
 	"os"
 	"path/filepath"
+	"sort"
 )
 
 type FileSystemKeyGatherer struct {
@@ -55,11 +57,25 @@ func (fkg *FileSystemKeyGatherer) readAndRemoveKeys() error {
 		return err
 	}
 
+	sort.Slice(entries, func(i, j int) bool {
+		// compare modified date
+		iStat, err := os.Stat(filepath.Join(fkg.dirPath, entries[i].Name()))
+		if err != nil {
+			panic(err)
+		}
+		jStat, err := os.Stat(filepath.Join(fkg.dirPath, entries[j].Name()))
+		if err != nil {
+			panic(err)
+		}
+		return iStat.ModTime().Before(jStat.ModTime())
+	})
+
 	for _, entry := range entries {
 		if entry.IsDir() {
 			return fmt.Errorf("directory %s contains a subdirectory %s. This is not supported", fkg.dirPath, entry.Name())
 		}
 
+		log.Println(entry.Name())
 		entryFilePath := filepath.Join(fkg.dirPath, entry.Name())
 
 		keyVal, err := os.ReadFile(entryFilePath)
