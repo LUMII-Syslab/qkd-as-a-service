@@ -11,6 +11,10 @@ type RandomKeyGatherer struct {
 	keyValLength int
 }
 
+func NewRandomKeyGatherer(keyIdLength, keyValLength int) KeyGatherer {
+	return &RandomKeyGatherer{keyGathererBase{make([]KeyGathererListener, 0), 0}, keyIdLength, keyValLength}
+}
+
 func (kg *RandomKeyGatherer) Start() error {
 	for {
 		keyId, keyVal := make([]byte, kg.keyIdLength), make([]byte, kg.keyValLength)

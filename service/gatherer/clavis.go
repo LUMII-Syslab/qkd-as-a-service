@@ -11,6 +11,10 @@ type ClavisKeyGatherer struct {
 	clavisURL string
 }
 
+func NewClavisKeyGatherer(clavisURL string) KeyGatherer {
+	return &ClavisKeyGatherer{keyGathererBase: keyGathererBase{make([]KeyGathererListener, 0), 0}, clavisURL: clavisURL}
+}
+
 func (kg *ClavisKeyGatherer) Start() error {
 	zCtx, err := zmq.NewContext()
 	if err != nil {
