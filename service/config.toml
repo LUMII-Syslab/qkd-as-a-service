@@ -11,3 +11,6 @@ aija_port = 8080
 brencis_port = 8081
 
 log_requests = false
+
+# possible gatherer values: "pseudorandom", "clavis"
+gatherer = "pseudorandom"
