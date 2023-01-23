@@ -79,7 +79,7 @@ func (fkg *FileSystemKeyGatherer) readAndRemoveKeys() error {
 		entryFilePath := filepath.Join(fkg.dirPath, entry.Name())
 
 		keyVal, err := os.ReadFile(entryFilePath)
-		if len(keyVal) > 128 {
+		if len(keyVal) > 128 { // ASN.1 SEQUENCE can't be longer than 128 bytes
 			keyVal = keyVal[:128]
 		}
 
@@ -88,7 +88,7 @@ func (fkg *FileSystemKeyGatherer) readAndRemoveKeys() error {
 		}
 
 		keyId := []byte(entry.Name())
-		if len(keyId) > 128 {
+		if len(keyId) > 128 { // ASN.1 SEQUENCE can't be longer than 128 bytes
 			keyId = keyId[:128]
 		}
 
