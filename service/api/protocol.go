@@ -47,10 +47,10 @@ func CreateObjSeqElement(o []byte) SequenceElement {
 	return res
 }
 
-func CreateArrSeqElement(a []byte) SequenceElement {
+func CreateArrSeqElement(b []byte) SequenceElement {
 	res := SequenceElement{}
 	res.id = ArrId
-	res.value = a
+	res.value = b
 	return res
 }
 

@@ -19,4 +19,4 @@ fs_gatherer_dir = "/tmp/qkd-mock"
 
 
 # logging every request may be useful for debugging
-log_requests = false
+log_requests = true

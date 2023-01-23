@@ -13,11 +13,11 @@ $(() => {
 
 function update_gkh_request() {
     var kdc = $('#gkh-kdc').val();
-    if (kdc != "Aija" && kdc != "Brencis") {
+    if (kdc !== "Aija" && kdc !== "Brencis") {
         gkh_err_msg = "KDC must be either Aija or Brencis";
         return;
     }
-    gkh_endpoint = kdc == "Aija" ? $("#kdcc-aija-url").val() : $("#kdcc-brencis-url").val();
+    gkh_endpoint = kdc === "Aija" ? $("#kdcc-aija-url").val() : $("#kdcc-brencis-url").val();
 
     var key_length = +$('#gkh-key-length').val();
     var key_id = $('#gkh-key-id').val();
@@ -41,7 +41,7 @@ function update_gkh_request() {
 }
 
 function encode_gkh_request(key_length, key_id_str, c_nonce) {
-    if (key_length != 256) {
+    if (key_length !== 256) {
         gkh_err_msg = "Key length must be 256";
         return;
     }
@@ -59,26 +59,33 @@ function encode_gkh_request(key_length, key_id_str, c_nonce) {
 
     let key_id = hex_octets_to_array(key_id_str);
 
-    const req = new Uint8Array(15+key_id.length)
+    const req = new Uint8Array(15 + key_id.length)
     // sequence
-    req[0] = 0x30; req[1] = 13+key_id.length    // a sequence of 13+len(key_id) bytes will follow
+    req[0] = 0x30;
+    req[1] = 13 + key_id.length    // a sequence of 13+len(key_id) bytes will follow
 
     // getKeyHalf request
-    req[2] = 0x02; req[3] = 0x01    // an integer of 1 byte will follow
+    req[2] = 0x02;
+    req[3] = 0x01    // an integer of 1 byte will follow
     req[4] = 0x02
 
     // key length
-    req[5] = 0x02; req[6] = 0x02    // an integer of 2 bytes will follow
-    req[7] = 0x01; req[8] = 0x00    // requested key length (256)
+    req[5] = 0x02;
+    req[6] = 0x02    // an integer of 2 bytes will follow
+    req[7] = 0x01;
+    req[8] = 0x00    // requested key length (256)
 
     // key id
-    req[9] = 0x04; req[10] = key_id.length  // a byte array of key_id.length bytes will follow
-    for(let i=0;i<key_id.length;i++)
-        req[i+11] = key_id[i];
-    
+    req[9] = 0x04;
+    req[10] = key_id.length  // a byte array of key_id.length bytes will follow
+    for (let i = 0; i < key_id.length; i++)
+        req[i + 11] = key_id[i];
+
     // call#
-    req[11+key_id.length] = 0x02; req[12+key_id.length] = 0x02   // an integer of 2 bytes will follow
-    req[13+key_id.length] = c_nonce>>8; req[14+key_id.length] = c_nonce%256
+    req[11 + key_id.length] = 0x02;
+    req[12 + key_id.length] = 0x02   // an integer of 2 bytes will follow
+    req[13 + key_id.length] = c_nonce >> 8;
+    req[14 + key_id.length] = c_nonce % 256
 
     return req;
 }
@@ -101,13 +108,13 @@ async function send_gkh_request() {
         let response = await ws_send_request(socket, gkh_request);
         let parsed = parse_gkh_result(response);
         console.log(parsed);
-        if(parsed["errors"] != 0) {
+        if (parsed["errors"] !== 0) {
             $("#gkh-resp-c-nonce").text(parsed["call#"]);
             $("#gkh-resp-err-code").text(parsed["errors"]);
             $("#gkh-resp-this-half").text("?");
             $("#gkh-resp-other-hash").text("?");
             $("#gkh-resp-hash-alg-id").text("?");
-        }else{
+        } else {
             $("#gkh-resp-c-nonce").text(parsed["call#"]);
             $("#gkh-resp-err-code").text(parsed["errors"]);
             $("#gkh-resp-this-half").text(hex_octets(parsed["key_half"]));

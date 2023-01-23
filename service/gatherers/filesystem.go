@@ -63,11 +63,18 @@ func (fkg *FileSystemKeyGatherer) readAndRemoveKeys() error {
 		entryFilePath := filepath.Join(fkg.dirPath, entry.Name())
 
 		keyVal, err := os.ReadFile(entryFilePath)
+		if len(keyVal) > 128 {
+			keyVal = keyVal[:128]
+		}
+
 		if err != nil {
 			return err
 		}
 
 		keyId := []byte(entry.Name())
+		if len(keyId) > 128 {
+			keyId = keyId[:128]
+		}
 
 		err = fkg.distributeKey(keyId, keyVal)
 		if err != nil {

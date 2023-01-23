@@ -63,6 +63,8 @@ func ListenAndServe(manager *data.KeyManager, APIPort int, logRequests bool) {
 				res = append(res, CreateArrSeqElement(otherHash))
 				res = append(res, CreateObjSeqElement(hashAlgorithmId))
 				if logRequests {
+					log.Println("keyId length: ", len(keyId))
+					log.Println("thisHalf length: ", len(thisHalf))
 					log.Println("reserveKeyAndGetKeyHalf response: ", utils.BytesToHexOctets(res.ToByteArray()))
 				}
 				err = conn.WriteMessage(msgType, res.ToByteArray())
