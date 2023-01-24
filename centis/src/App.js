@@ -1,4 +1,6 @@
 import diagram from './butterfly.drawio.png';
+import KDCConfig from "./KDCConfig";
+import ReserveKeyAndGetKeyHalf from "./ReserveKeyAndGetKeyHalf";
 
 function App() {
     return (
@@ -19,6 +21,9 @@ function App() {
                         <img src={diagram} alt="The Butterfly Protocol" style={{padding: "30px"}}/>
                     </div>
                 </div>
+                <KDCConfig/>
+                <h2>Requests</h2>
+                <ReserveKeyAndGetKeyHalf/>
             </main>
         </>
     );
