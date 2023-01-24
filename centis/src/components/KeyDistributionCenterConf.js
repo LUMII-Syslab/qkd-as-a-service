@@ -1,4 +1,4 @@
-export default function KDCConfig() {
+export default function KeyDistributionCenterConf() {
     return (<fieldset>
         <legend>KDC config</legend>
         <div className="row">
