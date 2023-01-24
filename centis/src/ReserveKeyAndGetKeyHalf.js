@@ -1,37 +1,17 @@
+import React, {useState} from "react";
+
 export default function ReserveKeyAndGetKeyHalf() {
+    let [request, setRequest] = useState({
+        kdc: "Aija",
+        keyLength: 256,
+        cNonce: 42069,
+    })
+
+    console.log(request)
+
     return (<fieldset>
             <legend><code>reserveKeyAndGetKeyHalf</code> request</legend>
-            <div className="row">
-                <div className="col-4">
-                    <div className="form-floating">
-                        <select id="rkagkh-kdc" className="form-select">
-                            <option value="Aija">Aija</option>
-                            <option value="Brencis">Brencis</option>
-                        </select>
-                        <label htmlFor="rkagkh-kdc">QKDC</label>
-                    </div>
-                </div>
-                <div className="col-4">
-                    <div className="form-floating">
-                        <input type="number" id="rkagkh-key-length" defaultValue="256" className="form-control"
-                               readOnly/>
-                        <label htmlFor="rkagkh-key-length">Key Length</label>
-                    </div>
-                </div>
-                <div className="col-4">
-                    <div className="form-floating">
-                        <input type="number" id="rkagkh-c-nonce" defaultValue="42069" className="form-control"/>
-                        <label htmlFor="rkagkh-c-nonce">Crypto Nonce</label>
-                    </div>
-                </div>
-
-            </div>
-            <div className="responsive-input-group">
-            </div>
-            <div className="responsive-input-group">
-            </div>
-            <div className="responsive-input-group">
-            </div>
+            <RKAGKHReqConfig request={request} setRequest={setRequest}/>
             <div style={{marginTop: "1rem"}}>
                 <div className="responsive-input-group" id="rkagkh-error">
                     input status: <code>?</code>
@@ -51,6 +31,7 @@ export default function ReserveKeyAndGetKeyHalf() {
                         <col span="1" style={{width: "20%"}}/>
                         <col span="1" style={{width: "80%"}}/>
                     </colgroup>
+                    <tbody>
                     <tr>
                         <td>crypto nonce</td>
                         <td><code id="rkagkh-resp-c-nonce">?</code></td>
@@ -76,9 +57,47 @@ export default function ReserveKeyAndGetKeyHalf() {
                         <td>hash alg id</td>
                         <td><code id="rkagkh-resp-hash-alg-id">?</code></td>
                     </tr>
+                    </tbody>
                 </table>
             </fieldset>
         </fieldset>
 
     )
+}
+
+let RKAGKHReqConfig = ({request, setRequest}) => {
+    return (
+        <div className="row">
+            <div className="col-4">
+                <div className="form-floating">
+                    <select id="rkagkh-kdc" className="form-select" defaultValue={request.kdc}
+                            onChange={(event) => {
+                                setRequest({...request, kdc: event.target.value})
+                            }}>
+                        <option value="Aija">Aija</option>
+                        <option value="Brencis">Brencis</option>
+                    </select>
+                    <label htmlFor="rkagkh-kdc">QKDC</label>
+                </div>
+            </div>
+            <div className="col-4">
+                <div className="form-floating">
+                    <input type="number" id="rkagkh-key-length" defaultValue={request.keyLength}
+                           className="form-control"
+                           readOnly disabled/>
+                    <label htmlFor="rkagkh-key-length">Key Length</label>
+                </div>
+            </div>
+            <div className="col-4">
+                <div className="form-floating">
+                    <input type="number" id="rkagkh-c-nonce" defaultValue={request.cNonce} className="form-control"
+                           onChange={(event) => {
+                               setRequest({...request, cNonce: event.target.value})
+                           }}/>
+                    <label htmlFor="rkagkh-c-nonce">Crypto Nonce</label>
+                </div>
+            </div>
+        </div>
+    )
+
 }
