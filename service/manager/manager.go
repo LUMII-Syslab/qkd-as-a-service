@@ -22,13 +22,13 @@ type Key struct {
 type KeyManager struct {
 	all        *deque.Deque[Key]
 	reservable *deque.Deque[Key]
-	C          map[string]bool // keys outside reservable
-	notifier   chan int        // alerts threads waiting for reservable keys
+	delayed    map[string]bool // keys outside reservable waiting to enter
 	delay      int             // key lifetime outside reservable ( milliseconds )
+	notifier   chan int        // alerts threads waiting for reservable keys
 	dictionary map[string]Key  // key id, val dictionary
 	sizeLimit  int             // maximum all size
 	servesLeft bool            // true <-> returns left of key and serves even ( otherwise returns right and serves odd)
-	mutex      sync.Mutex      // mutex for all, reservable, C, dictionary
+	mutex      sync.Mutex      // mutex for all, reservable, delayed, dictionary
 	running    bool            // running state ( keys can be reserved by the users)
 	keysAdded  int
 }
@@ -37,7 +37,7 @@ func newKeyManager(maxKeyCount int, aija bool) *KeyManager {
 	return &KeyManager{
 		all:        deque.New[Key](),
 		reservable: deque.New[Key](),
-		C:          make(map[string]bool),
+		delayed:    make(map[string]bool),
 		notifier:   make(chan int, maxKeyCount),
 		delay:      500,
 		dictionary: make(map[string]Key),
@@ -78,24 +78,27 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 	if k.all.Len() > k.sizeLimit {
 		rem := k.all.PopFront()
 		delete(k.dictionary, string(rem.KeyId))
-		_, exists = k.C[string(rem.KeyId)]
+		_, exists = k.delayed[string(rem.KeyId)]
 		if exists {
-			k.C[string(rem.KeyId)] = false
+			k.delayed[string(rem.KeyId)] = false
 		} else if k.reservable.Len() > 0 && reflect.DeepEqual(rem, k.reservable.Front()) { // the key will be in front of reservable if in reservable
 			<-k.notifier
 			k.reservable.PopFront()
 		}
 	}
-	// add key to reservable after a delay of delay milliseconds
+	// add key to reservable after a delay
 	if k.servesLeft == (utils.ByteSum(key.KeyVal)%2 == 0) {
-		k.C[string(key.KeyId)] = true
+		k.delayed[string(key.KeyId)] = true
 		go func() {
 			time.Sleep(time.Duration(k.delay) * time.Millisecond)
 			k.mutex.Lock()
-			in, e := k.C[string(key.KeyId)]
+			in, e := k.delayed[string(key.KeyId)]
 			if e && in {
 				k.reservable.PushBack(key)
 				k.notifier <- 1
+			}
+			if e {
+				delete(k.delayed, string(key.KeyId))
 			}
 			k.mutex.Unlock()
 		}()

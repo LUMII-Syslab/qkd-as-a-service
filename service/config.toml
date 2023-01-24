@@ -9,7 +9,7 @@ aija_port = 8080
 brencis_port = 8081
 
 # possible gatherers values: "pseudorandom", "clavis", "filesystem"
-gatherer = "filesystem"
+gatherer = "pseudorandom"
 
 # if gatherer is set to "clavis" clavis url is required
 # clavis_url = "tcp://192.168.10.101:5560"
