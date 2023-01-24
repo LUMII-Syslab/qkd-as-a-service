@@ -1,6 +1,6 @@
 import diagram from './butterfly.drawio.png';
 import KDCConfig from "./KDCConfig";
-import ReserveKeyAndGetKeyHalf from "./ReserveKeyAndGetKeyHalf";
+import ReserveKeyAndGetKeyHalf from "./ReserveKeyAndGetKeyHalf.tsx";
 
 function App() {
     return (
