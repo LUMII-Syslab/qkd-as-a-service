@@ -16,104 +16,122 @@ type Key struct {
 	KeyId   []byte
 	KeyVal  []byte
 	Created time.Time
+	Order   int
 }
 
 type KeyManager struct {
-	A *deque.Deque[Key] // all keys
-	B *deque.Deque[Key] // reservable keys
-	C map[string]bool   // keys outside B
-	S chan int          // notifies threads waiting for B elements
-	Z int               // key lifetime outside B ( milliseconds )
-	D map[string]Key    // key id, val dictionary
-	W int               // maximum A size
-	L bool              // true <-> returns left of key and serves even ( otherwise returns right and serves odd)
-	M sync.Mutex        // mutex for A, B, C, D
-	R bool              // running ( keys can be reserved by the users)
+	all        *deque.Deque[Key]
+	reservable *deque.Deque[Key]
+	C          map[string]bool // keys outside reservable
+	notifier   chan int        // alerts threads waiting for reservable keys
+	delay      int             // key lifetime outside reservable ( milliseconds )
+	dictionary map[string]Key  // key id, val dictionary
+	sizeLimit  int             // maximum all size
+	servesLeft bool            // true <-> returns left of key and serves even ( otherwise returns right and serves odd)
+	mutex      sync.Mutex      // mutex for all, reservable, C, dictionary
+	running    bool            // running state ( keys can be reserved by the users)
+	keysAdded  int
+}
+
+func newKeyManager(maxKeyCount int, aija bool) *KeyManager {
+	return &KeyManager{
+		all:        deque.New[Key](),
+		reservable: deque.New[Key](),
+		C:          make(map[string]bool),
+		notifier:   make(chan int, maxKeyCount),
+		delay:      500,
+		dictionary: make(map[string]Key),
+		sizeLimit:  maxKeyCount,
+		servesLeft: aija,
+		running:    true,
+	}
 }
 
 func (k *KeyManager) getKey(id []byte) (Key, error) {
-	if !k.R {
+	if !k.running {
 		return Key{}, errors.New("key manager is not running")
 	}
 
-	k.M.Lock()
-	val, exists := k.D[string(id)]
+	k.mutex.Lock()
+	val, exists := k.dictionary[string(id)]
 	if !exists {
-		k.M.Unlock()
+		k.mutex.Unlock()
 		return Key{}, errors.New(fmt.Sprintf("key %v not found in manager", id))
 	}
-	k.M.Unlock()
+	k.mutex.Unlock()
 	return val, nil
 }
 
 func (k *KeyManager) addKey(id []byte, val []byte) error {
 	key := Key{KeyId: id, KeyVal: val, Created: time.Now()}
+	k.mutex.Lock()
+	k.keysAdded += 1
+	key.Order = k.keysAdded
 
-	k.M.Lock()
-	_, exists := k.D[string(key.KeyId)]
+	_, exists := k.dictionary[string(key.KeyId)]
 	if exists {
-		k.M.Unlock()
+		k.mutex.Unlock()
 		return errors.New(fmt.Sprintf("key %v already exists", utils.BytesToHexOctets(key.KeyId)))
 	}
-	k.A.PushBack(key)
-	k.D[string(key.KeyId)] = key
-	if k.A.Len() > k.W {
-		rem := k.A.PopFront()
-		delete(k.D, string(rem.KeyId))
+	k.all.PushBack(key)
+	k.dictionary[string(key.KeyId)] = key
+	if k.all.Len() > k.sizeLimit {
+		rem := k.all.PopFront()
+		delete(k.dictionary, string(rem.KeyId))
 		_, exists = k.C[string(rem.KeyId)]
 		if exists {
 			k.C[string(rem.KeyId)] = false
-		} else if k.B.Len() > 0 && reflect.DeepEqual(rem, k.B.Front()) { // the key will be in front of B if in B
-			<-k.S
-			k.B.PopFront()
+		} else if k.reservable.Len() > 0 && reflect.DeepEqual(rem, k.reservable.Front()) { // the key will be in front of reservable if in reservable
+			<-k.notifier
+			k.reservable.PopFront()
 		}
 	}
-	// add key to B after a delay of Z milliseconds
-	if k.L == (utils.ByteSum(key.KeyVal)%2 == 0) {
+	// add key to reservable after a delay of delay milliseconds
+	if k.servesLeft == (utils.ByteSum(key.KeyVal)%2 == 0) {
 		k.C[string(key.KeyId)] = true
 		go func() {
-			time.Sleep(time.Duration(k.Z) * time.Millisecond)
-			k.M.Lock()
+			time.Sleep(time.Duration(k.delay) * time.Millisecond)
+			k.mutex.Lock()
 			in, e := k.C[string(key.KeyId)]
 			if e && in {
-				k.B.PushBack(key)
-				k.S <- 1
+				k.reservable.PushBack(key)
+				k.notifier <- 1
 			}
-			k.M.Unlock()
+			k.mutex.Unlock()
 		}()
 	}
-	k.M.Unlock()
+	k.mutex.Unlock()
 
 	return nil
 }
 
 // extractKey extracts key and removes it from queue
 func (k *KeyManager) extractKey() (Key, error) {
-	if !k.R {
+	if !k.running {
 		return Key{}, errors.New("key manager is not running")
 	}
 	retrieved := false
 	result := Key{}
 	for !retrieved {
-		<-k.S
-		k.M.Lock()
-		if k.B.Len() > 0 {
-			result = k.B.PopBack()
+		<-k.notifier
+		k.mutex.Lock()
+		if k.reservable.Len() > 0 {
+			result = k.reservable.PopBack()
 			retrieved = true
 		}
-		k.M.Unlock()
+		k.mutex.Unlock()
 	}
 	return result, nil
 }
 
 func (k *KeyManager) getManagerState() int {
 	keysAvailable := 0
-	k.M.Lock()
-	keysAvailable = k.B.Len()
-	k.M.Unlock()
+	k.mutex.Lock()
+	keysAvailable = k.reservable.Len()
+	k.mutex.Unlock()
 	if keysAvailable == 0 {
 		return constants.Empty
-	} else if k.R == false {
+	} else if k.running == false {
 		return constants.Receiving
 	} else {
 		return constants.Running
@@ -122,8 +140,8 @@ func (k *KeyManager) getManagerState() int {
 
 // getFirstKey returns the first key in the queue that is either even or odd
 func (k *KeyManager) getFirstKey(even bool) ([]byte, error) {
-	k.M.Lock()
+	k.mutex.Lock()
 
-	k.M.Unlock()
+	k.mutex.Unlock()
 	return []byte{}, nil
 }

@@ -1,21 +1,7 @@
 package manager
 
-import (
-	"github.com/gammazero/deque"
-)
-
 func NewKeyManager(maxKeyCount int, aija bool) *KeyManager {
-	return &KeyManager{
-		A: deque.New[Key](),
-		B: deque.New[Key](),
-		C: make(map[string]bool),
-		S: make(chan int, maxKeyCount),
-		Z: 500,
-		D: make(map[string]Key),
-		W: maxKeyCount,
-		L: aija,
-		R: true,
-	}
+	return newKeyManager(maxKeyCount, aija)
 }
 
 func (k *KeyManager) AddKey(keyId []byte, keyVal []byte) error {
