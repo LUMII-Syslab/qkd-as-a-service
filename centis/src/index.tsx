@@ -1,8 +1,8 @@
 import {StrictMode, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
-import './styles/lux.css'
-import './styles/cosmo.css'
+import './styles/lux.min.css'
+import './styles/cosmo.min.css'
 import './styles/global.css'
 import KDCConfig from "./components/KeyDistributionCenterConf";
 import ReserveKeyAndGetHalf from "./components/ReserveKeyAndGetHalf";
