@@ -4,14 +4,12 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 import './styles/lux.css'
 import './styles/cosmo.css'
 import './styles/global.css'
-// @ts-ignore
-import KDCConfig from "./components/KeyDistributionCenterConf.tsx";
-// @ts-ignore
-import ReserveKeyAndGetHalf from "./components/ReserveKeyAndGetHalf.tsx";
-// @ts-ignore
-import GetKeyHalf from "./components/GetKeyHalf.tsx";
+import KDCConfig from "./components/KeyDistributionCenterConf";
+import ReserveKeyAndGetHalf from "./components/ReserveKeyAndGetHalf";
+import GetKeyHalf from "./components/GetKeyHalf";
 // @ts-ignore
 import diagram from './images/diagram.png';
+import WatchKeys from "./components/WatchKeys";
 
 const root = createRoot(document.getElementById('root'));
 
@@ -46,9 +44,11 @@ function App() {
                 </div>
             </div>
             <KDCConfig config={config} setConfig={setConfig}/>
-            <h2>Requests</h2>
+            <h2 className={"mt-5"}>Requests</h2>
             <ReserveKeyAndGetHalf config={config}/>
             <GetKeyHalf config={config}/>
+            <h2 className={"mt-5"}>Monitoring</h2>
+            <WatchKeys/>
         </main>
     )
 }

@@ -1,6 +1,5 @@
 import {useEffect, useState} from "react";
-// @ts-ignore
-import {ASNDERToList, bytesToHexOctets, bytesToSpacedHexOctets, wsConnect, wsSendRequest} from '../utils/utils.ts';
+import {ASNDERToList, bytesToHexOctets, bytesToSpacedHexOctets, wsConnect, wsSendRequest} from '../utils/utils';
 
 interface RKAGHRequest {
     config: any
@@ -32,7 +31,7 @@ export default function ReserveKeyAndGetHalf({config}) {
         {error && <div className="alert alert-danger alert-dismissible fade show" role="alert"> {error}</div>}
         <RKAGHReqConfig request={request} setRequest={setRequest}/>
         <RKAGHSubmission request={request} setResponse={setResponse} setParentError={setError}/>
-        <RKAGHResponse response={response}/>
+        <RKAGHResponseTable response={response}/>
     </fieldset>)
 }
 
@@ -81,30 +80,23 @@ function RKAGHSubmission({
     let [encodedRequest, setEncodedRequest] = useState(null)
 
     useEffect(() => {
-
-        setError(null)
-        error = validateRKAGHRequest(request)
-        setError(error)
-        console.log(error, request)
-
+        setError(validateRKAGHRequest(request))
         const [result, err] = encodeRKAGHRequest(request)
         if (err) {
             setError(err.message)
             return
         }
-
         setEncodedRequest(result)
     }, [request])
 
     useEffect(() => {
         setParentError(error)
-    }, [error])
+    }, [error, setParentError])
 
     async function sendRequest() {
         try {
             let endpoint = request.config.aijaEndpoint;
             if (request.kdc === "Brencis") endpoint = request.config.brencisEndpoint
-
             let socket = await wsConnect(endpoint);
             let response = await wsSendRequest(socket, encodedRequest);
             let parsed = parseRKAGHResponse(response);
@@ -112,19 +104,18 @@ function RKAGHSubmission({
         } catch (error) {
             alert("websocket connection failed: " + error.message)
         }
-
     }
 
     if (error) return null
     return (<div className="my-3 w-100 d-flex">
         <div className="flex-grow-1 me-3 border p-2">
-            ASN.1 encoded request: <code>{encodedRequest}</code>
+            ASN.1 encoded request: <code>{encodedRequest && bytesToSpacedHexOctets(encodedRequest)}</code>
         </div>
         <button className="ms-3 btn btn-primary" onClick={sendRequest}>SEND REQUEST</button>
     </div>)
 }
 
-function RKAGHResponse({response}: { response: RKAGHResponse }) {
+function RKAGHResponseTable({response}: { response: RKAGHResponse }) {
     return (<fieldset>
         <legend>response</legend>
 
@@ -208,7 +199,7 @@ function parseRKAGHResponse(msg_arr): RKAGHResponse {
     };
 }
 
-function validateRKAGHRequest(request: RKAGHRequest) {
+function validateRKAGHRequest(request: RKAGHRequest): string {
     if (request.keyLength !== 256) {
         return "Key length must be 256"
     }

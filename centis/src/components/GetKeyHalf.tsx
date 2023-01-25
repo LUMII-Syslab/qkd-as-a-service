@@ -27,7 +27,11 @@ interface GKHResponse {
 
 export default function ReserveKeyAndGetHalf({config}) {
     let [request, setRequest] = useState({
-        config: config, kdc: "Aija", keyLength: 256, cNonce: 42069,
+        config: config,
+        kdc: "Aija",
+        keyLength: 256,
+        cNonce: 42069,
+        keyId: "e47908469a325a00eb566e5602e213f2e5429666acd96a47cf31871c98eafd8c"
     } as GKHRequest)
 
     let [response, setResponse] = useState(null as GKHResponse)
@@ -39,7 +43,7 @@ export default function ReserveKeyAndGetHalf({config}) {
             {error && <div className="alert alert-danger alert-dismissible fade show" role="alert"> {error}</div>}
             <GKHReqConfig request={request} setRequest={setRequest}/>
             <GKHSubmission request={request} setResponse={setResponse} setParentError={setError}/>
-            <GKHResponse response={response}/>
+            <GKHResponseTable response={response}/>
         </fieldset>
     )
 }
@@ -99,23 +103,18 @@ function GKHSubmission({
     let [encodedRequest, setEncodedRequest] = useState(null)
 
     useEffect(() => {
-        setError(null)
-        error = validateGKHRequest(request)
-        setError(error)
-        console.log(error, request)
-
+        setError(validateGKHRequest(request))
         const [result, err] = encodeGKHRequest(request)
         if (err) {
             setError(err.message)
             return
         }
-
         setEncodedRequest(result)
     }, [request])
 
     useEffect(() => {
         setParentError(error)
-    }, [error])
+    }, [error, setParentError])
 
     async function sendRequest() {
         try {
@@ -135,13 +134,13 @@ function GKHSubmission({
     if (error) return null
     return (<div className="my-3 w-100 d-flex">
         <div className="flex-grow-1 me-3 border p-2">
-            ASN.1 encoded request: <code>{encodedRequest}</code>
+            ASN.1 encoded request: <code>{encodedRequest && bytesToSpacedHexOctets(encodedRequest)}</code>
         </div>
         <button className="ms-3 btn btn-primary" onClick={sendRequest}>SEND REQUEST</button>
     </div>)
 }
 
-function GKHResponse({response}: { response: GKHResponse }) {
+function GKHResponseTable({response}: { response: GKHResponse }) {
     return (<fieldset>
         <legend>response</legend>
 
@@ -240,7 +239,7 @@ function validateGKHRequest(request: GKHRequest) {
     }
 
     if (!/^[0-9A-F]+$/i.test(request.keyId)) {
-        return "Key ID must be a hexadecimal number";
+        return "Key ID must be a hexadecimal string";
     }
 
     return null;

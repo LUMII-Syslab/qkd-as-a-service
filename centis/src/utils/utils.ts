@@ -10,7 +10,7 @@ export function bytesToHexOctets(data) {
     return res
 }
 
-export function bytesToSpacedHexOctets(data) {
+export function bytesToSpacedHexOctets(data: Uint8Array): string {
     let res2 = ""
     for (let i = 0; i < data.length; i++) {
         if (i) res2 += " ";
@@ -47,7 +47,7 @@ export function ASNDERToList(seq): (number | Uint8Array)[] {
     let it = 2;
     let data = [];
     while (it < 2 + seq[1]) {
-        if (seq[it] == 0x02) { // an integer follows
+        if (seq[it] === 0x02) { // an integer follows
             it++;
             let int_len = seq[it++];
             let int = 0;
@@ -56,7 +56,7 @@ export function ASNDERToList(seq): (number | Uint8Array)[] {
                 int += seq[it++];
             }
             data.push(int);
-        } else if (seq[it] == 0x04 || seq[it] == 0x06) {
+        } else if (seq[it] === 0x04 || seq[it] === 0x06) {
             it++;
             let arr_len = seq[it++];
             let res = new Uint8Array(arr_len);
@@ -75,7 +75,8 @@ export function ASNDERToList(seq): (number | Uint8Array)[] {
 export function hexOctetsToUint8Array(hexOctetStr: string): Uint8Array {
     let res = new Uint8Array(hexOctetStr.length / 2);
     for (let i = 0; i < res.length; i++) {
-        res[i] = parseInt(hexOctetStr.substr(i * 2, 2), 16);
+        res[i] = parseInt(hexOctetStr.substring(i * 2, 2), 16);
+
     }
     return res;
 }
