@@ -94,6 +94,11 @@ function RKAGKHRSubmission({
             return
         }
 
+        if (request.kdc !== "Aija" && request.kdc !== "Brencis") {
+            setError("Unknown KDC")
+            return
+        }
+
         const [result, err] = encodeRKAGHRequest(request)
         if (err) {
             setError(err.message)
@@ -109,18 +114,15 @@ function RKAGKHRSubmission({
 
     async function sendRequest() {
         try {
-            let endpoint;
-            if (request.kdc === "Aija") endpoint = request.config.aijaEndpoint
-            else if (request.kdc === "Brencis") endpoint = request.config.brencisEndpoint
-            else {
-                setError("unknown kdc: " + request.kdc)
-            }
+            let endpoint = request.config.aijaEndpoint;
+            if (request.kdc === "Brencis") endpoint = request.config.brencisEndpoint
+            
             let socket = await wsConnect(endpoint);
             let response = await wsSendRequest(socket, encodedRequest);
             let parsed = parseRKAGHRequest(response);
             console.log(parsed);
         } catch (error) {
-            setError("websocket connection failed: " + error.message)
+            alert("websocket connection failed: " + error.message)
         }
 
     }
