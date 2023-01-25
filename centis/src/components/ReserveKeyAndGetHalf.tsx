@@ -1,12 +1,15 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
+// @ts-ignore
+import {bytesToSpacedHexOctets, wsConnect, wsSendRequest, ASNDERToList} from '../utils/utils.ts';
 
-interface RKAGKHRequest {
+interface RKAGHRequest {
+    config: any
     kdc: string
     keyLength: number
     cNonce: number
 }
 
-interface RKAGKHResponse {
+interface RKAGHResponse {
     cNonce: number
     errCode: number
     keyId: Uint8Array
@@ -15,29 +18,30 @@ interface RKAGKHResponse {
     hashAlgId: Uint8Array
 }
 
-export default function ReserveKeyAndGetHalf() {
+export default function ReserveKeyAndGetHalf({config}) {
     let [request, setRequest] = useState({
-        kdc: "Aija", keyLength: 256, cNonce: 42069,
-    } as RKAGKHRequest)
+        config: config, kdc: "Aija", keyLength: 256, cNonce: 42069,
+    } as RKAGHRequest)
 
-    let [response, setResponse] = useState(null as RKAGKHResponse)
+    let [response, setResponse] = useState(null as RKAGHResponse)
 
     let [error, setError] = useState(null as string)
 
-    console.log(request)
+    useEffect(() => {
+        console.log("hello")
+    })
 
     return (<fieldset>
-            <legend><code>reserveKeyAndGetKeyHalf</code> request</legend>
+            <legend><code>reserveKeyAndGetHalf</code> request</legend>
             {error && <div className="alert alert-danger" role="alert"> {error}</div>}
             <RKAGKHReqConfig request={request} setRequest={setRequest}/>
             <RKAGKHRSubmission request={request} setResponse={setResponse} setError={setError}/>
-            <RKAGKHRResponse response={response} setResponse={setResponse}/>
+            <RKAGKHRResponse response={response}/>
         </fieldset>
-
     )
 }
 
-let RKAGKHReqConfig = ({request, setRequest}: { request: RKAGKHRequest, setRequest: any }) => {
+let RKAGKHReqConfig = ({request, setRequest}: { request: RKAGHRequest, setRequest: any }) => {
     return (<div className="row">
         <div className="col-4">
             <div className="form-floating">
@@ -77,38 +81,55 @@ let RKAGKHReqConfig = ({request, setRequest}: { request: RKAGKHRequest, setReque
 
 function RKAGKHRSubmission({
                                request, setResponse, setError
-                           }: { request: RKAGKHRequest, setResponse: any, setError: any }) {
+                           }: { request: RKAGHRequest, setResponse: any, setError: any }) {
+
     if (request.keyLength !== 256) {
+        console.error("Key length must be 256")
         setError("Key length must be 256")
         return;
     }
 
     if (request.cNonce < 0 || request.cNonce > 65535) {
+        console.error("Crypto nonce must be between 0 and 65535")
         setError("Crypto nonce must be between 0 and 65535")
         return;
     }
 
     const [encodedRequest, err] = encodeRKAGHRequest(request)
     if (err) {
+        console.error(err)
         setError(err.message)
         return;
     }
-    setError(null)
 
-    return (<div style={{marginTop: "1rem"}}>
-        <div className="responsive-input-group">
-            input status: <code>?</code>
+    async function sendRequest() {
+        try {
+            let endpoint;
+            if (request.kdc === "Aija") endpoint = request.config.aijaEndpoint
+            else if (request.kdc === "Brencis") endpoint = request.config.brencisEndpoint
+            else {
+                setError("unknown kdc: " + request.kdc)
+            }
+            let socket = await wsConnect(endpoint);
+            let response = await wsSendRequest(socket, encodedRequest);
+            let parsed = parseRKAGHRequest(response);
+            console.log(parsed);
+        } catch (error) {
+            console.error("websocket connection failed " + error.message)
+            setError("websocket connection failed " + error.message)
+        }
+
+    }
+
+    return (<div className="my-3 w-100 d-flex">
+        <div className="flex-grow-1 me-3 border p-2">
+            ASN.1 encoded request: <code>{bytesToSpacedHexOctets(encodedRequest)}</code>
         </div>
-        <div className="responsive-input-group">
-            ASN.1 encoded request: <code>?</code>
-        </div>
-        <div className="responsive-input-group">
-            <input type="button" value="SEND reserveKeyAndGetKeyHalf" className="btn"/>
-        </div>
+        <button className="ms-3 btn btn-primary" onClick={sendRequest}>SEND REQUEST</button>
     </div>)
 }
 
-function RKAGKHRResponse({response, setResponse}) {
+function RKAGKHRResponse({response}: { response: RKAGHResponse }) {
     return (<fieldset>
         <legend>response</legend>
 
@@ -120,35 +141,35 @@ function RKAGKHRResponse({response, setResponse}) {
             <tbody>
             <tr>
                 <td>crypto nonce</td>
-                <td><code></code></td>
+                <td><code>{response ? (response.cNonce ?? '?') : '?'}</code></td>
             </tr>
             <tr>
                 <td>err code</td>
-                <td><code>?</code></td>
+                <td><code>{response ? (response.errCode ?? '?') : '?'}</code></td>
             </tr>
             <tr>
                 <td>key id</td>
-                <td><code>?</code></td>
+                <td><code>{response ? (response.keyId ?? '?') : '?'}</code></td>
             </tr>
             <tr>
                 <td>this half</td>
-                <td><code>?</code></td>
+                <td><code>{response ? (response.thisHalf ?? '?') : '?'}</code></td>
             </tr>
             <tr>
                 <td>other hash</td>
                 <td><code style={{display: "inline-flex", maxWidth: "100%", overflow: "auto"}}
-                >?</code></td>
+                >{response ? (response.otherHash ?? '?') : '?'}</code></td>
             </tr>
             <tr>
                 <td>hash alg id</td>
-                <td><code>?</code></td>
+                <td><code>{response ? (response.hashAlgId ?? '?') : '?'}</code></td>
             </tr>
             </tbody>
         </table>
     </fieldset>)
 }
 
-function encodeRKAGHRequest(request: RKAGKHRequest): [Uint8Array, Error] {
+function encodeRKAGHRequest(request: RKAGHRequest): [Uint8Array, Error] {
     if (request.keyLength !== 256) {
         return [null, new Error("Key length must be 256")]
     }
@@ -178,4 +199,16 @@ function encodeRKAGHRequest(request: RKAGKHRequest): [Uint8Array, Error] {
     result[12] = request.cNonce % 256
 
     return [result, null];
+}
+
+function parseRKAGHRequest(msg_arr): RKAGHResponse {
+    let data = ASNDERToList(msg_arr);
+    let result = {} as RKAGHResponse;
+    result.cNonce = data[1] as number;
+    result.errCode = data[2] as number;
+    result.keyId = data[3] as Uint8Array;
+    result.thisHalf = data[4] as Uint8Array;
+    result.otherHash = data[5] as Uint8Array;
+    result.hashAlgId = data[6] as Uint8Array;
+    return result;
 }

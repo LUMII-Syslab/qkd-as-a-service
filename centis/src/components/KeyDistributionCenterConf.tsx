@@ -1,19 +1,26 @@
-export default function KeyDistributionCenterConf() {
+export default function KeyDistributionCenterConf({config, setConfig}: { config: any, setConfig: any }) {
     return (<fieldset>
         <legend>KDC config</legend>
         <div className="row">
             <div className="col-4">
                 <div className="form-floating">
-                    <input type="url" id="kdcc-aija-url" placeholder="Aija URL" defaultValue="ws://localhost:8080/ws"
-                           className="form-control mb-3"
-                    />
+                    <input type="url" id="kdcc-aija-url" placeholder="Aija URL" defaultValue={config.aijaEndpoint}
+                           className="form-control mb-3" onChange={
+                        (event) => {
+                            setConfig({...config, aijaEndpoint: event.target.value})
+                        }
+                    }/>
                     <label htmlFor="kdcc-aija-url">Aija URL</label>
                 </div>
             </div>
             <div className="col-4">
                 <div className="form-floating">
                     <input type="url" id="kdcc-brencis-url" placeholder="Brencis URL"
-                           defaultValue="ws://localhost:8081/ws" className="form-control mb-3"/>
+                           defaultValue={config.brencisEndpoint} className="form-control mb-3" onChange={
+                        (event) => {
+                            setConfig({...config, brencisEndpoint: event.target.value})
+                        }
+                    }/>
                     <label htmlFor="kdcc-brencis-url">Brencis URL</label>
                 </div>
             </div>

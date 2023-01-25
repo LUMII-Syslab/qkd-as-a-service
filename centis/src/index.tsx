@@ -1,10 +1,11 @@
-import {StrictMode} from 'react';
+import {StrictMode, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import './styles/lux.css'
 import './styles/cosmo.css'
 import './styles/global.css'
-import KDCConfig from "./components/KeyDistributionCenterConf";
+// @ts-ignore
+import KDCConfig from "./components/KeyDistributionCenterConf.tsx";
 // @ts-ignore
 import ReserveKeyAndGetHalf from "./components/ReserveKeyAndGetHalf.tsx";
 // @ts-ignore
@@ -14,6 +15,18 @@ const root = createRoot(document.getElementById('root'));
 
 root.render(
     <StrictMode>
+        <App/>
+    </StrictMode>
+);
+
+function App() {
+    let [config, setConfig] = useState({
+        aijaEndpoint: "ws://localhost:8080/ws",
+        brencisEndpoint: "ws://localhost:8081/ws",
+        password: "123456789"
+    })
+
+    return (
         <main className="container py-3">
             <div style={{display: "inline-flex"}}>
                 <div style={{width: "50%"}}>
@@ -30,9 +43,10 @@ root.render(
                     <img src={diagram} alt="The Butterfly Protocol" style={{padding: "30px"}}/>
                 </div>
             </div>
-            <KDCConfig/>
+            <KDCConfig config={config} setConfig={setConfig}/>
             <h2>Requests</h2>
-            <ReserveKeyAndGetHalf/>
+            <ReserveKeyAndGetHalf config={config}/>
+            
         </main>
-    </StrictMode>
-);
+    )
+}
