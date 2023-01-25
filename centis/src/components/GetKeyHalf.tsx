@@ -136,7 +136,7 @@ function GKHSubmission({
         <div className="flex-grow-1 me-3 border p-2">
             ASN.1 encoded request: <code>{encodedRequest && bytesToSpacedHexOctets(encodedRequest)}</code>
         </div>
-        <button className="ms-3 btn btn-primary" onClick={sendRequest}>SEND REQUEST</button>
+        <button className="ms-3 btn btn-outline-dark" onClick={sendRequest}>SEND REQUEST</button>
     </div>)
 }
 
