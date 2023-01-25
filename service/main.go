@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"log"
 	"os"
 	"qkdc-service/api"
@@ -22,9 +23,14 @@ func main() {
 		gatherer = gatherers.NewFileSystemKeyGatherer(config.FSGathererDir)
 	}
 
+	var infoEndpoint io.Writer
+	infoEndpoint = os.Stdout
+	if !config.LogRequests {
+		infoEndpoint = io.Discard
+	}
 	if config.AijaEnabled {
-		aijaInfoLogger := log.New(os.Stdout, "AIJA INFO: ", log.Ldate|log.Ltime)
-		aijaErrorLogger := log.New(os.Stdout, "AIJA ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+		aijaInfoLogger := log.New(infoEndpoint, "AIJA INFO ", log.Ldate|log.Ltime)
+		aijaErrorLogger := log.New(os.Stdout, "AIJA ERROR ", log.Ldate|log.Ltime|log.Lshortfile)
 
 		aijaKeyManager := manager.NewKeyManager(config.MaxKeyCount, true)
 		gatherer.PublishTo(aijaKeyManager)
@@ -32,8 +38,8 @@ func main() {
 	}
 
 	if config.BrencisEnabled {
-		brencisInfoLogger := log.New(os.Stdout, "BRENCIS INFO: ", log.Ldate|log.Ltime)
-		brencisErrorLogger := log.New(os.Stdout, "BRENCIS ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+		brencisInfoLogger := log.New(infoEndpoint, "BRENCIS INFO ", log.Ldate|log.Ltime)
+		brencisErrorLogger := log.New(os.Stdout, "BRENCIS ERROR ", log.Ldate|log.Ltime|log.Lshortfile)
 
 		brencisKeyManager := manager.NewKeyManager(config.MaxKeyCount, false)
 		gatherer.PublishTo(brencisKeyManager)
