@@ -17,7 +17,7 @@ func NewRandomKeyGatherer(keyIdLength, keyValLength int) *RandomKeyGatherer {
 }
 
 func (kg *RandomKeyGatherer) Start() error {
-	genTicker := time.NewTicker(time.Microsecond)
+	genTicker := time.NewTicker(time.Millisecond)
 	logTicker := time.NewTicker(5 * time.Second)
 	for {
 		select {
