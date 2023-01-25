@@ -1,5 +1,4 @@
 import {useState, useEffect} from "react";
-// @ts-ignore
 import {
     bytesToSpacedHexOctets,
     wsConnect,
@@ -7,7 +6,7 @@ import {
     ASNDERToList,
     hexOctetsToUint8Array,
     bytesToHexOctets
-} from '../utils/utils.ts';
+} from '../utils/utils';
 
 interface GKHRequest {
     config: any
