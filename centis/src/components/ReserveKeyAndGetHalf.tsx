@@ -27,15 +27,11 @@ export default function ReserveKeyAndGetHalf({config}) {
 
     let [error, setError] = useState(null as string)
 
-    useEffect(() => {
-        console.log("hello")
-    })
-
     return (<fieldset>
             <legend><code>reserveKeyAndGetHalf</code> request</legend>
-            {error && <div className="alert alert-danger" role="alert"> {error}</div>}
+            {error && <div className="alert alert-danger alert-dismissible fade show" role="alert"> {error}</div>}
             <RKAGKHReqConfig request={request} setRequest={setRequest}/>
-            <RKAGKHRSubmission request={request} setResponse={setResponse} setError={setError}/>
+            <RKAGKHRSubmission request={request} setResponse={setResponse} setParentError={setError}/>
             <RKAGKHRResponse response={response}/>
         </fieldset>
     )
@@ -80,27 +76,36 @@ let RKAGKHReqConfig = ({request, setRequest}: { request: RKAGHRequest, setReques
 }
 
 function RKAGKHRSubmission({
-                               request, setResponse, setError
-                           }: { request: RKAGHRequest, setResponse: any, setError: any }) {
+                               request, setResponse, setParentError
+                           }: { request: RKAGHRequest, setResponse: any, setParentError: any }) {
+    let [error, setError] = useState(null as string)
+    let [encodedRequest, setEncodedRequest] = useState(null)
 
-    if (request.keyLength !== 256) {
-        console.error("Key length must be 256")
-        setError("Key length must be 256")
-        return;
-    }
+    useEffect(() => {
+        setError(null)
+        console.log(error, request)
+        if (request.keyLength !== 256) {
+            setError("Key length must be 256")
+            return
+        }
 
-    if (request.cNonce < 0 || request.cNonce > 65535) {
-        console.error("Crypto nonce must be between 0 and 65535")
-        setError("Crypto nonce must be between 0 and 65535")
-        return;
-    }
+        if (request.cNonce < 0 || request.cNonce > 65535) {
+            setError("Crypto nonce must be between 0 and 65535")
+            return
+        }
 
-    const [encodedRequest, err] = encodeRKAGHRequest(request)
-    if (err) {
-        console.error(err)
-        setError(err.message)
-        return;
-    }
+        const [result, err] = encodeRKAGHRequest(request)
+        if (err) {
+            setError(err.message)
+            return
+        }
+
+        setEncodedRequest(result)
+    }, [request])
+
+    useEffect(() => {
+        setParentError(error)
+    }, [error])
 
     async function sendRequest() {
         try {
@@ -115,15 +120,15 @@ function RKAGKHRSubmission({
             let parsed = parseRKAGHRequest(response);
             console.log(parsed);
         } catch (error) {
-            console.error("websocket connection failed " + error.message)
-            setError("websocket connection failed " + error.message)
+            setError("websocket connection failed: " + error.message)
         }
 
     }
 
+    if (error) return null
     return (<div className="my-3 w-100 d-flex">
         <div className="flex-grow-1 me-3 border p-2">
-            ASN.1 encoded request: <code>{bytesToSpacedHexOctets(encodedRequest)}</code>
+            ASN.1 encoded request: <code>{encodedRequest}</code>
         </div>
         <button className="ms-3 btn btn-primary" onClick={sendRequest}>SEND REQUEST</button>
     </div>)
