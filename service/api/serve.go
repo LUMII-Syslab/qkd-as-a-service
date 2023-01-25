@@ -80,16 +80,18 @@ func ListenAndServe(manager *manager.KeyManager, infoLogger *log.Logger, errorLo
 				infoLogger.Println("0x02 request: (%v), (%v), (%v)", keyLength, cNonce, keyId)
 
 				thisHalf, otherHash, kdcErr := manager.GetKeyThisHalfOtherHash(keyId)
-				if kdcErr.Code != 0 {
+				errCode := 0
+				if kdcErr != nil {
+					errCode = kdcErr.Code
 					errorLogger.Println(kdcErr.ToString())
 				}
 
 				infoLogger.Println("0x02 response c nonce: ", cNonce)
-				infoLogger.Println("0x02 response err code:", kdcErr.Code)
+				infoLogger.Println("0x02 response err code:", errCode)
 				infoLogger.Println("0x02 response this half", thisHalf)
 				infoLogger.Println("0x02 response other hash", otherHash)
 
-				err = conn.WriteMessage(msgType, encodeGKHResponse(cNonce, kdcErr.Code, thisHalf, otherHash, hashAlgId))
+				err = conn.WriteMessage(msgType, encodeGKHResponse(cNonce, errCode, thisHalf, otherHash, hashAlgId))
 			case 0x03: // getState
 				infoLogger.Println("0x03 request: ", seq.ToString())
 				if len(seq) != 0 {
