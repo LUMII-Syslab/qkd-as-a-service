@@ -72,10 +72,10 @@ export function ASNDERToList(seq): (number | Uint8Array)[] {
     return data;
 }
 
-function hex_octets_to_array(hex_octet_string) {
-    let res = new Uint8Array(hex_octet_string.length / 2);
+export function hexOctetsToUint8Array(hexOctetStr: string): Uint8Array {
+    let res = new Uint8Array(hexOctetStr.length / 2);
     for (let i = 0; i < res.length; i++) {
-        res[i] = parseInt(hex_octet_string.substr(i * 2, 2), 16);
+        res[i] = parseInt(hexOctetStr.substr(i * 2, 2), 16);
     }
     return res;
 }

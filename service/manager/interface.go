@@ -1,5 +1,7 @@
 package manager
 
+import "qkdc-service/logging"
+
 func NewKeyManager(maxKeyCount int, aija bool) *KeyManager {
 	return newKeyManager(maxKeyCount, aija)
 }
@@ -8,7 +10,7 @@ func (k *KeyManager) AddKey(keyId []byte, keyVal []byte) error {
 	return k.addKey(keyId, keyVal)
 }
 
-func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, otherHash []byte, err error) {
+func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, otherHash []byte, err *logging.KDCError) {
 	thisHalf, err = k.getThisHalf(keyId)
 	if err != nil {
 		return
@@ -17,7 +19,7 @@ func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, oth
 	return
 }
 
-func (k *KeyManager) ReserveKeyAndGetHalf() (keyId []byte, thisHalf []byte, otherHash []byte, err error) {
+func (k *KeyManager) ReserveKeyAndGetHalf() (keyId []byte, thisHalf []byte, otherHash []byte, err *logging.KDCError) {
 	key, err := k.extractKey()
 	if err != nil {
 		return

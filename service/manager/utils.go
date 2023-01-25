@@ -2,9 +2,11 @@ package manager
 
 import (
 	"golang.org/x/crypto/sha3"
+	"qkdc-service/constants"
+	"qkdc-service/logging"
 )
 
-func (k *KeyManager) getThisHalf(keyId []byte) ([]byte, error) {
+func (k *KeyManager) getThisHalf(keyId []byte) ([]byte, *logging.KDCError) {
 	if k.servesLeft {
 		return k.getKeyLeft(keyId)
 	} else {
@@ -12,7 +14,7 @@ func (k *KeyManager) getThisHalf(keyId []byte) ([]byte, error) {
 	}
 }
 
-func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, error) {
+func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, *logging.KDCError) {
 	if k.servesLeft {
 		return k.getKeyRightHash(keyId)
 	} else {
@@ -31,7 +33,7 @@ func (k *KeyManager) getShake128Hash(data []byte) (hash []byte, err error) {
 	return
 }
 
-func (k *KeyManager) getKeyLeft(id []byte) ([]byte, error) {
+func (k *KeyManager) getKeyLeft(id []byte) ([]byte, *logging.KDCError) {
 	res, err := k.getKey(id)
 	if err != nil {
 		return nil, err
@@ -39,15 +41,19 @@ func (k *KeyManager) getKeyLeft(id []byte) ([]byte, error) {
 	return res.KeyVal[:len(res.KeyVal)/2+1], nil
 }
 
-func (k *KeyManager) getKeyLeftHash(id []byte) ([]byte, error) {
-	data, err := k.getKeyLeft(id)
-	if err != nil {
-		return nil, err
+func (k *KeyManager) getKeyLeftHash(id []byte) ([]byte, *logging.KDCError) {
+	data, kdcErr := k.getKeyLeft(id)
+	if kdcErr != nil {
+		return nil, kdcErr
 	}
-	return k.getShake128Hash(data)
+	hash, err := k.getShake128Hash(data)
+	if err != nil {
+		return nil, logging.NewKDCError(constants.ErrorInternal, err)
+	}
+	return hash, nil
 }
 
-func (k *KeyManager) getKeyRight(id []byte) ([]byte, error) {
+func (k *KeyManager) getKeyRight(id []byte) ([]byte, *logging.KDCError) {
 	res, err := k.getKey(id)
 	if err != nil {
 		return nil, err
@@ -55,10 +61,14 @@ func (k *KeyManager) getKeyRight(id []byte) ([]byte, error) {
 	return res.KeyVal[len(res.KeyVal)/2+1:], nil
 }
 
-func (k *KeyManager) getKeyRightHash(id []byte) ([]byte, error) {
-	data, err := k.getKeyRight(id)
-	if err != nil {
-		return nil, err
+func (k *KeyManager) getKeyRightHash(id []byte) ([]byte, *logging.KDCError) {
+	data, kdcErr := k.getKeyRight(id)
+	if kdcErr != nil {
+		return nil, kdcErr
 	}
-	return k.getShake128Hash(data)
+	hash, err := k.getShake128Hash(data)
+	if err != nil {
+		return nil, logging.NewKDCError(constants.ErrorInternal, err)
+	}
+	return hash, nil
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"qkdc-service/constants"
+	"qkdc-service/logging"
 	"qkdc-service/utils"
 	"reflect"
 	"sync"
@@ -47,16 +48,17 @@ func newKeyManager(maxKeyCount int, aija bool) *KeyManager {
 	}
 }
 
-func (k *KeyManager) getKey(id []byte) (Key, error) {
+func (k *KeyManager) getKey(id []byte) (Key, *logging.KDCError) {
 	if !k.running {
-		return Key{}, errors.New("key manager is not running")
+		return Key{}, logging.NewKDCError(constants.ErrorNotRunning, errors.New("key manager is not running"))
 	}
 
 	k.mutex.Lock()
 	val, exists := k.dictionary[string(id)]
 	if !exists {
 		k.mutex.Unlock()
-		return Key{}, errors.New(fmt.Sprintf("key %v not found in manager", id))
+		return Key{}, logging.NewKDCError(constants.ErrorKeyNotFound,
+			errors.New(fmt.Sprintf("key %v not found in manager", utils.BytesToHexOctets(id))))
 	}
 	k.mutex.Unlock()
 	return val, nil
@@ -109,9 +111,9 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 }
 
 // extractKey extracts key and removes it from queue
-func (k *KeyManager) extractKey() (Key, error) {
+func (k *KeyManager) extractKey() (Key, *logging.KDCError) {
 	if !k.running {
-		return Key{}, errors.New("key manager is not running")
+		return Key{}, logging.NewKDCError(constants.ErrorNotRunning, errors.New("key manager is not running"))
 	}
 	retrieved := false
 	result := Key{}

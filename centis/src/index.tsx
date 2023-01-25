@@ -9,6 +9,8 @@ import KDCConfig from "./components/KeyDistributionCenterConf.tsx";
 // @ts-ignore
 import ReserveKeyAndGetHalf from "./components/ReserveKeyAndGetHalf.tsx";
 // @ts-ignore
+import GetKeyHalf from "./components/GetKeyHalf.tsx";
+// @ts-ignore
 import diagram from './images/diagram.png';
 
 const root = createRoot(document.getElementById('root'));
@@ -46,7 +48,7 @@ function App() {
             <KDCConfig config={config} setConfig={setConfig}/>
             <h2>Requests</h2>
             <ReserveKeyAndGetHalf config={config}/>
-            
+            <GetKeyHalf config={config}/>
         </main>
     )
 }

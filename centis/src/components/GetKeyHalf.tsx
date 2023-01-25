@@ -1,18 +1,26 @@
-import {useEffect, useState} from "react";
+import {useState, useEffect} from "react";
 // @ts-ignore
-import {ASNDERToList, bytesToHexOctets, bytesToSpacedHexOctets, wsConnect, wsSendRequest} from '../utils/utils.ts';
+import {
+    bytesToSpacedHexOctets,
+    wsConnect,
+    wsSendRequest,
+    ASNDERToList,
+    hexOctetsToUint8Array,
+    bytesToHexOctets
+} from '../utils/utils.ts';
 
-interface RKAGHRequest {
+interface GKHRequest {
     config: any
+    endpoint: string
     kdc: string
     keyLength: number
     cNonce: number
+    keyId: string
 }
 
-interface RKAGHResponse {
+interface GKHResponse {
     cNonce: number
     errCode: number
-    keyId: Uint8Array
     thisHalf: Uint8Array
     otherHash: Uint8Array
     hashAlgId: Uint8Array
@@ -21,24 +29,25 @@ interface RKAGHResponse {
 export default function ReserveKeyAndGetHalf({config}) {
     let [request, setRequest] = useState({
         config: config, kdc: "Aija", keyLength: 256, cNonce: 42069,
-    } as RKAGHRequest)
+    } as GKHRequest)
 
-    let [response, setResponse] = useState(null as RKAGHResponse)
+    let [response, setResponse] = useState(null as GKHResponse)
 
     let [error, setError] = useState(null as string)
 
     return (<fieldset>
-        <legend><code>reserveKeyAndGetHalf</code> request</legend>
-        {error && <div className="alert alert-danger alert-dismissible fade show" role="alert"> {error}</div>}
-        <RKAGHReqConfig request={request} setRequest={setRequest}/>
-        <RKAGHSubmission request={request} setResponse={setResponse} setParentError={setError}/>
-        <RKAGHResponse response={response}/>
-    </fieldset>)
+            <legend><code>getKeyHalf</code> request</legend>
+            {error && <div className="alert alert-danger alert-dismissible fade show" role="alert"> {error}</div>}
+            <GKHReqConfig request={request} setRequest={setRequest}/>
+            <GKHSubmission request={request} setResponse={setResponse} setParentError={setError}/>
+            <GKHResponse response={response}/>
+        </fieldset>
+    )
 }
 
-let RKAGHReqConfig = ({request, setRequest}) => {
+let GKHReqConfig = ({request, setRequest}) => {
     return (<div className="row">
-        <div className="col-4">
+        <div className="col-2">
             <div className="form-floating">
                 <select className="form-select" defaultValue={request.kdc}
                         onChange={(event) => {
@@ -50,7 +59,7 @@ let RKAGHReqConfig = ({request, setRequest}) => {
                 <label>KDC</label>
             </div>
         </div>
-        <div className="col-4">
+        <div className="col-2">
             <div className="form-floating">
                 <input type="number" defaultValue={request.keyLength}
                        className="form-control"
@@ -58,7 +67,7 @@ let RKAGHReqConfig = ({request, setRequest}) => {
                 <label>Key Length</label>
             </div>
         </div>
-        <div className="col-4">
+        <div className="col-2">
             <div className="form-floating">
                 <input type="number" defaultValue={request.cNonce} className="form-control"
                        onChange={(event) => {
@@ -70,24 +79,33 @@ let RKAGHReqConfig = ({request, setRequest}) => {
                 </div>
             </div>
         </div>
+        <div className="col-6">
+            <div className="form-floating">
+                <input type="text" defaultValue={request.keyId}
+                       className="form-control"
+                       onChange={(event) => {
+                           setRequest({...request, keyId: event.target.value})
+                       }}/>
+                <label>Key Id</label>
+            </div>
+        </div>
     </div>)
 
 }
 
-function RKAGHSubmission({
-                             request, setResponse, setParentError
-                         }: { request: RKAGHRequest, setResponse: any, setParentError: any }) {
+function GKHSubmission({
+                           request, setResponse, setParentError
+                       }: { request: GKHRequest, setResponse: any, setParentError: any }) {
     let [error, setError] = useState(null as string)
     let [encodedRequest, setEncodedRequest] = useState(null)
 
     useEffect(() => {
-
         setError(null)
-        error = validateRKAGHRequest(request)
+        error = validateGKHRequest(request)
         setError(error)
         console.log(error, request)
 
-        const [result, err] = encodeRKAGHRequest(request)
+        const [result, err] = encodeGKHRequest(request)
         if (err) {
             setError(err.message)
             return
@@ -104,10 +122,10 @@ function RKAGHSubmission({
         try {
             let endpoint = request.config.aijaEndpoint;
             if (request.kdc === "Brencis") endpoint = request.config.brencisEndpoint
-
+            console.log("connecting to " + endpoint)
             let socket = await wsConnect(endpoint);
             let response = await wsSendRequest(socket, encodedRequest);
-            let parsed = parseRKAGHResponse(response);
+            let parsed = parseGKHRequest(response);
             setResponse(parsed)
         } catch (error) {
             alert("websocket connection failed: " + error.message)
@@ -124,7 +142,7 @@ function RKAGHSubmission({
     </div>)
 }
 
-function RKAGHResponse({response}: { response: RKAGHResponse }) {
+function GKHResponse({response}: { response: GKHResponse }) {
     return (<fieldset>
         <legend>response</legend>
 
@@ -141,10 +159,6 @@ function RKAGHResponse({response}: { response: RKAGHResponse }) {
             <tr>
                 <td>err code</td>
                 <td><code>{response ? (response.errCode ?? '?') : '?'}</code></td>
-            </tr>
-            <tr>
-                <td>key id</td>
-                <td><code>{response ? (bytesToHexOctets(response.keyId) ?? '?') : '?'}</code></td>
             </tr>
             <tr>
                 <td>this half</td>
@@ -164,51 +178,56 @@ function RKAGHResponse({response}: { response: RKAGHResponse }) {
     </fieldset>)
 }
 
-function encodeRKAGHRequest(request: RKAGHRequest): [Uint8Array, Error] {
-    if (request.keyLength !== 256) {
-        return [null, new Error("Key length must be 256")]
+function encodeGKHRequest(request: GKHRequest): [Uint8Array, Error] {
+    let error = validateGKHRequest(request)
+    if (error) {
+        return [null, new Error(error)]
     }
 
-    if (request.cNonce < 0 || request.cNonce > 65535) {
-        return [null, new Error("Crypto nonce must be between 0 and 65535")]
-    }
-
-    const result = new Uint8Array(13)
-
+    let keyId = hexOctetsToUint8Array(request.keyId)
+    const req = new Uint8Array(15 + keyId.length)
     // sequence
-    result[0] = 0x30;
-    result[1] = 0x0B    // a sequence of 11 bytes will follow
-    // reserveKeyAndGetKeyHalf request
-    result[2] = 0x02;
-    result[3] = 0x01    // an integer of 1 byte will follow
-    result[4] = 0x01
-    // requested key length (256)
-    result[5] = 0x02;
-    result[6] = 0x02    // an integer of 2 bytes will follow
-    result[7] = 0x01;
-    result[8] = 0x00
-    // crypto nonce
-    result[9] = 0x02;
-    result[10] = 0x02   // an integer of 2 bytes will follow
-    result[11] = request.cNonce >> 8;
-    result[12] = request.cNonce % 256
+    req[0] = 0x30;
+    req[1] = 13 + keyId.length    // a sequence of 13+len(keyId) bytes will follow
 
-    return [result, null];
+    // getKeyHalf request
+    req[2] = 0x02;
+    req[3] = 0x01    // an integer of 1 byte will follow
+    req[4] = 0x02
+
+    // key length
+    req[5] = 0x02;
+    req[6] = 0x02    // an integer of 2 bytes will follow
+    req[7] = 0x01;
+    req[8] = 0x00    // requested key length (256)
+
+    // key id
+    req[9] = 0x04;
+    req[10] = keyId.length  // a byte array of keyId.length bytes will follow
+    for (let i = 0; i < keyId.length; i++)
+        req[i + 11] = keyId[i];
+
+    // call#
+    req[11 + keyId.length] = 0x02;
+    req[12 + keyId.length] = 0x02   // an integer of 2 bytes will follow
+    req[13 + keyId.length] = request.cNonce >> 8;
+    req[14 + keyId.length] = request.cNonce % 256
+
+    return [req, null];
 }
 
-function parseRKAGHResponse(msg_arr): RKAGHResponse {
+function parseGKHRequest(msg_arr): GKHResponse {
     let data = ASNDERToList(msg_arr);
-    return {
-        cNonce: data[1] as number,
-        errCode: data[2] as number,
-        keyId: data[3] as Uint8Array,
-        thisHalf: data[4] as Uint8Array,
-        otherHash: data[5] as Uint8Array,
-        hashAlgId: data[6] as Uint8Array,
-    };
+    let result = {} as GKHResponse;
+    result.cNonce = data[1] as number;
+    result.errCode = data[2] as number;
+    result.thisHalf = data[3] as Uint8Array;
+    result.otherHash = data[4] as Uint8Array;
+    result.hashAlgId = data[5] as Uint8Array;
+    return result;
 }
 
-function validateRKAGHRequest(request: RKAGHRequest) {
+function validateGKHRequest(request: GKHRequest) {
     if (request.keyLength !== 256) {
         return "Key length must be 256"
     }
@@ -219,6 +238,10 @@ function validateRKAGHRequest(request: RKAGHRequest) {
 
     if (request.kdc !== "Aija" && request.kdc !== "Brencis") {
         return "Unknown KDC"
+    }
+
+    if (!/^[0-9A-F]+$/i.test(request.keyId)) {
+        return "Key ID must be a hexadecimal number";
     }
 
     return null;

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"qkdc-service/api"
 	"qkdc-service/gatherers"
 	"qkdc-service/manager"
@@ -22,15 +23,21 @@ func main() {
 	}
 
 	if config.AijaEnabled {
+		aijaInfoLogger := log.New(os.Stdout, "AIJA INFO: ", log.Ldate|log.Ltime)
+		aijaErrorLogger := log.New(os.Stdout, "AIJA ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+
 		aijaKeyManager := manager.NewKeyManager(config.MaxKeyCount, true)
 		gatherer.PublishTo(aijaKeyManager)
-		go api.ListenAndServe(aijaKeyManager, config.AijaAPIPort, config.LogRequests)
+		go api.ListenAndServe(aijaKeyManager, aijaInfoLogger, aijaErrorLogger, config.AijaAPIPort)
 	}
 
 	if config.BrencisEnabled {
+		brencisInfoLogger := log.New(os.Stdout, "BRENCIS INFO: ", log.Ldate|log.Ltime)
+		brencisErrorLogger := log.New(os.Stdout, "BRENCIS ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+
 		brencisKeyManager := manager.NewKeyManager(config.MaxKeyCount, false)
 		gatherer.PublishTo(brencisKeyManager)
-		go api.ListenAndServe(brencisKeyManager, config.BrencisAPiPort, config.LogRequests)
+		go api.ListenAndServe(brencisKeyManager, brencisInfoLogger, brencisErrorLogger, config.BrencisAPiPort)
 	}
 
 	time.Sleep(time.Millisecond * 100)
