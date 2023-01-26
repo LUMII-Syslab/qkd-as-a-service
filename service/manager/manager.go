@@ -95,26 +95,26 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 	keyReservable := k.servesLeft == ((keyByteSum % 2) == 0)
 
 	k.mutex.Lock()
-	k.keysAdded += 1
-	key.Order = k.keysAdded
 	_, exists := k.dictionary[string(key.KeyId)]
 	if exists {
 		k.mutex.Unlock()
 		return errors.New(fmt.Sprintf("key %v already exists", utils.BytesToHexOctets(key.KeyId)))
 	}
-	k.all.PushBack(key)
+
+	k.keysAdded += 1
+	key.Order = k.keysAdded
+
 	k.dictionary[string(key.KeyId)] = key
+	k.all.PushBack(key)
 	if uint64(k.all.Len()) > k.sizeLimit {
 		rem := k.all.PopFront()
-		delete(k.dictionary, string(rem.KeyId))
-		for k.reservable.Len() > 0 && k.reservable.Front().Order <= rem.Order {
-			<-k.notifier
-			k.reservable.PopFront()
+		if keyReservable {
+			for k.reservable.Len() > 0 && k.reservable.Front().Order <= rem.Order {
+				<-k.notifier
+				k.reservable.PopFront()
+			}
 		}
-	}
-	// add key to reservable after a delay
-	if keyReservable {
-		k.delayed[string(key.KeyId)] = true
+		delete(k.dictionary, string(rem.KeyId))
 	}
 	k.mutex.Unlock()
 

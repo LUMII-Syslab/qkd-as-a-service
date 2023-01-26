@@ -1,5 +1,5 @@
 # maximum number of keys to be buffered
-max_key_cnt = 1000
+max_key_cnt = 100000
 
 # both aija and brencis qkdc services
 # can be hosted from the same process
