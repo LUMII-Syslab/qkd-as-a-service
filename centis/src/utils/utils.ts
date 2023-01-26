@@ -75,7 +75,7 @@ export function ASNDERToList(seq): (number | Uint8Array)[] {
 export function hexOctetsToUint8Array(hexOctetStr: string): Uint8Array {
     let res = new Uint8Array(hexOctetStr.length / 2);
     for (let i = 0; i < res.length; i++) {
-        res[i] = parseInt(hexOctetStr.substring(i * 2, 2), 16);
+        res[i] = parseInt(hexOctetStr.substring(i * 2, i * 2 + 2), 16);
 
     }
     return res;

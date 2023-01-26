@@ -7,7 +7,7 @@ import (
 )
 
 func (k *KeyManager) getThisHalf(keyId []byte) ([]byte, *logging.KDCError) {
-	if k.servesLeft {
+	if k.aija {
 		return k.getKeyLeft(keyId)
 	} else {
 		return k.getKeyRight(keyId)
@@ -15,7 +15,7 @@ func (k *KeyManager) getThisHalf(keyId []byte) ([]byte, *logging.KDCError) {
 }
 
 func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, *logging.KDCError) {
-	if k.servesLeft {
+	if k.aija {
 		return k.getKeyRightHash(keyId)
 	} else {
 		return k.getKeyLeftHash(keyId)

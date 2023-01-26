@@ -21,31 +21,32 @@ type Key struct {
 }
 
 type KeyManager struct {
-	all         *deque.Deque[Key]
-	reservable  *deque.Deque[Key]
-	delayed     map[string]bool // keys outside reservable waiting to enter
-	delay       uint32          // key lifetime outside reservable ( milliseconds )
-	notifier    chan int        // alerts threads waiting for reservable keys
-	dictionary  map[string]Key  // key id, val dictionary
-	sizeLimit   uint64          // maximum all size
-	servesLeft  bool            // true <-> returns left of key and serves even ( otherwise returns right and serves odd)
-	mutex       sync.Mutex      // mutex for all, reservable, delayed, dictionary
-	running     bool            // running state ( keys can be reserved by the users)
+	all        *deque.Deque[Key]
+	reservable *deque.Deque[Key]
+	dictionary map[string]Key // key id, val map
+	delay      uint32         // key lifetime outside reservable ( milliseconds )
+	notifier   chan int       // alerts threads waiting for reservable keys
+	sizeLimit  uint64         // maximum all size
+	aija       bool           // true <-> returns left of key and serves even ( otherwise returns right and serves odd)
+	mutex      sync.Mutex     // mutex for all, reservable, delayed, dictionary
+	running    bool           // running state ( keys can be reserved by the users)
+
 	keysAdded   uint64
 	keysServerd uint64
-	logger      *log.Logger
+	keysDelayed uint64
+
+	logger *log.Logger
 }
 
 func newKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger) *KeyManager {
 	return &KeyManager{
 		all:        deque.New[Key](),
 		reservable: deque.New[Key](),
-		delayed:    make(map[string]bool),
 		notifier:   make(chan int, maxKeyCount*100),
 		delay:      500,
 		dictionary: make(map[string]Key),
 		sizeLimit:  maxKeyCount,
-		servesLeft: aija,
+		aija:       aija,
 		running:    true,
 		logger:     logger,
 	}
@@ -58,6 +59,7 @@ type KeyManagerState struct {
 	DictionarySize uint64
 	KeysAdded      uint64
 	KeysServed     uint64
+	KeysDelayed    uint64
 	Running        bool
 }
 
@@ -86,13 +88,14 @@ func (k *KeyManager) getKey(id []byte) (Key, *logging.KDCError) {
 			errors.New(fmt.Sprintf("key %v not found in manager", utils.BytesToHexOctets(id))))
 	}
 	k.mutex.Unlock()
+	k.keysServerd += 1
 	return val, nil
 }
 
 func (k *KeyManager) addKey(id []byte, val []byte) error {
 	key := Key{KeyId: id, KeyVal: val, Created: time.Now()}
 	keyByteSum := utils.ByteSum(key.KeyVal)
-	keyReservable := k.servesLeft == ((keyByteSum % 2) == 0)
+	keyReservable := k.aija == ((keyByteSum % 2) == 0)
 
 	k.mutex.Lock()
 	_, exists := k.dictionary[string(key.KeyId)]
@@ -120,7 +123,9 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 
 	if keyReservable {
 		go func() {
+			k.keysDelayed += 1
 			time.Sleep(time.Duration(k.delay) * time.Millisecond)
+			k.keysDelayed -= 1
 			k.mutex.Lock()
 			if k.all.Front().Order > key.Order {
 				k.mutex.Unlock()
