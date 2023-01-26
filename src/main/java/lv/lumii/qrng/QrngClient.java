@@ -44,7 +44,7 @@ public class QrngClient {
             NULL_BUFFER = null; // used from Java mode of GraalVM
         }
 
-        InjectablePQC.inject();
+        InjectablePQC.inject(); // makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
 
         /*
         do not use log4j2 in native executables/libraries!!!
@@ -85,7 +85,7 @@ public class QrngClient {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        logger.debug("Using TLS provider: "+tlsProvider.getName()); // BCJSSE
+        logger.info("Using TLS provider: "+tlsProvider.getName()); // BCJSSE
 
         //System.load("/Users/sergejs/.sdkman/candidates/java/current/lib/libosxsecurity.dylib");
         //System.load("/Users/sergejs/graalvm-ce-java17-22.3.0/Contents/Home/lib/libosxsecurity.dylib");
