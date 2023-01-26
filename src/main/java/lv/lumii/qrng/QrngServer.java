@@ -4,7 +4,6 @@ import nl.altindag.ssl.SSLFactory;
 import org.cactoos.Scalar;
 import org.cactoos.scalar.Sticky;
 import org.cactoos.scalar.Synced;
-import org.java_websocket.server.WebSocketServer;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;

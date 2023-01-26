@@ -2,7 +2,8 @@ package lv.lumii.qrng;
 
 import org.graalvm.nativeimage.c.type.CCharPointer;
 
-public class QrngTestRandom {
+
+public class QrngTestServer {
 
     public static void main(String[] args) throws Exception {
 
