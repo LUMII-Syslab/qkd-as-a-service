@@ -121,8 +121,9 @@ function GKHSubmission({
             let endpoint = request.config.aijaEndpoint;
             if (request.kdc === "Brencis") endpoint = request.config.brencisEndpoint
             console.log("connecting to " + endpoint)
-            let socket = await wsConnect(endpoint);
+            const socket = await wsConnect(endpoint);
             let response = await wsSendRequest(socket, encodedRequest);
+            socket.close();
             let parsed = parseGKHRequest(response);
             setResponse(parsed)
         } catch (error) {

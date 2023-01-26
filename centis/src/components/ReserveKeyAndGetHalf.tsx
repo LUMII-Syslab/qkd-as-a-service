@@ -97,8 +97,9 @@ function RKAGHSubmission({
         try {
             let endpoint = request.config.aijaEndpoint;
             if (request.kdc === "Brencis") endpoint = request.config.brencisEndpoint
-            let socket = await wsConnect(endpoint);
+            const socket = await wsConnect(endpoint);
             let response = await wsSendRequest(socket, encodedRequest);
+            socket.close();
             let parsed = parseRKAGHResponse(response);
             setResponse(parsed)
         } catch (error) {

@@ -23,7 +23,7 @@ export function bytesToSpacedHexOctets(data: Uint8Array): string {
     return res2
 }
 
-export function wsConnect(endpoint) {
+export function wsConnect(endpoint): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
         const socket = new WebSocket(endpoint);
         socket.onopen = () => resolve(socket);
