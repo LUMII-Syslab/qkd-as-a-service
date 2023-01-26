@@ -34,7 +34,8 @@ func ListenAndServe(manager *manager.KeyManager, infoLogger *log.Logger, errorLo
 			msgType, body, err := conn.ReadMessage() // msgType https://www.rfc-editor.org/rfc/rfc6455.html#section-11.8
 			if err != nil {
 				errorLogger.Println(err)
-				return
+				_ = conn.Close()
+				break
 			}
 			seq, err := DecodeDERSequence(body)
 			if err != nil {
@@ -111,8 +112,8 @@ func ListenAndServe(manager *manager.KeyManager, infoLogger *log.Logger, errorLo
 			}
 
 			if err != nil {
-				log.Println(err)
-				return
+				errorLogger.Println(err)
+				continue
 			}
 		}
 	})

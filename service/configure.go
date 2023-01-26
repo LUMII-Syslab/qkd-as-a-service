@@ -8,7 +8,7 @@ import (
 )
 
 type Configuration struct {
-	MaxKeyCount int `mapstructure:"max_key_cnt"`
+	MaxKeyCount uint64 `mapstructure:"max_key_cnt"`
 
 	AijaAPIPort    int `mapstructure:"aija_port"`
 	BrencisAPiPort int `mapstructure:"brencis_port"`

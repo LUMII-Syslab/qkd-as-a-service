@@ -1,9 +1,13 @@
 package manager
 
-import "qkdc-service/logging"
+import (
+	"log"
+	"qkdc-service/constants"
+	"qkdc-service/logging"
+)
 
-func NewKeyManager(maxKeyCount int, aija bool) *KeyManager {
-	return newKeyManager(maxKeyCount, aija)
+func NewKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger) *KeyManager {
+	return newKeyManager(maxKeyCount, aija, logger)
 }
 
 func (k *KeyManager) AddKey(keyId []byte, keyVal []byte) error {
@@ -30,6 +34,17 @@ func (k *KeyManager) ReserveKeyAndGetHalf() (keyId []byte, thisHalf []byte, othe
 }
 
 func (k *KeyManager) GetState() int {
+	state := k.getManagerState()
+	if state.ReservableSize == 0 {
+		return constants.Empty
+	} else if state.Running == false {
+		return constants.Receiving
+	} else {
+		return constants.Running
+	}
+}
+
+func (k *KeyManager) GetFullState() KeyManagerState {
 	return k.getManagerState()
 }
 

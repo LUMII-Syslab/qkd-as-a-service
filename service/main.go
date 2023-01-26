@@ -29,21 +29,39 @@ func main() {
 		infoEndpoint = io.Discard
 	}
 	if config.AijaEnabled {
+		aijaDebugLogger := log.New(os.Stdout, "AIJA DEBUG ", log.Ldate|log.Ltime|log.Lshortfile)
+		aijaKeyManager := manager.NewKeyManager(config.MaxKeyCount, true, aijaDebugLogger)
+		gatherer.PublishTo(aijaKeyManager)
+
 		aijaInfoLogger := log.New(infoEndpoint, "AIJA INFO ", log.Ldate|log.Ltime)
 		aijaErrorLogger := log.New(os.Stdout, "AIJA ERROR ", log.Ldate|log.Ltime|log.Lshortfile)
-
-		aijaKeyManager := manager.NewKeyManager(config.MaxKeyCount, true)
-		gatherer.PublishTo(aijaKeyManager)
 		go api.ListenAndServe(aijaKeyManager, aijaInfoLogger, aijaErrorLogger, config.AijaAPIPort)
+
+		go func() {
+			for {
+				time.Sleep(time.Second * 5)
+				state := aijaKeyManager.GetFullState()
+				aijaInfoLogger.Printf("state: %+v", state)
+			}
+		}()
 	}
 
 	if config.BrencisEnabled {
+		brencisDebugLogger := log.New(io.Discard, "BRENCIS DEBUG ", log.Ldate|log.Ltime|log.Lshortfile)
+		brencisKeyManager := manager.NewKeyManager(config.MaxKeyCount, false, brencisDebugLogger)
+		gatherer.PublishTo(brencisKeyManager)
+
 		brencisInfoLogger := log.New(infoEndpoint, "BRENCIS INFO ", log.Ldate|log.Ltime)
 		brencisErrorLogger := log.New(os.Stdout, "BRENCIS ERROR ", log.Ldate|log.Ltime|log.Lshortfile)
 
-		brencisKeyManager := manager.NewKeyManager(config.MaxKeyCount, false)
-		gatherer.PublishTo(brencisKeyManager)
 		go api.ListenAndServe(brencisKeyManager, brencisInfoLogger, brencisErrorLogger, config.BrencisAPiPort)
+		go func() {
+			for {
+				time.Sleep(time.Second * 5)
+				state := brencisKeyManager.GetFullState()
+				brencisInfoLogger.Printf("state: %+v", state)
+			}
+		}()
 	}
 
 	time.Sleep(time.Millisecond * 100)
