@@ -1,22 +1,19 @@
 package lv.lumii.qkd;
 
-import lv.lumii.qrng.ClientBuffer;
 import lv.lumii.qrng.QrngClient;
-import lv.lumii.qrng.QrngProperties;
-import nl.altindag.ssl.SSLFactory;
 import org.bouncycastle.pqc.InjectablePQC;
 import org.cactoos.Scalar;
 import org.cactoos.scalar.Sticky;
 import org.cactoos.scalar.Synced;
-import org.java_websocket.WebSocket;
-import org.java_websocket.handshake.ClientHandshake;
-import org.java_websocket.server.WebSocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.File;
-import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;
@@ -56,83 +53,49 @@ public class QkdServer {
 
     }
 
-    //private QkdProperties qkdProperties;
-    //private ClientBuffer clientBuffer;
+    private QkdProperties qkdProperties;
 
     private int port = 2222;
-    private Scalar<WebSocketServer> wsserver;
+    private Scalar<TlsServer> wsserver;
 
     public QkdServer() { // QkdProperties qkdProperties1) {
         System.out.println(" New QkdServer");
         this.wsserver = new Synced<>(new Sticky<>(() -> newConnection() ));
-
+        this.qkdProperties = new QkdProperties(mainDirectory);
     }
 
-    private WebSocketServer newConnection() throws Exception {
+    private TlsServer newConnection() throws Exception {
 
         System.out.println(" New QKD User2 ");
 
-        //QrngClientToken token = qrngProperties.clientToken();
+        QkdServerKey srvKey = qkdProperties.serverKey();
 
-        //System.out.println("TOKEN "+token.password()+" "+token.certificateChain());
-
-        //TrustManagerFactory trustMgrFact = TrustManagerFactory.getInstance("SunX509");
-        //trustMgrFact.init(qrngProperties.trustStore());
-
-        /*SSLFactory sslf2 = SSLFactory.builder()
-                //.withIdentityMaterial(token.key(), token.password(), token.certificateChain())
-                //.withNeedClientAuthentication()
-                //.withWantClientAuthentication()
-                .withProtocols("TLSv1.3")
-                //.withTrustMaterial(trustMgrFact)
-                .withSecureRandom(SecureRandom.getInstanceStrong())
-                .withCiphers("TLS_AES_256_GCM_SHA384")
-                .build();
-*/
+        System.out.println("SRV KEY "+srvKey.password());
 
 
-        WebSocketServer wssrv = new WebSocketServer(new InetSocketAddress(port)) {
+        SSLServerSocketFactory ssf = null;
+        try {
+            // set up key manager to do server authentication
+            SSLContext ctx;
 
-            @Override
-            public void onOpen(WebSocket conn, ClientHandshake handshake) {
-                System.out.println("Handshake :" + handshake.toString());
-            }
+            KeyManagerFactory kmf;
+            KeyStore ks;
 
-            @Override
-            public void onMessage(WebSocket arg0, String arg1) {
-                System.out.println("Server receives:  " + arg1 + " " + arg0.getRemoteSocketAddress());
+            ctx = SSLContext.getInstance("TLS");
+            kmf = KeyManagerFactory.getInstance("SunX509");
+            ks = srvKey.keyStore();
 
-                    //SERVER SEND THE CLIENT ID AND REGISTER A NEW CONNECTION
-                    //clientSockets.add(new Connection(arg0, clientId));
+            kmf.init(ks, srvKey.password());
+            ctx.init(kmf.getKeyManagers(), null, SecureRandom.getInstanceStrong());
 
-                    //clientId++;
-                    //nClients++;
+            ssf = ctx.getServerSocketFactory();
 
-            }
-
-            @Override
-            public void onError(WebSocket arg0, Exception arg1) {
-                // TODO Auto-generated method stub
-                System.out.println("Server Error " + arg1);
-            }
-
-            @Override
-            public void onStart() {
-
-            }
-
-            @Override
-            public void onClose(WebSocket arg0, int arg1, String arg2, boolean arg3) {
-            }
-        };
-
-        wssrv.setConnectionLostTimeout(20);
-        //wssrv.set .setSocketFactory(sslf2.getSslSocketFactory());
-        //Start Server functionality
-        wssrv.start();
-        System.out.println("Server started and ready.");
-
-        return wssrv;
+            ServerSocket ss = ssf.createServerSocket(port);
+            return new TlsServer(ss);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public void start() {

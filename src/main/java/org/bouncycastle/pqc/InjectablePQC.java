@@ -356,6 +356,7 @@ public class InjectablePQC {
             //this.clientPublicKey = kem.generate_keypair();
             //this.clientPrivateKey = kem.export_secret_key().clone();
 
+            System.out.println("KEM: KeyGen");
             // if pure Java (BouncyCastle):
             AsymmetricCipherKeyPair kp = kemGen.generateKeyPair();
             FrodoPublicKeyParameters pubParams = (FrodoPublicKeyParameters) (kp.getPublic());
@@ -368,10 +369,12 @@ public class InjectablePQC {
         }
 
         public void receivePeerValue(byte[] peerValue) throws IOException {
+            System.out.println("KEM: receivedPeerValue");
             this.serverEnsapsulated = peerValue;
         }
 
         public TlsSecret calculateSecret() throws IOException {
+            System.out.println("KEM: Decapsulate");
             // if via liboqs JNI + DLL:
             //byte[] shared_secret_client = kem.decap_secret(this.serverEnsapsulated);
             //this.kem.dispose_KEM();
