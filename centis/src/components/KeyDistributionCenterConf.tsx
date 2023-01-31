@@ -1,5 +1,5 @@
 export default function KeyDistributionCenterConf({config, setConfig}: { config: any, setConfig: any }) {
-    return (<fieldset>
+    return (<fieldset className="p-3 shadow-sm border mt-3">
         <legend>KDC config</legend>
         <div className="row">
             <div className="col-4">

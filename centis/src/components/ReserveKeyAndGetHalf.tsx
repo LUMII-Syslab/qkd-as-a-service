@@ -17,7 +17,7 @@ export default function ReserveKeyAndGetHalf({config}) {
 
     let [error, setError] = useState(null as string)
 
-    return (<fieldset>
+    return (<fieldset className="p-3 shadow-sm border">
         <legend><code>reserveKeyAndGetHalf</code> request</legend>
         {error && <div className="alert alert-danger alert-dismissible fade show" role="alert"> {error}</div>}
         <RKAGHReqConfig request={request} setRequest={setRequest}/>
@@ -103,7 +103,7 @@ function RKAGHSubmission({
         <div className="flex-grow-1 me-3 border p-2">
             ASN.1 encoded request: <code>{encodedRequest && bytesToSpacedHexOctets(encodedRequest)}</code>
         </div>
-        <button className="ms-3 btn btn-outline-dark" onClick={sendRequest}>SEND REQUEST</button>
+        <button className="ms-3 btn btn-outline-primary btn-sm" onClick={sendRequest}>SEND REQUEST</button>
     </div>)
 }
 
