@@ -1,21 +1,12 @@
 import {useEffect, useState} from "react";
-import {ASNDERToList, bytesToHexOctets, bytesToSpacedHexOctets, wsConnect, wsSendRequest} from '../utils/utils';
-
-interface RKAGHRequest {
-    config: any
-    kdc: string
-    keyLength: number
-    cNonce: number
-}
-
-interface RKAGHResponse {
-    cNonce: number
-    errCode: number
-    keyId: Uint8Array
-    thisHalf: Uint8Array
-    otherHash: Uint8Array
-    hashAlgId: Uint8Array
-}
+import {
+    ASNDERToList,
+    bytesToHexOctets,
+    bytesToSpacedHexOctets, encodeRKAGHRequest, parseRKAGHResponse,
+    RKAGHRequest, RKAGHResponse, validateRKAGHRequest,
+    wsConnect,
+    wsSendRequest
+} from '../utils/utils';
 
 export default function ReserveKeyAndGetHalf({config}) {
     let [request, setRequest] = useState({
@@ -154,64 +145,4 @@ function RKAGHResponseTable({response}: { response: RKAGHResponse }) {
             </tbody>
         </table>
     </fieldset>)
-}
-
-function encodeRKAGHRequest(request: RKAGHRequest): [Uint8Array, Error] {
-    if (request.keyLength !== 256) {
-        return [null, new Error("Key length must be 256")]
-    }
-
-    if (request.cNonce < 0 || request.cNonce > 65535) {
-        return [null, new Error("Crypto nonce must be between 0 and 65535")]
-    }
-
-    const result = new Uint8Array(13)
-
-    // sequence
-    result[0] = 0x30;
-    result[1] = 0x0B    // a sequence of 11 bytes will follow
-    // reserveKeyAndGetKeyHalf request
-    result[2] = 0x02;
-    result[3] = 0x01    // an integer of 1 byte will follow
-    result[4] = 0x01
-    // requested key length (256)
-    result[5] = 0x02;
-    result[6] = 0x02    // an integer of 2 bytes will follow
-    result[7] = 0x01;
-    result[8] = 0x00
-    // crypto nonce
-    result[9] = 0x02;
-    result[10] = 0x02   // an integer of 2 bytes will follow
-    result[11] = request.cNonce >> 8;
-    result[12] = request.cNonce % 256
-
-    return [result, null];
-}
-
-function parseRKAGHResponse(msg_arr): RKAGHResponse {
-    let data = ASNDERToList(msg_arr);
-    return {
-        cNonce: data[1] as number,
-        errCode: data[2] as number,
-        keyId: data[3] as Uint8Array,
-        thisHalf: data[4] as Uint8Array,
-        otherHash: data[5] as Uint8Array,
-        hashAlgId: data[6] as Uint8Array,
-    };
-}
-
-function validateRKAGHRequest(request: RKAGHRequest): string {
-    if (request.keyLength !== 256) {
-        return "Key length must be 256"
-    }
-
-    if (request.cNonce < 0 || request.cNonce > 65535) {
-        return "Crypto nonce must be between 0 and 65535"
-    }
-
-    if (request.kdc !== "Aija" && request.kdc !== "Brencis") {
-        return "Unknown KDC"
-    }
-
-    return null;
 }

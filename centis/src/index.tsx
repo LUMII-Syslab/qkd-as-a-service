@@ -48,7 +48,7 @@ function App() {
             <ReserveKeyAndGetHalf config={config}/>
             <GetKeyHalf config={config}/>
             <h2 className={"mt-5"}>Monitoring</h2>
-            <WatchKeys/>
+            <WatchKeys config={config}/>
         </main>
     )
 }
