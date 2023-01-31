@@ -1,6 +1,6 @@
 import {StrictMode, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import 'bootstrap/dist/js/bootstrap.bundle.min';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './styles/custom.scss';
 import KDCConfig from "./components/KeyDistributionCenterConf";
 import ReserveKeyAndGetHalf from "./components/ReserveKeyAndGetHalf";

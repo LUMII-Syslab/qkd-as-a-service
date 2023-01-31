@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {
     ASNDERToList,
     bytesToHexOctets,
@@ -7,6 +7,7 @@ import {
     wsConnect,
     wsSendRequest
 } from '../utils/utils';
+import {Collapse} from "bootstrap";
 
 export default function ReserveKeyAndGetHalf({config}) {
     let [request, setRequest] = useState({
@@ -108,9 +109,30 @@ function RKAGHSubmission({
 }
 
 function RKAGHResponseTable({response}: { response: RKAGHResponse }) {
-    return (<fieldset>
-        <legend>response</legend>
+    let [collapseIcon, setCollapseIcon] = useState("bi-caret-down")
+    const bsCollapse = useRef(null)
 
+    useEffect(()=>{
+        bsCollapse.current = new Collapse('#rkagh-response-table', {
+            toggle: false
+        })
+        let collapsable = document.getElementById('rkagh-response-table')
+        collapsable.addEventListener('hidden.bs.collapse', event => {
+            setCollapseIcon("bi-caret-down")
+        })
+        collapsable.addEventListener('shown.bs.collapse', event => {
+            setCollapseIcon("bi-caret-up")
+        })
+
+    },[])
+
+    return (<fieldset>
+        <legend><button className="btn nav-link" onClick={(e)=>{
+            bsCollapse.current.toggle()
+            setCollapseIcon(collapseIcon === "bi-caret-down" ? "bi-caret-up" : "bi-caret-down")
+        }}>response <i className={`bi ${collapseIcon} small align-bottom`} ></i></button></legend>
+
+        <div className="collapse" id="rkagh-response-table">
         <table className="table table-bordered w-100" style={{tableLayout: "fixed"}}>
             <colgroup>
                 <col span={1} style={{width: "20%"}}/>
@@ -144,5 +166,6 @@ function RKAGHResponseTable({response}: { response: RKAGHResponse }) {
             </tr>
             </tbody>
         </table>
+            </div>
     </fieldset>)
 }
