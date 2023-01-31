@@ -1,9 +1,7 @@
 import {StrictMode, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
-import './styles/lux.min.css'
-import './styles/cosmo.min.css'
-import './styles/global.css'
+import './styles/custom.scss';
 import KDCConfig from "./components/KeyDistributionCenterConf";
 import ReserveKeyAndGetHalf from "./components/ReserveKeyAndGetHalf";
 import GetKeyHalf from "./components/GetKeyHalf";
@@ -28,19 +26,16 @@ function App() {
 
     return (
         <main className="container py-3">
-            <div style={{display: "inline-flex"}}>
-                <div style={{width: "50%"}}>
+            <div className="d-flex">
+                <div className="col-md-6">
                     <h1>Centis - QAAS admin panel</h1>
                     <p>
                         This is a simple admin panel for QAAS (QKD as a service). It allows you to send requests to
-                        the KDCs
-                        (key
-                        distribution centers) and monitor the
-                        keys.
+                        the KDCs (key distribution centers) and monitor the keys.
                     </p>
                 </div>
-                <div style={{width: "50%"}}>
-                    <img src={diagram} alt="The Butterfly Protocol" style={{padding: "30px"}}/>
+                <div className="col-md-6">
+                    <img src={diagram} alt="The Butterfly Protocol" className="w-100"/>
                 </div>
             </div>
             <KDCConfig config={config} setConfig={setConfig}/>
