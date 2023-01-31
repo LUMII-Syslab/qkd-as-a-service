@@ -49,9 +49,9 @@ jobs:
       - name: Install dependencies
         run: yarn --cwd "centis" install
       - name: Build with Next.js
-        run: yarn --cwd "centis" next build
+        run: cd "centis" && yarn next build
       - name: Static HTML export with Next.js
-        run: yarn --cwd "centis" next export
+        run: cd "centis" && yarn next export
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
