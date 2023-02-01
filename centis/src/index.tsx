@@ -1,4 +1,4 @@
-import {StrictMode, useState} from 'react';
+import {StrictMode, useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -27,9 +27,35 @@ function App() {
         password: "123456789"
     })
 
+    let [aijaConnError, setAijaConnError] = useState(null as string)
+    let [brencisConnError, setBrencisConnError] = useState(null as string)
+    let [testingConnections, setTestingConnections] = useState(false)
+
+    function testConnection(endpoint: string, errorSetter: any) {
+        const ws = new WebSocket(endpoint);
+        ws.onopen = () => {
+            errorSetter(null)
+            setTestingConnections(false)
+            ws.close();
+        };
+        ws.onerror = (e) => {
+            console.log(e)
+            setTestingConnections(false)
+            errorSetter(e)
+        }
+    }
+
+    function testConnections() {
+        setTestingConnections(true)
+        testConnection(config.aijaEndpoint, setAijaConnError)
+        testConnection(config.brencisEndpoint, setBrencisConnError)
+    }
+
+    useEffect(testConnections, [config])
+
     return (
         <main className="container py-3">
-            <div className="d-flex flex-wrap">
+            <div className="d-flex flex-wrap align-items-center">
                 <div className="col-12 col-md-6">
                     <h1>Centis - QAAS admin panel</h1>
                     <p>
@@ -42,11 +68,25 @@ function App() {
                 </div>
             </div>
             <KDCConfig config={config} setConfig={setConfig}/>
-            <h2 className={"mt-5"}>Requests</h2>
-            <ReserveKeyAndGetHalf config={config}/>
-            <GetKeyHalf config={config}/>
-            <h2 className={"mt-5"}>Monitoring</h2>
-            <WatchKeys config={config}/>
+            <div className="row">
+                {aijaConnError && <div className="alert alert-danger alert-dismissible fade show col ms-3 me-2 my-3"
+                                       role="alert">Neizdevās savienoties ar Aiju.</div>}
+                {brencisConnError &&
+                    <div className="alert alert-danger alert-dismissible fade show col mx-2 my-3" role="alert">
+                        Neizdevās savienoties ar Brencis.</div>}
+                {(aijaConnError || brencisConnError) &&
+                    <button className="btn btn-warning col-3 me-3 my-3" onClick={testConnections}>
+                        Pārbaudīt savienojumu <i className={`bi bi-arrow-clockwise ${testingConnections && "spinner-border"}`}></i></button>}
+            </div>
+            {(!aijaConnError && !brencisConnError) && !testingConnections &&
+                <>
+                    <h2 className={"mt-5"}>Requests</h2>
+                    <ReserveKeyAndGetHalf config={config}/>
+                    <GetKeyHalf config={config}/>
+                    <h2 className={"mt-5"}>Monitoring</h2>
+                    <WatchKeys config={config}/>
+                </>
+            }
         </main>
     )
 }

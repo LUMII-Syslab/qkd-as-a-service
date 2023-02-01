@@ -1,6 +1,5 @@
 import {useEffect, useRef, useState} from "react";
 import {
-    ASNDERToList,
     bytesToHexOctets,
     bytesToSpacedHexOctets, encodeRKAGHRequest, parseRKAGHResponse,
     RKAGHRequest, RKAGHResponse, validateRKAGHRequest,
@@ -56,9 +55,6 @@ let RKAGHReqConfig = ({request, setRequest}) => {
                            setRequest({...request, cNonce: event.target.value})
                        }}/>
                 <label>Crypto Nonce</label>
-                <div className="invalid-feedback">
-                    Please choose a username.
-                </div>
             </div>
         </div>
     </div>)
@@ -117,17 +113,17 @@ function RKAGHResponseTable({response}: { response: RKAGHResponse }) {
             toggle: false
         })
         let collapsable = document.getElementById('rkagh-response-table')
-        collapsable.addEventListener('hidden.bs.collapse', event => {
+        collapsable.addEventListener('hidden.bs.collapse', () => {
             setCollapseIcon("bi-caret-down")
         })
-        collapsable.addEventListener('shown.bs.collapse', event => {
+        collapsable.addEventListener('shown.bs.collapse', () => {
             setCollapseIcon("bi-caret-up")
         })
 
     },[])
 
     return (<fieldset>
-        <legend><button className="btn nav-link" onClick={(e)=>{
+        <legend><button className="btn nav-link" onClick={()=>{
             bsCollapse.current.toggle()
             setCollapseIcon(collapseIcon === "bi-caret-down" ? "bi-caret-up" : "bi-caret-down")
         }}>response <i className={`bi ${collapseIcon} small align-bottom`} ></i></button></legend>
