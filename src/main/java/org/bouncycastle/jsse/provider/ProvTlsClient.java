@@ -120,10 +120,15 @@ class ProvTlsClient
         Vector<Integer> result = NamedGroupInfo.getSupportedGroupsLocalClient(jsseSecurityParameters.namedGroups);
 
         // adding injected KEMs: #pqc-tls #injection
-        //result.clear();
-        int i=0;
+        if (InjectedKEMs.injectionOrder == InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT)
+            result.clear();
+
+        int pos=0;
+        if (InjectedKEMs.injectionOrder == InjectedKEMs.InjectionOrder.AFTER_DEFAULT)
+            pos = result.size();
+
         for (int kem : InjectedKEMs.getInjectedKEMsCodePoints())
-            result.add(i++, kem);
+            result.add(pos++, kem);
 
         return result;
     }

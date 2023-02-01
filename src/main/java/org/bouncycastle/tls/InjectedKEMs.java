@@ -29,6 +29,13 @@ public class InjectedKEMs
 {
     private static final Logger LOG = Logger.getLogger(InjectedKEMs.class.getName());
 
+    public enum InjectionOrder {
+        BEFORE_DEFAULT,
+        INSTEAD_DEFAULT,
+        AFTER_DEFAULT
+    }
+    public static InjectionOrder injectionOrder = InjectionOrder.BEFORE_DEFAULT;
+
     public interface TlsAgreementFunction {
         TlsAgreement invoke(JcaTlsCrypto crypto, int kemCodePoint);
     }

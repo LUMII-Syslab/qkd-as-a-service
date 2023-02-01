@@ -298,12 +298,29 @@ class NamedGroupInfo
         {
             // return a concatenation of CANDIDATES_DEFAULT and injected KEMs code points #pqc-tls #injection
             int[] injected = InjectedKEMs.getInjectedKEMsCodePoints();
-            int[] retVal = new int[CANDIDATES_DEFAULT.length+injected.length];
 
-            for (int i=0; i<CANDIDATES_DEFAULT.length; i++)
-                retVal[i] = CANDIDATES_DEFAULT[i];
-            for (int i=0; i<injected.length; i++)
-                retVal[CANDIDATES_DEFAULT.length + i] = injected[i];
+            int newLength = injected.length;
+            if (InjectedKEMs.injectionOrder == InjectedKEMs.InjectionOrder.BEFORE_DEFAULT ||
+                    InjectedKEMs.injectionOrder == InjectedKEMs.InjectionOrder.AFTER_DEFAULT
+            ) {
+                newLength += CANDIDATES_DEFAULT.length;
+            }
+            int[] retVal = new int[newLength];
+
+            switch (InjectedKEMs.injectionOrder) {
+                case BEFORE_DEFAULT:
+                    System.arraycopy(injected, 0, retVal, 0, injected.length);
+                    System.arraycopy(CANDIDATES_DEFAULT, 0, retVal, injected.length, CANDIDATES_DEFAULT.length);
+                    break;
+                case INSTEAD_DEFAULT:
+                    System.arraycopy(injected, 0, retVal, 0, injected.length);
+                    break;
+                case AFTER_DEFAULT:
+                    System.arraycopy(CANDIDATES_DEFAULT, 0, retVal, 0, CANDIDATES_DEFAULT.length);
+                    System.arraycopy(injected, 0, retVal, CANDIDATES_DEFAULT.length, injected.length);
+                    break;
+            }
+
             return retVal;
         }
 
