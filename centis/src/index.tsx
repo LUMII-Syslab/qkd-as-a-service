@@ -1,13 +1,16 @@
 import {StrictMode, useState} from 'react';
 import {createRoot} from 'react-dom/client';
+
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './styles/custom.scss';
+
 import KDCConfig from "./components/KeyDistributionCenterConf";
 import ReserveKeyAndGetHalf from "./components/ReserveKeyAndGetHalf";
 import GetKeyHalf from "./components/GetKeyHalf";
+import WatchKeys from "./components/WatchKeys";
+
 // @ts-ignore
 import diagram from './images/diagram.png';
-import WatchKeys from "./components/WatchKeys";
 
 const root = createRoot(document.getElementById('root'));
 
@@ -26,15 +29,15 @@ function App() {
 
     return (
         <main className="container py-3">
-            <div className="d-flex">
-                <div className="col-md-6">
+            <div className="d-flex flex-wrap">
+                <div className="col-12 col-md-6">
                     <h1>Centis - QAAS admin panel</h1>
                     <p>
                         This is a simple admin panel for QAAS (QKD as a service). It allows you to send requests to
                         the KDCs (key distribution centers) and monitor the keys.
                     </p>
                 </div>
-                <div className="col-md-6">
+                <div className="col-12 col-md-6 px-3 my-3">
                     <img src={diagram} alt="The Butterfly Protocol" className="w-100"/>
                 </div>
             </div>
