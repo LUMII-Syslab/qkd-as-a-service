@@ -28,7 +28,7 @@ public class TlsServer implements Runnable {
      * @exception IOException if error occurs reading the class
      */
     public byte[] getBytes(String path) {
-            return "Some html".getBytes(StandardCharsets.UTF_8);
+            return ("Some html; the path was '"+path+"'").getBytes(StandardCharsets.UTF_8);
     }
 
     /**
@@ -129,6 +129,7 @@ public class TlsServer implements Runnable {
                 path = line.substring(0, index);
             }
         }
+        System.err.println("PATH=["+path+"]");
 
         // eat the rest of header
         do {
@@ -139,8 +140,7 @@ public class TlsServer implements Runnable {
         if (path.length() != 0) {
             return path;
         } else {
-            System.err.println(path);
-            throw new IOException("Malformed Header");
+            return "/";
         }
     }
 }
