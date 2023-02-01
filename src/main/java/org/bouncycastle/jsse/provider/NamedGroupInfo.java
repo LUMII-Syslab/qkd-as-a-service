@@ -14,10 +14,7 @@ import java.util.logging.Logger;
 
 import org.bouncycastle.jsse.java.security.BCAlgorithmConstraints;
 import org.bouncycastle.jsse.java.security.BCCryptoPrimitive;
-import org.bouncycastle.tls.InjectedKEMs;
-import org.bouncycastle.tls.NamedGroup;
-import org.bouncycastle.tls.ProtocolVersion;
-import org.bouncycastle.tls.TlsUtils;
+import org.bouncycastle.tls.*;
 import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsCrypto;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Integers;
@@ -375,6 +372,12 @@ class NamedGroupInfo
             addNamedGroup(isFipsContext, crypto, disableChar2, disableFFDHE, ng, all);
         }
 
+        // #pqc-tls #injection
+        for (int codePoint : InjectedKEMs.getInjectedKEMsCodePoints()) {
+            NamedGroupInfo ngInfo = new NamedGroupInfo(codePoint, InjectedKEMs.getInjectedKEMStandardName(codePoint), null, true);
+            ng.put(codePoint, ngInfo);
+        }
+
         return ng;
     }
 
@@ -475,40 +478,83 @@ class NamedGroupInfo
         return result;
     }
 
-    private final All all;
+    //private final All all;
+    // for injection, we cannot use final enum All; we need some dynamic
+    // data structure for storing the corresponding sig scheme info
+    // #pqc-tls #injection
+
+    private final int namedGroup;
+    private final String name;
+    private final String text;
+    private final String jcaAlgorithm;
+    private final String jcaGroup;
+    private final boolean char2;
+    private final boolean supportedPost13;
+    private final boolean supportedPre13;
+    private final int bitsECDH;
+    private final int bitsFFDHE;
     private final AlgorithmParameters algorithmParameters;
     private final boolean enabled;
 
     NamedGroupInfo(All all, AlgorithmParameters algorithmParameters, boolean enabled)
     {
-        this.all = all;
+        //this.all = all;
+        // #pqc-tls #injection
+        this.namedGroup = all.namedGroup;
+        this.name = all.name;
+        this.text = all.text;
+        this.jcaAlgorithm = all.jcaAlgorithm;
+        this.jcaGroup = all.jcaGroup;
+        this.char2 = all.char2;
+        this.supportedPost13 = all.supportedPost13;
+        this.supportedPre13 = all.supportedPre13;
+        this.bitsECDH = all.bitsECDH;
+        this.bitsFFDHE = all.bitsFFDHE;
+
+        this.algorithmParameters = algorithmParameters;
+        this.enabled = enabled;
+    }
+
+    NamedGroupInfo(int kemCodePoint, String name, AlgorithmParameters algorithmParameters, boolean enabled)
+    {
+        this.namedGroup = kemCodePoint;
+        this.name = name;
+        this.text = name;
+        this.jcaAlgorithm = name;
+        this.jcaGroup = name;
+        this.char2 = false; // not a curve
+        this.supportedPost13 = true;
+        this.supportedPre13 = true;
+        this.bitsECDH = 0; // not a curve
+        this.bitsFFDHE = 0; // not a curve
+
         this.algorithmParameters = algorithmParameters;
         this.enabled = enabled;
     }
 
     int getBitsECDH()
     {
-        return all.bitsECDH;
+        return this.bitsECDH;
     }
 
     int getBitsFFDHE()
     {
-        return all.bitsFFDHE;
+        return this.bitsFFDHE;
     }
 
     String getJcaAlgorithm()
     {
-        return all.jcaAlgorithm;
+        return this.jcaAlgorithm;
     }
 
     String getJcaGroup()
     {
-        return all.jcaGroup;
+        return this.jcaGroup;
     }
 
     int getNamedGroup()
     {
-        return all.namedGroup;
+        return this.namedGroup;
     }
 
     boolean isActive(BCAlgorithmConstraints algorithmConstraints, boolean post13Active, boolean pre13Active)
@@ -525,18 +571,18 @@ class NamedGroupInfo
 
     boolean isSupportedPost13()
     {
-        return all.supportedPost13;
+        return this.supportedPost13;
     }
 
     boolean isSupportedPre13()
     {
-        return all.supportedPre13;
+        return this.supportedPre13;
     }
 
     @Override
     public String toString()
     {
-        return all.text;
+        return this.text;
     }
 
     private boolean isPermittedBy(BCAlgorithmConstraints algorithmConstraints)

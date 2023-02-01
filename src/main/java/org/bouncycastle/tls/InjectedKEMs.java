@@ -34,7 +34,7 @@ public class InjectedKEMs
         INSTEAD_DEFAULT,
         AFTER_DEFAULT
     }
-    public static InjectionOrder injectionOrder = InjectionOrder.BEFORE_DEFAULT;
+    public static InjectionOrder injectionOrder = InjectionOrder.INSTEAD_DEFAULT;
 
     public interface TlsAgreementFunction {
         TlsAgreement invoke(JcaTlsCrypto crypto, int kemCodePoint);
