@@ -2,15 +2,20 @@ package lv.lumii.qkd;
 
 import org.cactoos.scalar.Sticky;
 import org.cactoos.scalar.Unchecked;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
 import java.security.KeyStore;
 import java.util.Properties;
 
 public class QkdProperties {
+
+    Logger logger = LoggerFactory.getLogger(QkdProperties.class);
     private String mainDirectory;
     private Unchecked<Properties> properties;
 
@@ -27,7 +32,7 @@ public class QkdProperties {
         try {
             p.load(new BufferedReader(new FileReader(fileName)));
         } catch (IOException e) {
-            QkdServer.logger.error("Could not load properties from "+fileName, e);
+            logger.error("Could not load properties from "+fileName, e);
         }
 
         return p;
@@ -41,6 +46,11 @@ public class QkdProperties {
         return f.getAbsolutePath();
     }
 
+    public URI remoteUri() throws Exception {
+        String host = properties.value().getProperty("host", "localhost");
+        host = "https://"+host+":"+port();
+        return new URI(host);
+    }
 
     public int port() throws Exception {
         int defaultPort = 443;
@@ -71,8 +81,7 @@ public class QkdProperties {
 
         String password = properties.value().getProperty("caPassword", "ca-truststore-pass"); // ca-truststore-pass
 
-        KeyStore trustStore = KeyStore.getInstance(f, password.toCharArray());
-        return trustStore;
+        return KeyStore.getInstance(f, password.toCharArray());
     }
 
 

@@ -1,6 +1,5 @@
 package lv.lumii.qkd;
 
-import lv.lumii.qrng.QrngClient;
 import org.bouncycastle.pqc.InjectablePQC;
 import org.cactoos.Scalar;
 import org.cactoos.scalar.Sticky;
@@ -40,7 +39,7 @@ public class WsServer {
 
         String logFileName = mainDirectory+ File.separator+"qkd.log";
         System.setProperty("org.slf4j.simpleLogger.logFile", logFileName);
-        logger = LoggerFactory.getLogger(QrngClient.class);
+        logger = LoggerFactory.getLogger(QkdServer.class);
 
         Provider tlsProvider = null;
         try {

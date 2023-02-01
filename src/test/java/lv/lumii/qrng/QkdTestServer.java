@@ -1,10 +1,9 @@
 package lv.lumii.qrng;
 
 import lv.lumii.qkd.QkdServer;
-import org.graalvm.nativeimage.c.type.CCharPointer;
 
 
-public class QrngTestServer {
+public class QkdTestServer {
 
     public static void main(String[] args) throws Exception {
 

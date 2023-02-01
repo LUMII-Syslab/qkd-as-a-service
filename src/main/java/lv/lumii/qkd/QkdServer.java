@@ -1,6 +1,5 @@
 package lv.lumii.qkd;
 
-import lv.lumii.qrng.QrngClient;
 import org.bouncycastle.pqc.InjectablePQC;
 import org.cactoos.Scalar;
 import org.cactoos.scalar.Sticky;
@@ -20,7 +19,7 @@ import java.security.SecureRandom;
 
 public class QkdServer {
 
-    public static Logger logger; // one common logger
+    public static Logger logger; // static initialization
 
     public static String mainExecutable;
     public static String mainDirectory;
@@ -33,7 +32,7 @@ public class QkdServer {
         mainExecutable = f.getAbsolutePath();
         mainDirectory = f.getParent();
 
-        // Fix for debug purposes when qrng-client is launched from the IDE:
+        // Fix for debug purposes when qkd-client is launched from the IDE:
         if (mainExecutable.replace('\\', '/').endsWith("/build/classes/java/main")) {
             mainDirectory = mainExecutable.substring(0, mainExecutable.length()-"/build/classes/java/main".length());
             mainExecutable = "java";
@@ -41,7 +40,7 @@ public class QkdServer {
 
         String logFileName = mainDirectory+ File.separator+"qkd.log";
         System.setProperty("org.slf4j.simpleLogger.logFile", logFileName);
-        logger = LoggerFactory.getLogger(QrngClient.class);
+        logger = LoggerFactory.getLogger(QkdServer.class);
 
         Provider tlsProvider = null;
         try {

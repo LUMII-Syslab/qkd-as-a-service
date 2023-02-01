@@ -25,6 +25,8 @@ public class QkdServerKey {
         KeyStore clientKeyStore  = KeyStore.getInstance("PKCS12");
         // ^^^ If "Algorithm HmacPBESHA256 not available" error => need jdk16+ (new pkx format hash)
 
+        //variant:        KeyStore clientKeyStore = KeyStore.getInstance(f, password.toCharArray());
+
         File f = new File(fileName);
         FileInputStream instream = new FileInputStream(f);
         try {
