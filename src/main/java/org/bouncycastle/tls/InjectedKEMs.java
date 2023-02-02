@@ -37,14 +37,13 @@ public class InjectedKEMs
     public static InjectionOrder injectionOrder = InjectionOrder.INSTEAD_DEFAULT;
 
     public interface TlsAgreementFunction {
-        TlsAgreement invoke(JcaTlsCrypto crypto, int kemCodePoint);
+        TlsAgreement invoke(JcaTlsCrypto crypto, int kemCodePoint, boolean isServer);
     }
 
     private record KEMInfo(/*ASN1ObjectIdentifier oid,*/ int codePoint, /*String jcaAlgorithm,*/ String standardName,
                                                          TlsAgreementFunction tlsAgreementFunction) {
     }
 
-    ;
     private static final Vector<Integer> injectedCodePoints = new Vector<>();
     private static final Map<Integer, KEMInfo> injectedKEMs = new HashMap<>();
 
@@ -69,8 +68,8 @@ public class InjectedKEMs
         return injectedKEMs.get(kemCodePoint).standardName;
     }
 
-    public static TlsAgreement getTlsAgreement(JcaTlsCrypto crypto, int kemCodePoint) {
-        return injectedKEMs.get(kemCodePoint).tlsAgreementFunction.invoke(crypto, kemCodePoint);
+    public static TlsAgreement getTlsAgreement(JcaTlsCrypto crypto, int kemCodePoint, boolean isServer) {
+        return injectedKEMs.get(kemCodePoint).tlsAgreementFunction.invoke(crypto, kemCodePoint, isServer);
     }
 
 /*    public static boolean isParameterSupported(AsymmetricKeyParameter param) {

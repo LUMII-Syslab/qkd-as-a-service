@@ -5362,7 +5362,7 @@ public class TlsUtils
             else {
                 // #pqc-tls #injection
                 assert (crypto instanceof JcaTlsCrypto);
-                agreement = InjectedKEMs.getTlsAgreement((JcaTlsCrypto)crypto, supportedGroup);
+                agreement = InjectedKEMs.getTlsAgreement((JcaTlsCrypto)crypto, supportedGroup, false); // assume we are a client
             }
 
             if (null != agreement)

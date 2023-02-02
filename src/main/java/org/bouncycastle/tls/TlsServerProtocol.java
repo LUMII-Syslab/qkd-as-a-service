@@ -401,7 +401,7 @@ public class TlsServerProtocol
             else if (InjectedKEMs.isKEMSupported(namedGroup)) {
                 // #pqc-tls #injection
                 assert crypto instanceof JcaTlsCrypto;
-                agreement = InjectedKEMs.getTlsAgreement((JcaTlsCrypto) crypto, namedGroup);
+                agreement = InjectedKEMs.getTlsAgreement((JcaTlsCrypto) crypto, namedGroup, true);
             }
             else
             {
