@@ -1060,7 +1060,10 @@ public class TlsClientProtocol
 
                     // implementing client-side KEM: 3.Decapsulate (called by kem.decapsulateSecret)
                     kem.decapsulateSecret(keyShareEntry.getKeyExchange());
-                    sharedSecret = kem.sharedSecret();
+                    sharedSecret = kem.receivedSecret();
+
+                    // for double KEM TODO:
+                    //   combine ownSecret with the received secret into sharedSecret
                 }
                 else {
                     agreement.receivePeerValue(keyShareEntry.getKeyExchange());

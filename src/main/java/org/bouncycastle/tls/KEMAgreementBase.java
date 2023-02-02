@@ -17,10 +17,11 @@ import java.io.IOException;
 public abstract class KEMAgreementBase implements TlsAgreement, KEM {
     protected JcaTlsCrypto crypto;
     protected boolean isServer;
+
+    // writable object state (=assignable "coordinates"):
     protected byte[] mySecretKey = null;
     protected byte[] mySecret = null;
-    protected byte[] sharedSecret = null;
-
+    protected byte[] receivedSecret = null;
 
     public KEMAgreementBase(JcaTlsCrypto crypto, boolean isServer) {
         this.crypto = crypto;
@@ -52,15 +53,15 @@ public abstract class KEMAgreementBase implements TlsAgreement, KEM {
     }
 
     public void decapsulateSecret(byte[] ciphertext) {
-        this.sharedSecret = this.decapsulate(this.mySecretKey, ciphertext); // factory method call
+        this.receivedSecret = this.decapsulate(this.mySecretKey, ciphertext); // factory method call
     }
 
     public TlsSecret ownSecret() {
         return new JceTlsSecret(this.crypto, this.mySecret); // for non-double KEM
     }
 
-    public TlsSecret sharedSecret() {
-        return new JceTlsSecret(this.crypto, this.sharedSecret);
+    public TlsSecret receivedSecret() {
+        return new JceTlsSecret(this.crypto, this.receivedSecret);
     }
 
     // excluded TlsAgreement functions:

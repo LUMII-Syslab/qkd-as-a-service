@@ -415,7 +415,9 @@ public class TlsServerProtocol
                 KEMAgreementBase kem = (KEMAgreementBase)agreement;
 
                 // implementing server-side KEM: 1.KeyGen (called by kem.publicKey)
-                byte[] serverPublicKey = kem.publicKey(); // not used in non-double KEM
+                byte[] serverPublicKey = kem.publicKey();
+                    // ^^^ not used in non-double KEM but invoked, since KeyGen may also
+                    //     generate the secret to be encapsulated in the next step
 
                 // implementing server-side KEM: 2.Encapsulate (called by kem.encapsulatedSecret)
                 byte[] serverCiphertext = kem.encapsulatedSecret(clientShare.getKeyExchange());
