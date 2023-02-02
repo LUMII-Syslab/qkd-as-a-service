@@ -334,36 +334,48 @@ public class InjectablePQC {
         }
     }
 
-    public static class InjectableFrodoKEMAgreement implements TlsAgreement // all by SK
-    {
-        // from the client point of view
-        private JcaTlsCrypto crypto;
+    public static class InjectableFrodoKEMAgreement extends KEMAgreementBase {
         private org.openquantumsafe.KeyEncapsulation kem; //- if via liboqs + JNI + DLL
-
         FrodoKeyPairGenerator kemGen; // - if via BC
 
-        private boolean isServer;
-        private byte[] myPublicKey = null; // used by the client
-        private byte[] myPrivateKey = null; // used by the client
-        private byte[] peerEncapsulated = null; // used by the client and the server
-
         public InjectableFrodoKEMAgreement(JcaTlsCrypto crypto, String kemName, boolean isServer) {
-            this.crypto = crypto;
+            super(crypto, isServer);
             this.kem = new org.openquantumsafe.KeyEncapsulation(kemName); //- if via liboqs + JNI + DLL
 
             this.kemGen = new FrodoKeyPairGenerator();
             this.kemGen.init(new FrodoKeyGenerationParameters(new SecureRandom(), FrodoParameters.frodokem640shake));
-
-            this.isServer = isServer;
         }
 
-        public byte[] generateEphemeral() throws IOException {
 
-            System.out.println(this+" KEM: KeyGen "+isServer);
+
+
+            // if pure Java (BouncyCastle):
+/*            FrodoPrivateKeyParameters priv = new FrodoPrivateKeyParameters(FrodoParameters.frodokem640shake, this.clientPrivateKey);
+            FrodoKEMExtractor ext = new FrodoKEMExtractor(priv);
+
+            byte[] otherSecret = ext.extractSecret(this.serverEnsapsulated);
+
+
+            // bitwise XOR of mySecred and otherSecret
+            BitSet bsa = BitSet.valueOf(mySecret);
+            BitSet bsb = BitSet.valueOf(otherSecret);
+
+            bsa.xor(bsb);
+            //write bsa to byte-Array c
+            byte[] sharedSecret = bsa.toByteArray();
+
+            System.out.println(" otherSecret="+byteArrayToString(otherSecret));
+            //System.out.println(" otherEncapsulation="+byteArrayToString(this.serverEnsapsulated));
+            return new JceTlsSecret(this.crypto, sharedSecret);
+*/
+
+        @Override
+        public Pair<byte[], byte[]> keyGen() {
+            System.out.println(this+" KEM: KeyGen "+this.isServer());
 
             // if via liboqs JNI + DLL:
-            this.myPublicKey = kem.generate_keypair().clone();
-            this.myPrivateKey = kem.export_secret_key().clone();
+            byte[] myPublicKey = kem.generate_keypair().clone();
+            byte[] myPrivateKey = kem.export_secret_key().clone();
 
 
 
@@ -390,56 +402,43 @@ public class InjectablePQC {
             System.out.println(" mySecret2="+byteArrayToString(mySecret2));
 
             return encapsulation;*/
-            if (this.isServer)
-                return new byte[] {}; // not needed by the server
-            else
-                return this.myPublicKey;
-        }
-
-        public void receivePeerValue(byte[] peerEncapsulated) throws IOException {
-            System.out.println(this+" KEM: receivedPeerValue len="+peerEncapsulated.length);
-            this.peerEncapsulated = peerEncapsulated;
-        }
-
-        public TlsSecret calculateSecret() throws IOException {
-
-            byte[] sharedSecret;
-
-            System.out.println(this+"KEM: Decapsulate");
-            if (this.isServer) {
-                Pair<byte[], byte[]> pair = kem.encap_secret(this.peerEncapsulated);
-                //byte[] cipherText = pair.getLeft();
-                sharedSecret = pair.getRight();
+            if (this.isServer()) {
+                return new Pair<>(new byte[]{}, new byte[]{}); // not needed by the server
             }
             else {
-                sharedSecret = kem.decap_secret(this.peerEncapsulated);
+                return new Pair<>(myPublicKey, myPrivateKey);
             }
+        }
+
+        @Override
+        public Pair<byte[], byte[]> encapsulate(byte[] partnerPublicKey) {
+            if (this.isServer()) {
+                Pair<byte[], byte[]> pair = kem.encap_secret(partnerPublicKey);
+                byte[] ciphertext = pair.getLeft();
+                byte[] semiSecret = pair.getRight();
+                return new Pair<>(semiSecret, ciphertext);
+            }
+            else { // client
+                return new Pair<>(new byte[]{}, new byte[]{});
+            }
+        }
+
+        @Override
+        public byte[] decapsulate(byte[] secretKey, byte[] ciphertext) {
+            System.out.println(this+"KEM: Decapsulate");
+            byte[] sharedSecret;
+            if (this.isServer()) {
+                sharedSecret = this.mySecret;
+            }
+            else {
+                // assert: this.secretKey == secretKey
+                sharedSecret = kem.decap_secret(ciphertext);
+            }
+            System.out.println(this+" SHARED SECRET: "+byteArrayToString(sharedSecret));
 
             // if via liboqs JNI + DLL:
-            System.out.println(this+" SHARED SECRET: "+byteArrayToString(sharedSecret));
             this.kem.dispose_KEM();
-            return new JceTlsSecret(this.crypto, sharedSecret);
-
-
-            // if pure Java (BouncyCastle):
-/*            FrodoPrivateKeyParameters priv = new FrodoPrivateKeyParameters(FrodoParameters.frodokem640shake, this.clientPrivateKey);
-            FrodoKEMExtractor ext = new FrodoKEMExtractor(priv);
-
-            byte[] otherSecret = ext.extractSecret(this.serverEnsapsulated);
-
-
-            // bitwise XOR of mySecred and otherSecret
-            BitSet bsa = BitSet.valueOf(mySecret);
-            BitSet bsb = BitSet.valueOf(otherSecret);
-
-            bsa.xor(bsb);
-            //write bsa to byte-Array c
-            byte[] sharedSecret = bsa.toByteArray();
-
-            System.out.println(" otherSecret="+byteArrayToString(otherSecret));
-            //System.out.println(" otherEncapsulation="+byteArrayToString(this.serverEnsapsulated));
-            return new JceTlsSecret(this.crypto, sharedSecret);
-*/
+            return sharedSecret;
         }
     }
 

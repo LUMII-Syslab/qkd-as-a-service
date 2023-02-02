@@ -11,6 +11,7 @@ import java.util.Vector;
 import org.bouncycastle.tls.crypto.TlsAgreement;
 import org.bouncycastle.tls.crypto.TlsSecret;
 import org.bouncycastle.tls.crypto.TlsStreamSigner;
+import org.bouncycastle.tls.crypto.impl.jcajce.JceTlsSecret;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Integers;
 
@@ -1053,8 +1054,18 @@ public class TlsClientProtocol
                     throw new TlsFatalAlert(AlertDescription.illegal_parameter);
                 }
 
-                agreement.receivePeerValue(keyShareEntry.getKeyExchange());
-                sharedSecret = agreement.calculateSecret();
+                // #pqc-tls #injection (if-then part)
+                if (agreement instanceof KEMAgreementBase) {
+                    KEMAgreementBase kem = (KEMAgreementBase) agreement;
+
+                    // implementing client-side KEM: 3.Decapsulate (called by kem.decapsulateSecret)
+                    kem.decapsulateSecret(keyShareEntry.getKeyExchange());
+                    sharedSecret = kem.sharedSecret();
+                }
+                else {
+                    agreement.receivePeerValue(keyShareEntry.getKeyExchange());
+                    sharedSecret = agreement.calculateSecret();
+                }
             }
         }
 

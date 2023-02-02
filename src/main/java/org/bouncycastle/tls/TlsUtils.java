@@ -5365,7 +5365,20 @@ public class TlsUtils
                 agreement = InjectedKEMs.getTlsAgreement((JcaTlsCrypto)crypto, supportedGroup, false); // assume we are a client
             }
 
-            if (null != agreement)
+            // #pqc-tls #injection (if-then part)
+            if (agreement instanceof KEMAgreementBase) {
+                KEMAgreementBase kem = (KEMAgreementBase) agreement;
+
+                // implementing client-side KEM: 1.KeyGen (called by kem.publicKey)
+                byte[] pk = kem.publicKey();
+
+                // implementing client-side KEM: sending pk to the server
+                KeyShareEntry clientShare = new KeyShareEntry(supportedGroup, pk);
+
+                clientShares.addElement(clientShare);
+                clientAgreements.put(supportedGroupElement, agreement);
+            }
+            else if (null != agreement)
             {
                 byte[] key_exchange = agreement.generateEphemeral();
                 KeyShareEntry clientShare = new KeyShareEntry(supportedGroup, key_exchange);
