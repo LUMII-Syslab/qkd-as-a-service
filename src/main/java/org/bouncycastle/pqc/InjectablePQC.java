@@ -339,7 +339,7 @@ public class InjectablePQC {
         private JcaTlsCrypto crypto;
         private org.openquantumsafe.KeyEncapsulation kem; //- if via liboqs + JNI + DLL
 
-        //FrodoKeyPairGenerator kemGen;
+        FrodoKeyPairGenerator kemGen; // - if via BC
         private byte[] clientPublicKey = null;
         private byte[] clientPrivateKey = null;
         private byte[] serverEnsapsulated = null;
@@ -348,24 +348,29 @@ public class InjectablePQC {
             this.crypto = crypto;
             this.kem = new org.openquantumsafe.KeyEncapsulation(kemName); //- if via liboqs + JNI + DLL
 
-            //this.kemGen = new FrodoKeyPairGenerator();
-            //this.kemGen.init(new FrodoKeyGenerationParameters(new SecureRandom(), FrodoParameters.frodokem640shake));
+            this.kemGen = new FrodoKeyPairGenerator();
+            this.kemGen.init(new FrodoKeyGenerationParameters(new SecureRandom(), FrodoParameters.frodokem640shake));
         }
 
         public byte[] generateEphemeral() throws IOException {
             // if via liboqs JNI + DLL:
-            this.clientPublicKey = kem.generate_keypair();
-            this.clientPrivateKey = kem.export_secret_key().clone();
+            //this.clientPublicKey = kem.generate_keypair();
+            //this.clientPrivateKey = kem.export_secret_key().clone();
 
             System.out.println("KEM: KeyGen");
             // if pure Java (BouncyCastle):
-            /*AsymmetricCipherKeyPair kp = kemGen.generateKeyPair();
+            AsymmetricCipherKeyPair kp = kemGen.generateKeyPair();
             FrodoPublicKeyParameters pubParams = (FrodoPublicKeyParameters) (kp.getPublic());
             FrodoPrivateKeyParameters privParams = (FrodoPrivateKeyParameters) (kp.getPrivate());
+            //variant: byte[] encoded = pubParams.getEncoded();
+            //variant: byte[] encoded2 = pubParams.getPublicKey();
             this.clientPublicKey = pubParams.publicKey.clone();
             this.clientPrivateKey = privParams.getPrivateKey().clone();
-*/
-            return this.clientPublicKey;
+
+            FrodoKEMGenerator gen = new FrodoKEMGenerator(this.crypto.getSecureRandom());
+            byte[] encapsulation = gen.generateEncapsulated(pubParams).getEncapsulation();
+
+            return encapsulation;
 
         }
 
