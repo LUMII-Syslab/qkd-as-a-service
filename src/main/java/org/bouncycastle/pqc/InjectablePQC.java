@@ -26,6 +26,7 @@ import org.bouncycastle.pqc.jcajce.provider.sphincsplus.BCSPHINCSPlusPrivateKey;
 import org.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyFactorySpi;
 import org.bouncycastle.tls.*;
 import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsCrypto;
+import org.openquantumsafe.Pair;
 
 import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
@@ -360,10 +361,14 @@ public class InjectablePQC {
             // if via liboqs JNI + DLL:
             this.clientPublicKey = kem.generate_keypair();
             this.clientPrivateKey = kem.export_secret_key().clone();
+            Pair<byte[], byte[]> pair = kem.encap_secret(this.clientPublicKey);
+            byte[] encapsulation = pair.getLeft();
+            this.mySecret = pair.getRight();
 
             System.out.println("KEM: KeyGen");
+
             // if pure Java (BouncyCastle):
-            AsymmetricCipherKeyPair kp = kemGen.generateKeyPair();
+            /*AsymmetricCipherKeyPair kp = kemGen.generateKeyPair();
             FrodoPublicKeyParameters pubParams = (FrodoPublicKeyParameters) (kp.getPublic());
             FrodoPrivateKeyParameters privParams = (FrodoPrivateKeyParameters) (kp.getPrivate());
             //variant: byte[] encoded = pubParams.getEncoded();
@@ -375,7 +380,9 @@ public class InjectablePQC {
 
             SecretWithEncapsulation secEnc = gen.generateEncapsulated(pubParams);
             this.mySecret = secEnc.getSecret();
-            byte[] encapsulation = secEnc.getEncapsulation();
+            byte[] encapsulation = secEnc.getEncapsulation();*/
+
+
             System.out.println(" mySecret="+byteArrayToString(mySecret));
             System.out.println(" myEncapsulation="+byteArrayToString(encapsulation));
 
@@ -391,19 +398,16 @@ public class InjectablePQC {
         public TlsSecret calculateSecret() throws IOException {
             System.out.println("KEM: Decapsulate");
             // if via liboqs JNI + DLL:
-            //byte[] shared_secret_client = kem.decap_secret(this.serverEnsapsulated);
-            //this.kem.dispose_KEM();
-            //return new JceTlsSecret(this.crypto, shared_secret_client);
+            byte[] otherSecret = kem.decap_secret(this.serverEnsapsulated);
+            this.kem.dispose_KEM();
 
 
             // if pure Java (BouncyCastle):
-            FrodoPrivateKeyParameters priv = new FrodoPrivateKeyParameters(FrodoParameters.frodokem640shake, this.clientPrivateKey);
+/*            FrodoPrivateKeyParameters priv = new FrodoPrivateKeyParameters(FrodoParameters.frodokem640shake, this.clientPrivateKey);
             FrodoKEMExtractor ext = new FrodoKEMExtractor(priv);
 
-            byte[] otherSecret = ext.extractSecret(this.serverEnsapsulated);
+            byte[] otherSecret = ext.extractSecret(this.serverEnsapsulated);*/
 
-            System.out.println(" otherSecret="+byteArrayToString(mySecret));
-            System.out.println(" otherEncapsulation="+byteArrayToString(this.serverEnsapsulated));
 
             // bitwise XOR of mySecred and otherSecret
             BitSet bsa = BitSet.valueOf(mySecret);
@@ -413,6 +417,8 @@ public class InjectablePQC {
             //write bsa to byte-Array c
             byte[] sharedSecret = bsa.toByteArray();
 
+            System.out.println(" otherSecret="+byteArrayToString(otherSecret));
+            System.out.println(" otherEncapsulation="+byteArrayToString(this.serverEnsapsulated));
             return new JceTlsSecret(this.crypto, sharedSecret);
 
         }
