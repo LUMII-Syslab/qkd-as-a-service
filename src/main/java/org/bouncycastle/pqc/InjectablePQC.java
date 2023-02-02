@@ -376,6 +376,8 @@ public class InjectablePQC {
             SecretWithEncapsulation secEnc = gen.generateEncapsulated(pubParams);
             this.mySecret = secEnc.getSecret();
             byte[] encapsulation = secEnc.getEncapsulation();
+            System.out.println(" mySecret="+byteArrayToString(mySecret));
+            System.out.println(" myEncapsulation="+byteArrayToString(encapsulation));
 
             return encapsulation;
 
@@ -399,6 +401,9 @@ public class InjectablePQC {
             FrodoKEMExtractor ext = new FrodoKEMExtractor(priv);
 
             byte[] otherSecret = ext.extractSecret(this.serverEnsapsulated);
+
+            System.out.println(" otherSecret="+byteArrayToString(mySecret));
+            System.out.println(" otherEncapsulation="+byteArrayToString(this.serverEnsapsulated));
 
             // bitwise XOR of mySecred and otherSecret
             BitSet bsa = BitSet.valueOf(mySecret);
