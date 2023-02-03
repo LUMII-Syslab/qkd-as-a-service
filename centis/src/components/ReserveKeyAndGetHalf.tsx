@@ -17,7 +17,7 @@ export default function ReserveKeyAndGetHalf({config}) {
 
     let [error, setError] = useState(null as string)
 
-    return (<fieldset className="p-3 shadow-sm border">
+    return (<fieldset className="p-3 my-3 shadow-sm border">
         <legend><code>reserveKeyAndGetHalf</code> request</legend>
         {error && <div className="alert alert-danger alert-dismissible fade show" role="alert"> {error}</div>}
         <RKAGHReqConfig request={request} setRequest={setRequest}/>
@@ -90,6 +90,12 @@ function RKAGHSubmission({
             socket.close();
             let parsed = parseRKAGHResponse(response);
             setResponse(parsed)
+
+            // show response table
+            let collapsable = document.getElementById('rkagh-response-table')
+            if (!collapsable.classList.contains('show')) {
+                new Collapse('#rkagh-response-table')
+            }
         } catch (error) {
             alert("websocket connection failed: " + error.message)
         }
@@ -106,10 +112,10 @@ function RKAGHSubmission({
 
 function RKAGHResponseTable({response}: { response: RKAGHResponse }) {
     let [collapseIcon, setCollapseIcon] = useState("bi-caret-down")
-    const bsCollapse = useRef(null)
+    const respTableCollapse = useRef(null)
 
     useEffect(()=>{
-        bsCollapse.current = new Collapse('#rkagh-response-table', {
+        respTableCollapse.current = new Collapse('#rkagh-response-table', {
             toggle: false
         })
         let collapsable = document.getElementById('rkagh-response-table')
@@ -124,7 +130,7 @@ function RKAGHResponseTable({response}: { response: RKAGHResponse }) {
 
     return (<fieldset>
         <legend><button className="btn nav-link" onClick={()=>{
-            bsCollapse.current.toggle()
+            respTableCollapse.current.toggle()
             setCollapseIcon(collapseIcon === "bi-caret-down" ? "bi-caret-up" : "bi-caret-down")
         }}>response <i className={`bi ${collapseIcon} small align-bottom`} ></i></button></legend>
 
