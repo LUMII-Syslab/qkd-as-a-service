@@ -1,12 +1,16 @@
-import {useState, useEffect} from "react";
+import {useEffect, useRef, useState} from "react";
 import {
+    bytesToHexOctets,
     bytesToSpacedHexOctets,
+    encodeGKHRequest,
+    GKHRequest,
+    GKHResponse,
+    parseGKHRequest,
+    validateGKHRequest,
     wsConnect,
-    wsSendRequest,
-    ASNDERToList,
-    hexOctetsToUint8Array,
-    bytesToHexOctets, parseGKHRequest, GKHResponse, GKHRequest, validateGKHRequest, encodeGKHRequest
+    wsSendRequest
 } from '../utils/utils';
+import {Collapse} from "bootstrap";
 
 
 export default function ReserveKeyAndGetHalf({config}) {
@@ -22,7 +26,7 @@ export default function ReserveKeyAndGetHalf({config}) {
 
     let [error, setError] = useState(null as string)
 
-    return (<fieldset>
+    return (<fieldset className={"p-3 my-3 shadow-sm border"}>
             <legend><code>getKeyHalf</code> request</legend>
             {error && <div className="alert alert-danger alert-dismissible fade show" role="alert"> {error}</div>}
             <GKHReqConfig request={request} setRequest={setRequest}/>
@@ -110,6 +114,12 @@ function GKHSubmission({
             socket.close();
             let parsed = parseGKHRequest(response);
             setResponse(parsed)
+
+            // show response table
+            let collapsable = document.getElementById('gkh-response-table')
+            if (!collapsable.classList.contains('show')) {
+                new Collapse('#gkh-response-table')
+            }
         } catch (error) {
             alert("websocket connection failed: " + error.message)
         }
@@ -121,42 +131,66 @@ function GKHSubmission({
         <div className="flex-grow-1 me-3 border p-2">
             ASN.1 encoded request: <code>{encodedRequest && bytesToSpacedHexOctets(encodedRequest)}</code>
         </div>
-        <button className="ms-3 btn btn-outline-dark" onClick={sendRequest}>SEND REQUEST</button>
+        <button className="ms-3 btn btn-outline-primary btn-sm" onClick={sendRequest}>SEND REQUEST</button>
     </div>)
 }
 
 function GKHResponseTable({response}: { response: GKHResponse }) {
-    return (<fieldset>
-        <legend>response</legend>
+    let [collapseIcon, setCollapseIcon] = useState("bi-caret-down")
+    const respTableCollapse = useRef(null)
 
-        <table className="table table-bordered w-100" style={{tableLayout: "fixed"}}>
-            <colgroup>
-                <col span={1} style={{width: "20%"}}/>
-                <col span={1} style={{width: "80%"}}/>
-            </colgroup>
-            <tbody>
-            <tr>
-                <td>crypto nonce</td>
-                <td><code>{response ? (response.cNonce ?? '?') : '?'}</code></td>
-            </tr>
-            <tr>
-                <td>err code</td>
-                <td><code>{response ? (response.errCode ?? '?') : '?'}</code></td>
-            </tr>
-            <tr>
-                <td>this half</td>
-                <td><code>{response ? (bytesToHexOctets(response.thisHalf) ?? '?') : '?'}</code></td>
-            </tr>
-            <tr>
-                <td>other hash</td>
-                <td><code style={{display: "inline-flex", maxWidth: "100%", overflow: "auto"}}
-                >{response ? (bytesToHexOctets(response.otherHash) ?? '?') : '?'}</code></td>
-            </tr>
-            <tr>
-                <td>hash alg id</td>
-                <td><code>{response ? (bytesToHexOctets(response.hashAlgId) ?? '?') : '?'}</code></td>
-            </tr>
-            </tbody>
-        </table>
+    useEffect(() => {
+        respTableCollapse.current = new Collapse('#gkh-response-table', {
+            toggle: false
+        })
+        let collapsable = document.getElementById('gkh-response-table')
+        collapsable.addEventListener('hidden.bs.collapse', () => {
+            setCollapseIcon("bi-caret-down")
+        })
+        collapsable.addEventListener('shown.bs.collapse', () => {
+            setCollapseIcon("bi-caret-up")
+        })
+
+    }, [])
+
+    return (<fieldset>
+        <legend>
+            <button className="btn nav-link" onClick={() => {
+                respTableCollapse.current.toggle()
+                setCollapseIcon(collapseIcon === "bi-caret-down" ? "bi-caret-up" : "bi-caret-down")
+            }}>response <i className={`bi ${collapseIcon} small align-bottom`}></i></button>
+        </legend>
+
+        <div className="collapse" id="gkh-response-table">
+            <table className="table table-bordered w-100" style={{tableLayout: "fixed"}}>
+                <colgroup>
+                    <col span={1} style={{width: "20%"}}/>
+                    <col span={1} style={{width: "80%"}}/>
+                </colgroup>
+                <tbody>
+                <tr>
+                    <td>crypto nonce</td>
+                    <td><code>{response ? (response.cNonce ?? '?') : '?'}</code></td>
+                </tr>
+                <tr>
+                    <td>err code</td>
+                    <td><code>{response ? (response.errCode ?? '?') : '?'}</code></td>
+                </tr>
+                <tr>
+                    <td>this half</td>
+                    <td><code>{response ? (bytesToHexOctets(response.thisHalf) ?? '?') : '?'}</code></td>
+                </tr>
+                <tr>
+                    <td>other hash</td>
+                    <td><code style={{display: "inline-flex", maxWidth: "100%", overflow: "auto"}}
+                    >{response ? (bytesToHexOctets(response.otherHash) ?? '?') : '?'}</code></td>
+                </tr>
+                <tr>
+                    <td>hash alg id</td>
+                    <td><code>{response ? (bytesToHexOctets(response.hashAlgId) ?? '?') : '?'}</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </fieldset>)
 }
