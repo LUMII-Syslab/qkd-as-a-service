@@ -29,12 +29,12 @@ func main() {
 		infoEndpoint = io.Discard
 	}
 	if config.AijaEnabled {
-		aijaDebugLogger := log.New(os.Stdout, "AIJA DEBUG ", log.Ldate|log.Ltime|log.Lshortfile)
+		aijaDebugLogger := log.New(os.Stdout, "AIJA DEBUG\t", log.Ldate|log.Ltime|log.Lshortfile)
 		aijaKeyManager := manager.NewKeyManager(config.MaxKeyCount, true, aijaDebugLogger)
 		gatherer.PublishTo(aijaKeyManager)
 
-		aijaInfoLogger := log.New(infoEndpoint, "AIJA INFO ", log.Ldate|log.Ltime)
-		aijaErrorLogger := log.New(os.Stdout, "AIJA ERROR ", log.Ldate|log.Ltime|log.Lshortfile)
+		aijaInfoLogger := log.New(infoEndpoint, "AIJA INFO\t", log.Ldate|log.Ltime)
+		aijaErrorLogger := log.New(os.Stdout, "AIJA ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 		go api.ListenAndServe(aijaKeyManager, aijaInfoLogger, aijaErrorLogger, config.AijaAPIPort)
 
 		go func() {
@@ -47,12 +47,12 @@ func main() {
 	}
 
 	if config.BrencisEnabled {
-		brencisDebugLogger := log.New(io.Discard, "BRENCIS DEBUG ", log.Ldate|log.Ltime|log.Lshortfile)
+		brencisDebugLogger := log.New(io.Discard, "BRENCIS DEBUG\t", log.Ldate|log.Ltime|log.Lshortfile)
 		brencisKeyManager := manager.NewKeyManager(config.MaxKeyCount, false, brencisDebugLogger)
 		gatherer.PublishTo(brencisKeyManager)
 
-		brencisInfoLogger := log.New(infoEndpoint, "BRENCIS INFO ", log.Ldate|log.Ltime)
-		brencisErrorLogger := log.New(os.Stdout, "BRENCIS ERROR ", log.Ldate|log.Ltime|log.Lshortfile)
+		brencisInfoLogger := log.New(infoEndpoint, "BRENCIS INFO\t", log.Ldate|log.Ltime)
+		brencisErrorLogger := log.New(os.Stdout, "BRENCIS ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 		go api.ListenAndServe(brencisKeyManager, brencisInfoLogger, brencisErrorLogger, config.BrencisAPiPort)
 		go func() {
