@@ -3,8 +3,6 @@ import {
     bytesToSpacedHexOctets,
     wsConnect,
     wsSendRequest,
-    ASNDERToList,
-    hexOctetsToUint8Array,
     bytesToHexOctets, parseGKHRequest, GKHResponse, GKHRequest, validateGKHRequest, encodeGKHRequest
 } from '../utils/utils';
 
