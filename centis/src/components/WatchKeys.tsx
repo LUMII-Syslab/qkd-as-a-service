@@ -1,10 +1,10 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {
     wsConnect,
     wsSendRequest,
     encodeRKAGHRequest,
     parseRKAGHResponse,
-    encodeGKHRequest, bytesToHexOctets, parseGKHRequest
+    encodeGKHRequest, bytesToHexOctets, parseGKHRequest, bytesToSpacedHexOctets
 } from "../utils/utils";
 
 interface WatchKeysTableRow {
@@ -18,10 +18,13 @@ interface WatchKeysTableRow {
 export default function WatchKeys({config}) {
     let [watchingKeys, setWatchingKeys] = useState(false);
     let [requestDelay, setRequestDelay] = useState(0);
-    let [tableRows, setTableRows] = useState([]); // [{keyId, left, right, hashLeft, hashRight}
     let [aijaWS, setAijaWS] = useState(null);
     let [brencisWS, setBrencisWS] = useState(null);
-    
+    let interval = useRef(null);
+    let [tableRowCount, setTableRowCount] = useState(5);
+
+    let [tableRows, setTableRows] = useState([] as WatchKeysTableRow[])
+
     useEffect(() => {
         wsConnect(config.aijaEndpoint).then((ws) => {
             setAijaWS(ws);
@@ -29,10 +32,13 @@ export default function WatchKeys({config}) {
         wsConnect(config.brencisEndpoint).then((ws) => {
             setBrencisWS(ws);
         });
-    }, []);
+    }, [config.aijaEndpoint, config.brencisEndpoint]);
 
-    let interval = setInterval(async () => {
-        if (watchingKeys) {
+    useEffect(()=>{
+        clearInterval(interval.current);
+        interval.current = setInterval(async () => {
+            if(!watchingKeys) return;
+
             let result = {} as WatchKeysTableRow
 
             let [rkaghReq, rkaghError] = encodeRKAGHRequest({
@@ -58,27 +64,22 @@ export default function WatchKeys({config}) {
                 console.error(gkhError)
             }
             let gkhResp = parseGKHRequest(await wsSendRequest(brencisWS, gkhReq))
-            console.log(gkhResp)
-
-            // let rkagkh_raw = await ws_send_request(aija_watch_ws, encode_rkagkh_request(256, 0))
-            // let rkagkh_resp = parse_rkagkh_result(rkagkh_raw)
-            // result.key_id = rkagkh_resp.key_id
-            // result.key_left = rkagkh_resp.key_half
-            // result.hash_right = rkagkh_resp.other_hash
-            // let key_id_str = hex_octets(rkagkh_resp.key_id)
-            // let gkh_raw = await ws_send_request(brencis_watch_ws, encode_gkh_request(256, key_id_str, 0))
-            // let gkh_resp = parse_gkh_result(gkh_raw)
-            // result.key_right = gkh_resp.key_half
-            // result.hash_left = gkh_resp.other_hash
-        }
-    }, requestDelay)
+            result.KeyId = rkaghResp.keyId
+            result.Left = rkaghResp.thisHalf
+            result.Right = gkhResp.thisHalf
+            result.HashLeft = gkhResp.otherHash
+            result.HashRight = rkaghResp.otherHash
+            tableRows.unshift(result)
+            while(tableRows.length > tableRowCount) tableRows.pop()
+            setTableRows([...tableRows])
+        }, requestDelay)
+    },[aijaWS, brencisWS, config, requestDelay, tableRowCount, tableRows, watchingKeys])
 
     return (
-        <>
-            {/*create input to set delay for key requests*/}
+        <div className="border shadow-sm p-3 my-3">
             <div className={"d-flex flex-row  mb-3 col-12"}>
-                <div className="form-floating col-2">
-                    <input type="number" id="wk-delay" placeholder="Aija URL"
+                <div className="form-floating col-3">
+                    <input type="number" id="wk-delay"
                            className="form-control"
                            defaultValue={0} onChange={
                         (e) => {
@@ -87,8 +88,18 @@ export default function WatchKeys({config}) {
                     }/>
                     <label htmlFor="wk-delay">request delay in ms</label>
                 </div>
+                <div className="form-floating col-2 mx-3">
+                    <input type="number"
+                           className="form-control"
+                           defaultValue={tableRowCount} onChange={
+                        (e) => {
+                            setTableRowCount(parseInt(e.target.value));
+                        }
+                    }/>
+                    <label>table row count</label>
+                </div>
                 <input type="button" id="toggle-monitor" value={watchingKeys ? "STOP MONITORING" : "START MONITORING"}
-                       className="btn btn-outline-dark ms-4 col-2" onClick={() => {
+                       className="btn btn-outline-primary btn-sm ms-1" onClick={() => {
                     setWatchingKeys(!watchingKeys);
                 }}/>
             </div>
@@ -109,7 +120,17 @@ export default function WatchKeys({config}) {
                     <th>hash(right)</th>
                 </tr>
                 </thead>
-                <tbody id="my-table"></tbody>
+                <tbody className="text-center">
+                {tableRows.map((row, i) => {
+                    return <tr key={i}>
+                        <td><code>{bytesToSpacedHexOctets(row.KeyId)}</code></td>
+                        <td><code>{bytesToSpacedHexOctets(row.Left)}</code></td>
+                        <td><code>{bytesToSpacedHexOctets(row.Right)}</code></td>
+                        <td><code>{bytesToSpacedHexOctets(row.HashLeft)}</code></td>
+                        <td><code>{bytesToSpacedHexOctets(row.HashRight)}</code></td>
+                    </tr>
+                })}
+                </tbody>
             </table>
-        </>);
+        </div>);
 }
