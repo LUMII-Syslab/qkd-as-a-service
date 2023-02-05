@@ -15,34 +15,40 @@ import {Collapse} from "bootstrap";
 
 export default function ReserveKeyAndGetHalf({config}) {
     let [request, setRequest] = useState({
-        config: config,
-        kdc: "Aija",
         keyLength: 256,
         cNonce: 42069,
         keyId: "e47908469a325a00eb566e5602e213f2e5429666acd96a47cf31871c98eafd8c"
     } as GKHRequest)
 
     let [response, setResponse] = useState(null as GKHResponse)
-
+    let [endpoint, setEndpoint] = useState(config.aijaEndpoint)
     let [error, setError] = useState(null as string)
+
+    function setKDC(kdc) {
+        if (kdc === "Aija") {
+            setEndpoint(config.aijaEndpoint)
+        } else {
+            setEndpoint(config.brencisEndpoint)
+        }
+    }
 
     return (<fieldset className={"p-3 my-3 shadow-sm border"}>
             <legend><code>getKeyHalf</code> request</legend>
             {error && <div className="alert alert-danger alert-dismissible fade show" role="alert"> {error}</div>}
-            <GKHReqConfig request={request} setRequest={setRequest}/>
-            <GKHSubmission request={request} setResponse={setResponse} setParentError={setError}/>
+            <GKHReqConfig request={request} setRequest={setRequest} setKDC={setKDC}/>
+            <GKHSubmission request={request} endpoint={endpoint} setResponse={setResponse} setParentError={setError}/>
             <GKHResponseTable response={response}/>
         </fieldset>
     )
 }
 
-let GKHReqConfig = ({request, setRequest}) => {
+let GKHReqConfig = ({request, setRequest, setKDC}) => {
     return (<div className="row">
         <div className="col-2">
             <div className="form-floating">
-                <select className="form-select" defaultValue={request.kdc}
+                <select className="form-select"
                         onChange={(event) => {
-                            setRequest({...request, kdc: event.target.value})
+                            setKDC(event.target.value);
                         }}>
                     <option value="Aija">Aija</option>
                     <option value="Brencis">Brencis</option>
@@ -84,9 +90,8 @@ let GKHReqConfig = ({request, setRequest}) => {
 
 }
 
-function GKHSubmission({
-                           request, setResponse, setParentError
-                       }: { request: GKHRequest, setResponse: any, setParentError: any }) {
+function GKHSubmission(
+    {request, setResponse, setParentError, endpoint}) {
     let [error, setError] = useState(null as string)
     let [encodedRequest, setEncodedRequest] = useState(null)
 
@@ -106,9 +111,6 @@ function GKHSubmission({
 
     async function sendRequest() {
         try {
-            let endpoint = request.config.aijaEndpoint;
-            if (request.kdc === "Brencis") endpoint = request.config.brencisEndpoint
-            console.log("connecting to " + endpoint)
             const socket = await wsConnect(endpoint);
             let response = await wsSendRequest(socket, encodedRequest);
             socket.close();

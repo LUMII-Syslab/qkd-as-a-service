@@ -42,8 +42,6 @@ export default function WatchKeys({config}) {
             let result = {} as WatchKeysTableRow
 
             let [rkaghReq, rkaghError] = encodeRKAGHRequest({
-                config: config,
-                kdc: "Aija",
                 keyLength: 256,
                 cNonce: 42069
             })
@@ -53,9 +51,6 @@ export default function WatchKeys({config}) {
             let rkaghResp = parseRKAGHResponse(await wsSendRequest(aijaWS, rkaghReq))
 
             let [gkhReq, gkhError] = encodeGKHRequest({
-                config: config,
-                endpoint: config.brencisEndpoint,
-                kdc: "Brencis",
                 keyId: bytesToHexOctets(rkaghResp.keyId),
                 cNonce: 42069,
                 keyLength: 256,
