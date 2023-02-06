@@ -18,6 +18,8 @@ export default function GetState({config}) {
     let [endpoint, setEndpoint] = useState(config.aijaEndpoint)
     let [error, setError] = useState(null as string)
 
+    console.log(response)
+
     function setKDC(kdc) {
         if (kdc === "Aija") {
             setEndpoint(config.aijaEndpoint)
@@ -32,7 +34,7 @@ export default function GetState({config}) {
             {error && <div className="alert alert-danger alert-dismissible fade show" role="alert"> {error}</div>}
             <GetStateConfig request={request} setRequest={setRequest} setKDC={setKDC}/>
             <GetStateSubmission request={request} setResponse={setResponse} setParentError={setError}
-                                endpoint={config.aijaEndpoint}/>
+                                endpoint={endpoint}/>
             <GetStateResponseTable response={response}/>
         </fieldset>
     )
@@ -144,6 +146,14 @@ function GetStateResponseTable({response}: { response: GetStateResponse }) {
                     <col span={1} style={{width: "80%"}}/>
                 </colgroup>
                 <tbody>
+                <tr>
+                    <td>err code</td>
+                    <td><code>{response ? (response.errCode ?? '?'):'?'}</code></td>
+                </tr>
+                <tr>
+                    <td>crypto nonce</td>
+                    <td><code>{response ? (response.cNonce ?? '?'):'?'}</code></td>
+                </tr>
                 <tr>
                     <td>state</td>
                     <td><code>{response ? (response.state ?? '?'):'?'}</code></td>

@@ -242,7 +242,7 @@ export interface GetStateResponse {
     keyId1: Uint8Array
 }
 
-export function validateGetStateRequest(request: GetStateRequest) {
+export function validateGetStateRequest(_: GetStateRequest) {
     return null;
 }
 
@@ -274,8 +274,8 @@ export function encodeGetStateRequest(request: GetStateRequest): [Uint8Array, Er
 export function parseGetStateResponse(msg_arr): GetStateResponse {
     let data = ASNDERToList(msg_arr);
     let result = {} as GetStateResponse;
-    result.cNonce = data[1] as number;
-    result.errCode = data[2] as number;
+    result.errCode = data[1] as number;
+    result.cNonce = data[2] as number;
     result.state = data[3] as number;
     result.keyId0 = data[4] as Uint8Array;
     result.keyId1 = data[5] as Uint8Array;
