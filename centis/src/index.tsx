@@ -11,6 +11,7 @@ import WatchKeys from "./components/WatchKeys";
 
 // @ts-ignore
 import diagram from './images/diagram.png';
+import GetState from './components/GetState';
 
 const root = createRoot(document.getElementById('root'));
 
@@ -83,8 +84,10 @@ function App() {
                     <h2 className={"mt-5"}>Requests</h2>
                     <ReserveKeyAndGetHalf config={config}/>
                     <GetKeyHalf config={config}/>
+                    <GetState config={config}/>
                     <h2 className={"mt-5"}>Monitoring</h2>
                     <WatchKeys config={config}/>
+
                 </>
             }
         </main>

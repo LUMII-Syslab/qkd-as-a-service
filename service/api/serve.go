@@ -97,6 +97,7 @@ func ListenAndServe(manager *manager.KeyManager, infoLogger *log.Logger, errorLo
 				infoLogger.Println("0x03 request: ", seq.ToString())
 				if len(seq) != 0 {
 					log.Println("sequence of length 0 was expected")
+					err = conn.WriteMessage(msgType, encodeErrResponse(1))
 					continue
 				}
 				res := DERSequence{}
@@ -162,5 +163,12 @@ func encodeGKHResponse(cNonce int, errCode int, thisHalf []byte, otherHash []byt
 	res = append(res, CreateArrSeqElement(thisHalf))
 	res = append(res, CreateArrSeqElement(otherHash))
 	res = append(res, CreateObjSeqElement(hashAlgId))
+	return res.ToByteArray()
+}
+
+func encodeErrResponse(errCode int) []byte {
+	res := DERSequence{}
+	res = append(res, CreateIntSeqElement(0xfe))    // getKeyHalf result
+	res = append(res, CreateIntSeqElement(errCode)) // error
 	return res.ToByteArray()
 }

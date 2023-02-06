@@ -1,28 +1,24 @@
-import {useEffect, useRef, useState} from "react";
 import {
-    bytesToHexOctets,
-    bytesToSpacedHexOctets,
-    encodeGKHRequest,
-    GKHRequest,
-    GKHResponse,
-    parseGKHRequest,
-    validateGKHRequest,
+    bytesToSpacedHexOctets, encodeGetStateRequest,
+    GetStateRequest,
+    GetStateResponse, parseGetStateResponse,
+    validateGetStateRequest,
     wsConnect,
     wsSendRequest
-} from '../utils/utils';
+} from "../utils/utils";
+import {useEffect, useRef, useState} from "react";
 import {Collapse} from "bootstrap";
 
-
-export default function ReserveKeyAndGetHalf({config}) {
+export default function GetState({config}) {
     let [request, setRequest] = useState({
-        keyLength: 256,
         cNonce: 42069,
-        keyId: "e47908469a325a00eb566e5602e213f2e5429666acd96a47cf31871c98eafd8c"
-    } as GKHRequest)
+    } as GetStateRequest)
 
-    let [response, setResponse] = useState(null as GKHResponse)
+    let [response, setResponse] = useState(null as GetStateResponse)
     let [endpoint, setEndpoint] = useState(config.aijaEndpoint)
     let [error, setError] = useState(null as string)
+
+    console.log(response)
 
     function setKDC(kdc) {
         if (kdc === "Aija") {
@@ -32,21 +28,23 @@ export default function ReserveKeyAndGetHalf({config}) {
         }
     }
 
-    return (<fieldset className={"p-3 my-3 shadow-sm border"}>
-            <legend><code>getKeyHalf</code> request</legend>
+    return (
+        <fieldset className={"p-3 my-3 shadow-sm border"}>
+            <legend><code>getState</code> request</legend>
             {error && <div className="alert alert-danger alert-dismissible fade show" role="alert"> {error}</div>}
-            <GKHReqConfig request={request} setRequest={setRequest} setKDC={setKDC}/>
-            <GKHSubmission request={request} endpoint={endpoint} setResponse={setResponse} setParentError={setError}/>
-            <GKHResponseTable response={response}/>
+            <GetStateConfig request={request} setRequest={setRequest} setKDC={setKDC}/>
+            <GetStateSubmission request={request} setResponse={setResponse} setParentError={setError}
+                                endpoint={endpoint}/>
+            <GetStateResponseTable response={response}/>
         </fieldset>
     )
 }
 
-let GKHReqConfig = ({request, setRequest, setKDC}) => {
+function GetStateConfig({request, setRequest, setKDC}){
     return (<div className="row">
         <div className="col-2">
             <div className="form-floating">
-                <select className="form-select"
+                <select className="form-select" defaultValue={"Aija"}
                         onChange={(event) => {
                             setKDC(event.target.value);
                         }}>
@@ -58,46 +56,24 @@ let GKHReqConfig = ({request, setRequest, setKDC}) => {
         </div>
         <div className="col-2">
             <div className="form-floating">
-                <input type="number" defaultValue={request.keyLength}
-                       className="form-control"
-                       readOnly disabled/>
-                <label>Key Length</label>
-            </div>
-        </div>
-        <div className="col-2">
-            <div className="form-floating">
-                <input type="number" defaultValue={request.cNonce} className="form-control"
-                       onChange={(event) => {
-                           setRequest({...request, cNonce: event.target.value})
-                       }}/>
+                <input type="number" defaultValue={42069} className="form-control" onChange={(event)=> {
+                    setRequest({...request, cNonce: event.target.value})
+                }}/>
                 <label>Crypto Nonce</label>
-                <div className="invalid-feedback">
-                    Please choose a username.
-                </div>
-            </div>
-        </div>
-        <div className="col-6">
-            <div className="form-floating">
-                <input type="text" defaultValue={request.keyId}
-                       className="form-control"
-                       onChange={(event) => {
-                           setRequest({...request, keyId: event.target.value})
-                       }}/>
-                <label>Key Id</label>
             </div>
         </div>
     </div>)
-
 }
 
-function GKHSubmission(
-    {request, setResponse, setParentError, endpoint}) {
+function GetStateSubmission({
+                                request, setResponse, setParentError, endpoint
+                            }) {
     let [error, setError] = useState(null as string)
     let [encodedRequest, setEncodedRequest] = useState(null)
 
     useEffect(() => {
-        setError(validateGKHRequest(request))
-        const [result, err] = encodeGKHRequest(request)
+        setError(validateGetStateRequest(request))
+        const [result, err] = encodeGetStateRequest(request)
         if (err) {
             setError(err.message)
             return
@@ -114,18 +90,18 @@ function GKHSubmission(
             const socket = await wsConnect(endpoint);
             let response = await wsSendRequest(socket, encodedRequest);
             socket.close();
-            let parsed = parseGKHRequest(response);
+            let parsed = parseGetStateResponse(response);
+            console.log(parsed)
             setResponse(parsed)
 
             // show response table
-            let collapsable = document.getElementById('gkh-response-table')
+            let collapsable = document.getElementById('getstate-response-table')
             if (!collapsable.classList.contains('show')) {
-                new Collapse('#gkh-response-table')
+                new Collapse('#getstate-response-table')
             }
         } catch (error) {
             alert("websocket connection failed: " + error.message)
         }
-
     }
 
     if (error) return null
@@ -137,15 +113,15 @@ function GKHSubmission(
     </div>)
 }
 
-function GKHResponseTable({response}: { response: GKHResponse }) {
+function GetStateResponseTable({response}: { response: GetStateResponse }) {
     let [collapseIcon, setCollapseIcon] = useState("bi-caret-down")
     const respTableCollapse = useRef(null)
 
     useEffect(() => {
-        respTableCollapse.current = new Collapse('#gkh-response-table', {
+        respTableCollapse.current = new Collapse('#getstate-response-table', {
             toggle: false
         })
-        let collapsable = document.getElementById('gkh-response-table')
+        let collapsable = document.getElementById('getstate-response-table')
         collapsable.addEventListener('hidden.bs.collapse', () => {
             setCollapseIcon("bi-caret-down")
         })
@@ -163,33 +139,32 @@ function GKHResponseTable({response}: { response: GKHResponse }) {
             }}>response <i className={`bi ${collapseIcon} small align-bottom`}></i></button>
         </legend>
 
-        <div className="collapse" id="gkh-response-table">
-            <table className="table table-bordered w-100" style={{tableLayout: "fixed"}}>
+        <div className="collapse" id="getstate-response-table">
+            <table className="table table-bordered">
                 <colgroup>
                     <col span={1} style={{width: "20%"}}/>
                     <col span={1} style={{width: "80%"}}/>
                 </colgroup>
                 <tbody>
                 <tr>
-                    <td>crypto nonce</td>
-                    <td><code>{response ? (response.cNonce ?? '?') : '?'}</code></td>
-                </tr>
-                <tr>
                     <td>err code</td>
-                    <td><code>{response ? (response.errCode ?? '?') : '?'}</code></td>
+                    <td><code>{response ? (response.errCode ?? '?'):'?'}</code></td>
                 </tr>
                 <tr>
-                    <td>this half</td>
-                    <td><code>{response ? (bytesToHexOctets(response.thisHalf) ?? '?') : '?'}</code></td>
+                    <td>crypto nonce</td>
+                    <td><code>{response ? (response.cNonce ?? '?'):'?'}</code></td>
                 </tr>
                 <tr>
-                    <td>other hash</td>
-                    <td><code style={{display: "inline-flex", maxWidth: "100%", overflow: "auto"}}
-                    >{response ? (bytesToHexOctets(response.otherHash) ?? '?') : '?'}</code></td>
+                    <td>state</td>
+                    <td><code>{response ? (response.state ?? '?'):'?'}</code></td>
                 </tr>
                 <tr>
-                    <td>hash alg id</td>
-                    <td><code>{response ? (bytesToHexOctets(response.hashAlgId) ?? '?') : '?'}</code></td>
+                    <td>keyID<sub>0</sub></td>
+                    <td><code>{response ? (response.keyId0 ?? '?'):'?'}</code></td>
+                </tr>
+                <tr>
+                    <td>keyID<sub>1</sub></td>
+                    <td><code>{response ? (response.keyId1 ?? '?'):'?'}</code></td>
                 </tr>
                 </tbody>
             </table>

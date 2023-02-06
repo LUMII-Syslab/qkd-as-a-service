@@ -12,27 +12,34 @@ export default function ReserveKeyAndGetHalf({config}) {
     let [request, setRequest] = useState({
         config: config, kdc: "Aija", keyLength: 256, cNonce: 42069,
     } as RKAGHRequest)
-
+    let [endpoint, setEndpoint] = useState(config.aijaEndpoint)
     let [response, setResponse] = useState(null as RKAGHResponse)
-
     let [error, setError] = useState(null as string)
+
+    function setKDC(kdc) {
+        if (kdc === "Aija") {
+            setEndpoint(config.aijaEndpoint)
+        } else {
+            setEndpoint(config.brencisEndpoint)
+        }
+    }
 
     return (<fieldset className="p-3 my-3 shadow-sm border">
         <legend><code>reserveKeyAndGetHalf</code> request</legend>
         {error && <div className="alert alert-danger alert-dismissible fade show" role="alert"> {error}</div>}
-        <RKAGHReqConfig request={request} setRequest={setRequest}/>
-        <RKAGHSubmission request={request} setResponse={setResponse} setParentError={setError}/>
+        <RKAGHReqConfig request={request} setRequest={setRequest} setKDC={setKDC}/>
+        <RKAGHSubmission request={request} endpoint={endpoint} setResponse={setResponse} setParentError={setError}/>
         <RKAGHResponseTable response={response}/>
     </fieldset>)
 }
 
-let RKAGHReqConfig = ({request, setRequest}) => {
+let RKAGHReqConfig = ({request, setRequest, setKDC}) => {
     return (<div className="row">
         <div className="col-4">
             <div className="form-floating">
                 <select className="form-select" defaultValue={request.kdc}
                         onChange={(event) => {
-                            setRequest({...request, kdc: event.target.value})
+                            setKDC(event.target.value)
                         }}>
                     <option value="Aija">Aija</option>
                     <option value="Brencis">Brencis</option>
@@ -62,8 +69,7 @@ let RKAGHReqConfig = ({request, setRequest}) => {
 }
 
 function RKAGHSubmission({
-                             request, setResponse, setParentError
-                         }: { request: RKAGHRequest, setResponse: any, setParentError: any }) {
+                             request, setResponse, setParentError, endpoint}) {
     let [error, setError] = useState(null as string)
     let [encodedRequest, setEncodedRequest] = useState(null)
 
@@ -83,8 +89,6 @@ function RKAGHSubmission({
 
     async function sendRequest() {
         try {
-            let endpoint = request.config.aijaEndpoint;
-            if (request.kdc === "Brencis") endpoint = request.config.brencisEndpoint
             const socket = await wsConnect(endpoint);
             let response = await wsSendRequest(socket, encodedRequest);
             socket.close();
