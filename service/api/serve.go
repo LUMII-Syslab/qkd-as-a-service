@@ -174,9 +174,9 @@ func parseGKHRequest(seq DERSequence) (keyLength int, keyId []byte, callId int, 
 
 func encodeGKHResponse(cNonce int, errCode int, thisHalf []byte, otherHash []byte, hashAlgId []byte) []byte {
 	res := DERSequence{}
+	res = append(res, CreateIntSeqElement(errCode))
 	res = append(res, CreateIntSeqElement(0xfe)) // getKeyHalf result
 	res = append(res, CreateIntSeqElement(cNonce))
-	res = append(res, CreateIntSeqElement(errCode))
 	res = append(res, CreateArrSeqElement(thisHalf))
 	res = append(res, CreateArrSeqElement(otherHash))
 	res = append(res, CreateObjSeqElement(hashAlgId))

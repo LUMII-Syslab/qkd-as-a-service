@@ -109,13 +109,33 @@ returns:
 
 3. crypto nonce
 
-4. key identifier
+4. half of key bytes
 
-5. half of key bytes
+5. hash(the other half)
 
-6. hash(the other half)
+6. hash algorithm id = `0x608648016503040211`
 
-7. hash algorithm id = `0x608648016503040211`
+encoded response example:
+
+```
+30 19 02 01 01 02 01 fe 02 02 30 39 04 00 04 00 06 09 60 86 48 01 65 03 04 02 11
+```
+
+explanation:
+
+`30` `19`: sequence type (`0x30`) with length `0x19` = 25 bytes;
+
+`02` `01` `01`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x01` = 1; ( **error code** )
+
+`02` `01` `fe`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0xfe` = 254; ( **response id** )
+
+`02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
+
+`04` `00` ``: byte array (`0x04`) with length `0x00` = 0 bytes; ( **half of key bytes** )
+
+`04` `00` ``: byte array (`0x04`) with length `0x00` = 0 bytes; ( **hash(the other half)** )
+
+`06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** )
 
 ## QAAS admin API
 
