@@ -92,8 +92,8 @@ function RKAGHSubmission({
             const socket = await wsConnect(endpoint);
             let response = await wsSendRequest(socket, encodedRequest);
             socket.close();
-            let parsed = parseRKAGHResponse(response);
-            setResponse(parsed)
+            let result = parseRKAGHResponse(response);
+            setResponse(result)
 
             // show response table
             let collapsable = document.getElementById('rkagh-response-table')
@@ -139,6 +139,9 @@ function RKAGHResponseTable({response}: { response: RKAGHResponse }) {
         }}>response <i className={`bi ${collapseIcon} small align-bottom`} ></i></button></legend>
 
         <div className="collapse" id="rkagh-response-table">
+            <div className="flex-grow-1 my-3 border p-2">
+                ASN.1 encoded response: <code>{response.raw && bytesToSpacedHexOctets(response.raw)}</code>
+            </div>
         <table className="table table-bordered w-100" style={{tableLayout: "fixed"}}>
             <colgroup>
                 <col span={1} style={{width: "20%"}}/>

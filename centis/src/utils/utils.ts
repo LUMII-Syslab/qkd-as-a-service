@@ -93,6 +93,7 @@ export interface RKAGHResponse {
     thisHalf: Uint8Array
     otherHash: Uint8Array
     hashAlgId: Uint8Array
+    raw: Uint8Array
 }
 
 export function encodeRKAGHRequest(request: RKAGHRequest): [Uint8Array, Error] {
@@ -130,6 +131,7 @@ export function encodeRKAGHRequest(request: RKAGHRequest): [Uint8Array, Error] {
 export function parseRKAGHResponse(msg_arr): RKAGHResponse {
     let data = ASNDERToList(msg_arr);
     return {
+        raw: msg_arr,
         cNonce: data[1] as number,
         errCode: data[2] as number,
         keyId: data[3] as Uint8Array,
