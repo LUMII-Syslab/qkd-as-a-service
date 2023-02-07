@@ -7,10 +7,12 @@
 parameters:
 
 1. endpoint id = `0x01`
+
 2. key length
+
 3. crypto nonce
 
-encoded call example
+encoded request example
 
 ```
 30 0B 02 01 01 02 02 01 00 02 02 30 39
@@ -68,6 +70,54 @@ explanation:
 
 `06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** )
 
+### 0x02: `getKeyHalf` request
+
+1. endpoint id = `0x01`
+
+2. key length
+
+3. key identifier
+
+4. crypto nonce
+
+encoded request example
+
+```
+30 11 02 01 02 02 02 01 00 04 04 40 af a0 1f 02 02 30 39
+```
+
+explanation:
+
+`30` `11`: sequence type (`0x30`) with length `0x11` = 17 bytes;
+
+`02` `01` `02`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x02` = 2; ( **endpoint id** )
+
+`02` `02` `01 00`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x0100` = 256; ( **key length** )
+
+`04` `04` `40 af a0 1f`: byte array (`0x04`) with length `0x04` = 4 bytes; ( **key identifier** )
+
+`02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
+
+
+### 0xfe: `getKeyHalf` response
+
+returns:
+
+1. error code
+
+2. response id = `0xff`
+
+3. crypto nonce
+
+4. key identifier
+
+5. half of key bytes
+
+6. hash(the other half)
+
+7. hash algorithm id = `0x608648016503040211`
+
+## QAAS admin API
 
 ### 0x03: `getState` request
 

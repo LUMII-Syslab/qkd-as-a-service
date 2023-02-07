@@ -69,7 +69,8 @@ let RKAGHReqConfig = ({request, setRequest, setKDC}) => {
 }
 
 function RKAGHSubmission({
-                             request, setResponse, setParentError, endpoint}) {
+                             request, setResponse, setParentError, endpoint
+                         }) {
     let [error, setError] = useState(null as string)
     let [encodedRequest, setEncodedRequest] = useState(null)
 
@@ -118,7 +119,7 @@ function RKAGHResponseTable({response}: { response: RKAGHResponse }) {
     let [collapseIcon, setCollapseIcon] = useState("bi-caret-down")
     const respTableCollapse = useRef(null)
 
-    useEffect(()=>{
+    useEffect(() => {
         respTableCollapse.current = new Collapse('#rkagh-response-table', {
             toggle: false
         })
@@ -130,51 +131,53 @@ function RKAGHResponseTable({response}: { response: RKAGHResponse }) {
             setCollapseIcon("bi-caret-up")
         })
 
-    },[])
+    }, [])
 
     return (<fieldset>
-        <legend><button className="btn nav-link" onClick={()=>{
-            respTableCollapse.current.toggle()
-            setCollapseIcon(collapseIcon === "bi-caret-down" ? "bi-caret-up" : "bi-caret-down")
-        }}>response <i className={`bi ${collapseIcon} small align-bottom`} ></i></button></legend>
+        <legend>
+            <button className="btn nav-link" onClick={() => {
+                respTableCollapse.current.toggle()
+                setCollapseIcon(collapseIcon === "bi-caret-down" ? "bi-caret-up" : "bi-caret-down")
+            }}>response <i className={`bi ${collapseIcon} small align-bottom`}></i></button>
+        </legend>
 
         <div className="collapse" id="rkagh-response-table">
             <div className="flex-grow-1 my-3 border p-2">
                 ASN.1 encoded response: <code>{response && response.raw && bytesToSpacedHexOctets(response.raw)}</code>
             </div>
-        <table className="table table-bordered w-100" style={{tableLayout: "fixed"}}>
-            <colgroup>
-                <col span={1} style={{width: "20%"}}/>
-                <col span={1} style={{width: "80%"}}/>
-            </colgroup>
-            <tbody>
-            <tr>
-                <td>crypto nonce</td>
-                <td><code>{response ? (response.cNonce ?? '?') : '?'}</code></td>
-            </tr>
-            <tr>
-                <td>err code</td>
-                <td><code>{response ? (response.errCode ?? '?') : '?'}</code></td>
-            </tr>
-            <tr>
-                <td>key id</td>
-                <td><code>{response ? (bytesToHexOctets(response.keyId) ?? '?') : '?'}</code></td>
-            </tr>
-            <tr>
-                <td>this half</td>
-                <td><code>{response ? (bytesToHexOctets(response.thisHalf) ?? '?') : '?'}</code></td>
-            </tr>
-            <tr>
-                <td>other hash</td>
-                <td><code style={{display: "inline-flex", maxWidth: "100%", overflow: "auto"}}
-                >{response ? (bytesToHexOctets(response.otherHash) ?? '?') : '?'}</code></td>
-            </tr>
-            <tr>
-                <td>hash alg id</td>
-                <td><code>{response ? (bytesToHexOctets(response.hashAlgId) ?? '?') : '?'}</code></td>
-            </tr>
-            </tbody>
-        </table>
-            </div>
+            <table className="table table-bordered w-100" style={{tableLayout: "fixed"}}>
+                <colgroup>
+                    <col span={1} style={{width: "20%"}}/>
+                    <col span={1} style={{width: "80%"}}/>
+                </colgroup>
+                <tbody>
+                <tr>
+                    <td>crypto nonce</td>
+                    <td><code>{response ? (response.cNonce ?? '?') : '?'}</code></td>
+                </tr>
+                <tr>
+                    <td>err code</td>
+                    <td><code>{response ? (response.errCode ?? '?') : '?'}</code></td>
+                </tr>
+                <tr>
+                    <td>key id</td>
+                    <td><code>{response ? (bytesToHexOctets(response.keyId) ?? '?') : '?'}</code></td>
+                </tr>
+                <tr>
+                    <td>this half</td>
+                    <td><code>{response ? (bytesToHexOctets(response.thisHalf) ?? '?') : '?'}</code></td>
+                </tr>
+                <tr>
+                    <td>other hash</td>
+                    <td><code style={{display: "inline-flex", maxWidth: "100%", overflow: "auto"}}
+                    >{response ? (bytesToHexOctets(response.otherHash) ?? '?') : '?'}</code></td>
+                </tr>
+                <tr>
+                    <td>hash alg id</td>
+                    <td><code>{response ? (bytesToHexOctets(response.hashAlgId) ?? '?') : '?'}</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </fieldset>)
 }
