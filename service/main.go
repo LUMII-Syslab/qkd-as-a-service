@@ -23,11 +23,11 @@ func main() {
 		gatherer = gatherers.NewFileSystemKeyGatherer(config.FSGathererDir)
 	}
 
-	var infoEndpoint io.Writer
-	infoEndpoint = os.Stdout
+	var infoEndpoint io.Writer = os.Stdout
 	if !config.LogRequests {
 		infoEndpoint = io.Discard
 	}
+
 	if config.AijaEnabled {
 		aijaDebugLogger := log.New(os.Stdout, "AIJA DEBUG\t", log.Ldate|log.Ltime|log.Lshortfile)
 		aijaKeyManager := manager.NewKeyManager(config.MaxKeyCount, true, aijaDebugLogger)

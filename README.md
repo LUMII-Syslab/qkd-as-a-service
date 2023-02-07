@@ -1,3 +1,47 @@
+# QKD as a Service (QAAS) API
+
+## QAAS client API
+
+### 0x01: `reserveKeyAndGetHalf` request
+
+parameters:
+
+1. endpoint id = `0x01`
+
+2. key length
+
+3. crypto nonce
+
+encoded call example
+
+```
+30 0B 02 01 01 02 02 01 00 02 02 30 39
+```
+
+explanation:
+
+`30 0B`: sequence type (`0x30`) with length `0x0B` = 11 bytes;
+
+`02 01 01`:  integer type (`0x02`) with length `0x01` = 1 byte, integer's value `0x01` = **1** ( **endpoint id** ).
+
+`02 02 01 00`: integer type (`0x02`) with length `0x02` = 2 bytes, integer's value `0x0100` = **256** ( **key length** )
+
+`02 02 30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, integer's value `0x3039` = **12345** ( **crypto nonce** )
+
+### 0x01: `reserveKeyAndGetHalf` response
+
+### 0x02:`getKeyHalf`
+
+## QAAS admin API
+
+### 0x03: `getState` request
+
+### 0x04: `setState` request
+
+## 0x05:`getStatistics` request
+
+## Key
+
 # QKD centra darbība
 
 Es `reserveKeyAndGetKeyHalf` un `getKeyHalf` apzīmēšu ar attiecīgi $X$ un $Y$.

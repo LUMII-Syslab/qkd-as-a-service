@@ -36,12 +36,12 @@ Funkcijas:
 
 - [not used] reserveKey() → id (16 baiti) - it kā būtu loģiski izveidot šādu funkciju, bet lai samazinātu round-trip skaitu, reserveKey() vietā būs nākamā funkcija
 - 0x01: reserveKeyAndGetKeyHalf(…) → id, keyL|keyR, hashR|hashL
-    - Aija drīkst rezervēt tikai pāra atslēgas (0 mod 2), bet Brencis - nepāra (1 mod 2)
+  - Aija drīkst rezervēt tikai pāra atslēgas (0 mod 2), bet Brencis - nepāra (1 mod 2)
 - 0x02: getKeyHalf(id, …)
-→ keyL (128 bit), hashR (atgriež Aija)
-→ keyR (128 bit), hashL (atgriež Brencis)
-    - ja sender mums jau prasīja reserveKeyAndGetKeyHalf, tad getKeyHalf drīkst izsaukt tikai receiver tieši vienu reizi; pēc tam atslēga <id> tiek izdzēsta
-    - ja sender rezervēja atslēgu ne pie mums, tad jābūt tieši 2 getKeyHalf izsaukumiem (viens no sender, otrs - no receiver); pēc 2. izsaukuma, atslēga <id> tiek izdzēsta (vai pēc 1 sekundes kopš reserveKey - kas iestāsies ātrāk)
+  → keyL (128 bit), hashR (atgriež Aija)
+  → keyR (128 bit), hashL (atgriež Brencis)
+  - ja sender mums jau prasīja reserveKeyAndGetKeyHalf, tad getKeyHalf drīkst izsaukt tikai receiver tieši vienu reizi; pēc tam atslēga <id> tiek izdzēsta
+  - ja sender rezervēja atslēgu ne pie mums, tad jābūt tieši 2 getKeyHalf izsaukumiem (viens no sender, otrs - no receiver); pēc 2. izsaukuma, atslēga <id> tiek izdzēsta (vai pēc 1 sekundes kopš reserveKey - kas iestāsies ātrāk)
 
 Lai nokodētu funkcijas izsaukumu, kā arī atbildi, mēs izmantosim bināro ASN.1 notāciju. Uz doto brīdi katra ziņojuma garumam jābūt <2+127 baitiem (QKD web serviss to var pārbaudīt).
 
@@ -200,13 +200,13 @@ Synchronization API is needed, since it is costy to restart the QDK process (30 
 Funkcijas:
 
 - 0x04: syncFirstKey(id) → first-common-key-id
-    - palaižot Brenci, tas uzreiz mēģina ņemt atslēgas no Clavis;
-    - palaižot Aiju, tā mēģina pievienoties Brencim (caur IPSec?)
-    - gan Aija, gan Brencis izdzēš atslēgas, kas iegūtas agrāk par first-common-key-id;
+  - palaižot Brenci, tas uzreiz mēģina ņemt atslēgas no Clavis;
+  - palaižot Aiju, tā mēģina pievienoties Brencim (caur IPSec?)
+  - gan Aija, gan Brencis izdzēš atslēgas, kas iegūtas agrāk par first-common-key-id;
 - 0x05: mirrorReserveKey(id) → void
-    - Aija sūta Brencim pāra atslēgas id, ko rezervējusi, atbildot uz Sender/Receiver reserveKey (ja process sākās pie Brenča, tas sūta Aijai nepāra atslēgas id…)
-    - kopš šī brīža, gan Aija, gan Brencis izmet doto atslēgu no atmiņas vai nu pēc diviem getKeyHalf izsaukumiem, vai pēc 1 sekundes (kas iestāsies ātrāk)
-    - funkcija ir vajadzīga, jo pēc atslēgas rezervācijas internets var pazust un Brencis nekad neizmetīs atslēgu, ko rezervēja Aija (un otrādi)
+  - Aija sūta Brencim pāra atslēgas id, ko rezervējusi, atbildot uz Sender/Receiver reserveKey (ja process sākās pie Brenča, tas sūta Aijai nepāra atslēgas id…)
+  - kopš šī brīža, gan Aija, gan Brencis izmet doto atslēgu no atmiņas vai nu pēc diviem getKeyHalf izsaukumiem, vai pēc 1 sekundes (kas iestāsies ātrāk)
+  - funkcija ir vajadzīga, jo pēc atslēgas rezervācijas internets var pazust un Brencis nekad neizmetīs atslēgu, ko rezervēja Aija (un otrādi)
 
 ## syncFirstKey
 
@@ -301,4 +301,3 @@ Authorization, Server validation for VKDC: the same.
 “Mazu” VKDC var lietot pašos Sender un Receiver, kas bieži komunicē savā starpā,  lai samazinātu round-trip time (atslēga tiek ņemta no lokālā VKDC, kas darbojas uz tā paša datora, nevis uz Aijas vai Brenča);
 
 Bez round-trip benefit, ir vēl šāds benefit: nevajag bieži pārbaudīt Aijas un Brenča sertifikātus, kā arī Aijai un Brencim nevajag katru reizi pārbaudīt Sender un Receiver.
-
