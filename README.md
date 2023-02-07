@@ -19,8 +19,11 @@ encoded call example
 explanation:
 
 `30` `0b`: sequence type (`0x30`) with length `0x0b` = 11 bytes;
-`02` `01` `01`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x01` = 1; ( **endpoint id**)
+
+`02` `01` `01`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x01` = 1; ( **endpoint id** )
+
 `02` `02` `01 00`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x0100` = 256; ( **key length** )
+
 `02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
 
 ### 0xff: `reserveKeyAndGetHalf` response
@@ -39,7 +42,7 @@ returns:
 
 6. hash(the other half)
 
-7. hashalgorithm id = `0x608648016503040211`
+7. hash algorithm id = `0x608648016503040211`
 
 encoded return example:
 
@@ -50,13 +53,21 @@ encoded return example:
 explanation:
 
 `30` `23`: sequence type (`0x30`) with length `0x23` = 35 bytes;
-`02` `01` `00`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x00` = 0;
-`02` `01` `ff`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0xff` = 255;
-`02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345;
-`04` `04` `28 8b de 07`: byte array (`0x04`) with length `0x04` = 4 bytes, bytes: [28, 8b, de, 07];
-`04` `02` `21 a1`: byte array (`0x04`) with length `0x02` = 2 bytes, bytes: [21, a1];
-`04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes, bytes: [01, 02];
-`06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes, bytes: [60, 86, 48, 01, 65, 03, 04, 02, 11];
+
+`02` `01` `00`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x00` = 0; ( **error code** )
+
+`02` `01` `ff`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0xff` = 255; ( **response id** )
+
+`02` `02` `a4 55`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0xa455` = 42069; ( **crypto nonce** )
+
+`04` `04` `28 8b de 07`: byte array (`0x04`) with length `0x04` = 4 bytes; ( **key identifier** )
+
+`04` `02` `21 a1`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **half of key bytes** )
+
+`04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **hash(the other half)** )
+
+`06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** )
+
 
 ### 0x03: `getState` request
 
