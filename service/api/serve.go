@@ -42,6 +42,10 @@ func ListenAndServe(manager *manager.KeyManager, infoLogger *log.Logger, errorLo
 				errorLogger.Println(err)
 				continue
 			}
+			if len(seq) < 1 {
+				errorLogger.Println("sequence of length zero received")
+				continue
+			}
 			stateId := seq[0].AsInt()
 
 			switch stateId {
@@ -94,14 +98,27 @@ func ListenAndServe(manager *manager.KeyManager, infoLogger *log.Logger, errorLo
 
 				err = conn.WriteMessage(msgType, encodeGKHResponse(cNonce, errCode, thisHalf, otherHash, hashAlgId))
 			case 0x03: // getState
-				infoLogger.Println("0x03 request: ", seq.ToString())
-				if len(seq) != 0 {
-					log.Println("sequence of length 0 was expected")
-					err = conn.WriteMessage(msgType, encodeErrResponse(1))
+				cNonce, err := parseGetStateRequest(seq)
+				if err != nil {
+					err = conn.WriteMessage(msgType, encodeErrResponse(constants.ErrorInvalidReq))
 					continue
 				}
-				res := DERSequence{}
-				err = conn.WriteMessage(msgType, res.ToByteArray())
+
+				infoLogger.Printf("0x03 request: (%v)", cNonce)
+
+				state, keyId0, keyId1, kdcErr := manager.GetState()
+				errCode := 0
+				if kdcErr != nil {
+					errCode = kdcErr.Code
+					errorLogger.Println(kdcErr.ToString())
+				}
+
+				infoLogger.Println("0x03 response c nonce: ", cNonce)
+				infoLogger.Println("0x03 response state: ", state)
+				infoLogger.Println("0x03 response key id 0: ", keyId0)
+				infoLogger.Println("0x03 response key id 1: ", keyId1)
+
+				err = conn.WriteMessage(msgType, encodeGetStateResponse(cNonce, errCode, state, keyId0, keyId1))
 			case 0x04: // setState
 				infoLogger.Println("0x04 request: ", seq.ToString())
 				if len(seq) != 0 {
@@ -170,5 +187,25 @@ func encodeErrResponse(errCode int) []byte {
 	res := DERSequence{}
 	res = append(res, CreateIntSeqElement(0xfe))    // getKeyHalf result
 	res = append(res, CreateIntSeqElement(errCode)) // error
+	return res.ToByteArray()
+}
+
+func parseGetStateRequest(seq DERSequence) (cNonce int, err error) {
+	if len(seq) != 1 {
+		err = errors.New("sequence of length 1 was expected")
+		return
+	}
+	cNonce = seq[1].AsInt()
+	return
+}
+
+func encodeGetStateResponse(cNonce int, errCode int, state int, keyId0 []byte, keyId1 []byte) []byte {
+	res := DERSequence{}
+	res = append(res, CreateIntSeqElement(errCode))
+	res = append(res, CreateIntSeqElement(0xfd)) // getState result
+	res = append(res, CreateIntSeqElement(cNonce))
+	res = append(res, CreateIntSeqElement(state))
+	res = append(res, CreateArrSeqElement(keyId0))
+	res = append(res, CreateArrSeqElement(keyId1))
 	return res.ToByteArray()
 }

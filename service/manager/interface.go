@@ -33,15 +33,16 @@ func (k *KeyManager) ReserveKeyAndGetHalf() (keyId []byte, thisHalf []byte, othe
 	return
 }
 
-func (k *KeyManager) GetState() int {
-	state := k.getManagerState()
-	if state.ReservableSize == 0 {
-		return constants.Empty
-	} else if state.Running == false {
-		return constants.Receiving
+func (k *KeyManager) GetState() (state int, keyId0 []byte, keyId1 []byte, err *logging.KDCError) {
+	keyManagerState := k.getManagerState()
+	if keyManagerState.ReservableSize == 0 {
+		state = constants.Empty
+	} else if keyManagerState.Running == false {
+		state = constants.Receiving
 	} else {
-		return constants.Running
+		state = constants.Running
 	}
+	return
 }
 
 func (k *KeyManager) GetFullState() KeyManagerState {
