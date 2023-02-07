@@ -38,7 +38,7 @@ func (k *KeyManager) getKeyLeft(id []byte) ([]byte, *logging.KDCError) {
 	if err != nil {
 		return nil, err
 	}
-	return res.KeyVal[:len(res.KeyVal)/2+1], nil
+	return res.KeyVal[:(len(res.KeyVal)+1)/2], nil
 }
 
 func (k *KeyManager) getKeyLeftHash(id []byte) ([]byte, *logging.KDCError) {
@@ -58,7 +58,7 @@ func (k *KeyManager) getKeyRight(id []byte) ([]byte, *logging.KDCError) {
 	if err != nil {
 		return nil, err
 	}
-	return res.KeyVal[len(res.KeyVal)/2+1:], nil
+	return res.KeyVal[(len(res.KeyVal)+1)/2:], nil
 }
 
 func (k *KeyManager) getKeyRightHash(id []byte) ([]byte, *logging.KDCError) {
