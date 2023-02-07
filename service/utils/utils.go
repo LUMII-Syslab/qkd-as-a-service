@@ -13,6 +13,9 @@ func IntToBytes(x int) []byte {
 			res = append(res, byte(maskedValue))
 		}
 	}
+	if len(res) == 0 {
+		res = append(res, 0)
+	}
 	return res
 }
 

@@ -17,7 +17,7 @@ interface WatchKeysTableRow {
 
 export default function WatchKeys({config}) {
     let [watchingKeys, setWatchingKeys] = useState(false);
-    let [requestDelay, setRequestDelay] = useState(0);
+    let [requestDelay, setRequestDelay] = useState(50);
     let [aijaWS, setAijaWS] = useState(null);
     let [brencisWS, setBrencisWS] = useState(null);
     let interval = useRef(null);

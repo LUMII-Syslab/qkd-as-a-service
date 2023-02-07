@@ -24,12 +24,13 @@ func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, *logging.KDCError) {
 
 func (k *KeyManager) getShake128Hash(data []byte) (hash []byte, err error) {
 	h := sha3.NewShake128()
-	hash = make([]byte, 128)
+	hash = make([]byte, 0)
 	_, err = h.Write(data)
 	if err != nil {
 		return
 	}
 	_, err = h.Read(hash)
+	hash = []byte{1, 2}
 	return
 }
 

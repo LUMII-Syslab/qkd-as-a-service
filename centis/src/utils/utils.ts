@@ -132,8 +132,8 @@ export function parseRKAGHResponse(msg_arr): RKAGHResponse {
     let data = ASNDERToList(msg_arr);
     return {
         raw: msg_arr,
-        cNonce: data[1] as number,
-        errCode: data[2] as number,
+        cNonce: data[2] as number,
+        errCode: data[0] as number,
         keyId: data[3] as Uint8Array,
         thisHalf: data[4] as Uint8Array,
         otherHash: data[5] as Uint8Array,

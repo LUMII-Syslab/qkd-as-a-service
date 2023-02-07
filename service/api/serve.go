@@ -154,9 +154,9 @@ func parseRKAGHRequest(seq DERSequence) (keyLength int, callId int, err error) {
 
 func encodeRKAGHResponse(cNonce int, errCode int, keyId []byte, thisHalf []byte, otherHash []byte, hashAlgId []byte) []byte {
 	res := DERSequence{}
+	res = append(res, CreateIntSeqElement(errCode))
 	res = append(res, CreateIntSeqElement(0xff)) // reserveKeyAndGetHalf result
 	res = append(res, CreateIntSeqElement(cNonce))
-	res = append(res, CreateIntSeqElement(errCode))
 	res = append(res, CreateArrSeqElement(keyId))
 	res = append(res, CreateArrSeqElement(thisHalf))
 	res = append(res, CreateArrSeqElement(otherHash))
