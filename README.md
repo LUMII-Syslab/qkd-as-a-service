@@ -123,17 +123,17 @@ encoded response example:
 
 explanation:
 
-`30` `19`: sequence type (`0x30`) with length `0x19` = 25 bytes;
+`30` `1d`: sequence type (`0x30`) with length `0x1d` = 29 bytes;
 
-`02` `01` `01`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x01` = 1; ( **error code** )
+`02` `01` `00`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x00` = 0; ( **error code** )
 
 `02` `01` `fe`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0xfe` = 254; ( **response id** )
 
 `02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
 
-`04` `00` ``: byte array (`0x04`) with length `0x00` = 0 bytes; ( **half of key bytes** )
+`04` `02` `e1 5c`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **half of key bytes** )
 
-`04` `00` ``: byte array (`0x04`) with length `0x00` = 0 bytes; ( **hash(the other half)** )
+`04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **hash(the other half)** )
 
 `06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** )
 
