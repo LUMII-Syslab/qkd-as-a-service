@@ -140,7 +140,7 @@ function RKAGHResponseTable({response}: { response: RKAGHResponse }) {
 
         <div className="collapse" id="rkagh-response-table">
             <div className="flex-grow-1 my-3 border p-2">
-                ASN.1 encoded response: <code>{response.raw && bytesToSpacedHexOctets(response.raw)}</code>
+                ASN.1 encoded response: <code>{response && response.raw && bytesToSpacedHexOctets(response.raw)}</code>
             </div>
         <table className="table table-bordered w-100" style={{tableLayout: "fixed"}}>
             <colgroup>
