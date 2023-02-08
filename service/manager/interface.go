@@ -3,7 +3,6 @@ package manager
 import (
 	"log"
 	"qkdc-service/constants"
-	"qkdc-service/logging"
 	"qkdc-service/models"
 )
 
@@ -15,26 +14,32 @@ func (k *KeyManager) AddKey(keyId []byte, keyVal []byte) error {
 	return k.addKey(keyId, keyVal)
 }
 
-func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, otherHash []byte, err *logging.KDCError) {
-	thisHalf, err = k.getThisHalf(keyId)
-	if err != nil {
+func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, otherHash []byte, errId int) {
+	thisHalf, errId = k.getThisHalf(keyId)
+	if errId != constants.NoError {
 		return
 	}
-	otherHash, err = k.getOtherHash(keyId)
+	otherHash, errId = k.getOtherHash(keyId)
 	return
 }
 
-func (k *KeyManager) ReserveKeyAndGetHalf(request *models.RKAGHRequest) (response *models.RKAGHResponse, err error) {
-	key, err := k.extractKey()
-	if err != nil {
+func (k *KeyManager) ReserveKeyAndGetHalf(request *models.RKAGHRequest) (response *models.RKAGHResponse) {
+	response = new(models.RKAGHResponse)
+
+	key, errId := k.extractKey()
+
+	response.ErrId = errId
+	if response.ErrId != constants.NoError {
 		return
 	}
-	keyId = key.KeyId
-	thisHalf, otherHash, err = k.GetKeyThisHalfOtherHash(keyId)
+
+	response.KeyId = key.KeyId
+	response.ThisHalf, response.OtherHash, response.ErrId = k.GetKeyThisHalfOtherHash(response.KeyId)
+
 	return
 }
 
-func (k *KeyManager) GetState() (state int, keyId0 []byte, keyId1 []byte, err *logging.KDCError) {
+func (k *KeyManager) GetState() (state int, keyId0 []byte, keyId1 []byte, errId int) {
 	keyManagerState := k.getManagerState()
 	if keyManagerState.ReservableSize == 0 {
 		state = constants.Empty

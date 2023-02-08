@@ -16,10 +16,7 @@ func (c *Controller) handleRKAGHRequest(conn *websocket.Conn, sequence DERSequen
 
 	c.infoLogger.Printf("0x01 request %+v", request)
 
-	response, err := c.manager.ReserveKeyAndGetHalf(request)
-	if err != nil {
-		c.errorLogger.Println(err)
-	}
+	response := c.manager.ReserveKeyAndGetHalf(request)
 
 	c.infoLogger.Printf("0x01 response %+v", response)
 
@@ -38,7 +35,7 @@ func parseRKAGHRequest(seq DERSequence) (request *models.RKAGHRequest, cNonce in
 
 func encodeRKAGHResponse(response *models.RKAGHResponse, cNonce int) []byte {
 	res := DERSequence{}
-	res = append(res, CreateIntSeqElement(response.ErrCode))
+	res = append(res, CreateIntSeqElement(response.ErrId))
 	res = append(res, CreateIntSeqElement(0xff)) // reserveKeyAndGetHalf result
 	res = append(res, CreateIntSeqElement(cNonce))
 	res = append(res, CreateArrSeqElement(response.KeyId))

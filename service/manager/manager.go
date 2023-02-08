@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"qkdc-service/constants"
-	"qkdc-service/logging"
 	"qkdc-service/utils"
 	"sync"
 	"time"
@@ -78,21 +77,21 @@ func (k *KeyManager) getManagerState() KeyManagerState {
 	}
 }
 
-func (k *KeyManager) getKey(id []byte) (Key, *logging.KDCError) {
+func (k *KeyManager) getKey(id []byte) (key *Key, errId int) {
 	if !k.running {
-		return Key{}, logging.NewKDCError(constants.ErrorNotRunning, errors.New("key manager is not running"))
+		errId = constants.ErrorNotRunning
+		return
 	}
 
 	k.mutex.Lock()
 	val, exists := k.dictionary[string(id)]
 	if !exists {
 		k.mutex.Unlock()
-		return Key{}, logging.NewKDCError(constants.ErrorKeyNotFound,
-			errors.New(fmt.Sprintf("key %v not found in manager", utils.BytesToHexOctets(id))))
+		return nil, constants.ErrorKeyNotFound
 	}
 	k.mutex.Unlock()
 	k.keysServerd += 1
-	return val, nil
+	return &val, constants.NoError
 }
 
 func (k *KeyManager) addKey(id []byte, val []byte) error {
@@ -144,9 +143,10 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 }
 
 // extractKey extracts key and removes it from queue
-func (k *KeyManager) extractKey() (Key, *logging.KDCError) {
+func (k *KeyManager) extractKey() (key *Key, errId int) {
 	if !k.running {
-		return Key{}, logging.NewKDCError(constants.ErrorNotRunning, errors.New("key manager is not running"))
+		errId = constants.ErrorNotRunning
+		return
 	}
 	retrieved := false
 	result := Key{}
@@ -159,7 +159,7 @@ func (k *KeyManager) extractKey() (Key, *logging.KDCError) {
 		}
 		k.mutex.Unlock()
 	}
-	return result, nil
+	return &result, constants.NoError
 }
 
 // getFirstKey returns the first key in the queue that is either even or odd

@@ -15,6 +15,7 @@ const (
 	SetStateRequest             = 0x04
 	SetStateResponse            = 0xfc
 
+	NoError          = 0
 	ErrorKeyNotFound = 1
 	ErrorNotRunning  = 2
 	ErrorInternal    = 3

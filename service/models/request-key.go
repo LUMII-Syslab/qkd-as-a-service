@@ -5,7 +5,7 @@ type RKAGHRequest struct {
 }
 
 type RKAGHResponse struct {
-	ErrCode   int
+	ErrId     int
 	KeyId     []byte
 	ThisHalf  []byte
 	OtherHash []byte
