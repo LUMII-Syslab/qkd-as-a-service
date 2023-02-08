@@ -134,7 +134,7 @@ returns:
 encoded response example:
 
 ```
-30 1d 02 01 00 02 01 fe 02 02 30 39 04 02 e1 5c 04 02 01 02 06 09 60 86 48 01 65 03 04 02 11
+30 1d 02 01 00 02 01 fe 02 02 30 3a 04 02 e1 5c 04 02 01 02 06 09 60 86 48 01 65 03 04 02 11
 ```
 
 explanation:
@@ -145,7 +145,7 @@ explanation:
 
 `02` `01` `fe`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0xfe` = 254; ( **response id** )
 
-`02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
+`02` `02` `30 3a`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x303a` = 12346; ( **crypto nonce** )
 
 `04` `02` `e1 5c`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **half of key bytes** )
 
@@ -200,6 +200,8 @@ returns:
 5. even key id
 
 6. odd key id
+
+
 
 ### 0x04: `setState` request
 
