@@ -154,6 +154,26 @@ explanation:
 
 ### 0x03: `getState` request
 
+parameters:
+
+1. endpoint id = `0x01`
+
+2. crypto nonce
+
+encoded request example:
+
+```
+30 07 02 01 03 02 02 30 39
+```
+
+explanation:
+
+`30` `07`: sequence type (`0x30`) with length `0x07` = 7 bytes;
+
+`02` `01` `03`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x03` = 3; ( **endpoint id** )
+
+`02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
+
 ### 0x04: `setState` request
 
 ## 0x05:`getStatistics` request
