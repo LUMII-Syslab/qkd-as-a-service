@@ -157,7 +157,7 @@ explanation:
 
 - `getState` is used to determine the state and key identifiers of the first even and odd parity keys respectively.
 
-- `setState` is used to set the state of kdc and synchronize keys
+- `setState` is used to set the state of kdc and synchronize keys.
 
 ### 0x03: `getState` request
 
