@@ -7,7 +7,7 @@ Table of Contents:
 	2. [0xff: `reserveKeyAndGetHalf` response](#0xff-reservekeyandgethalf-response)
 	3. [0x02: `getKeyHalf` request](#0x02-getKeyHalf-request)
 	4. [0xfe: `getKeyHalf` response](#0xfe-getKeyHalf-response)
-2. [QAAS admin API]
+2. [QAAS admin API](#qaas-admin-api)
 	1. [0x03: `getState` request](#0x03-getstate-request)
 	2. [0xfd: `getState` response](#0xfd-getstate-response)
 	3. [0x04: `setState` request](#0x04-setstate-request)
