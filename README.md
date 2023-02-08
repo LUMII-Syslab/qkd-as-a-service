@@ -180,7 +180,9 @@ explanation:
 
 ### 0xfd: `getState` response
 
-> `getState` is used to determine the state of the kdc and for kdc synchronization purposes the first key identifier of each parity.
+description:
+
+> `getState` is used to determine the state and key identifiers of the first even and odd parity keys respectively.
 
 returns:
 
@@ -192,9 +194,9 @@ returns:
 
 4. kdc state id
 	
-	- `EMPTY` = 0
-	- `RECEIVING` = 1
-	- `RUNNING` = 2
+	- `EMPTY` = 0 ( when there are no keys received from QKD device )
+	- `RECEIVING` = 1 ( when at least one key has been received )
+	- `RUNNING` = 2 ( when keys can be reserved by the users )
 
 5. even key id
 
