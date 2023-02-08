@@ -194,9 +194,9 @@ returns:
 
 4. kdc state id
 	
-	- `EMPTY` = 0 ( when there are no keys received from QKD device )
-	- `RECEIVING` = 1 ( when at least one key has been received )
-	- `RUNNING` = 2 ( when keys can be reserved by the users )
+	- `EMPTY` = 0		( when there are no keys received from QKD device )
+	- `RECEIVING` = 1	( when at least one key has been received )
+	- `RUNNING` = 2		( when keys can be reserved by the users )
 
 5. even key id
 
