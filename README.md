@@ -12,9 +12,8 @@ Table of Contents:
 	2. [0xfd: `getState` response](#0xfd-getstate-response)
 	3. [0x04: `setState` request](#0x04-setstate-request)
 	4. [0xfc: `setState` response](#0xfc-setstate-response)
-3. [Error codes & KDC states]
+3. [Error codes & Other constants]
 	1. [Error codes](#error-codes)
-	2. [KDC states](#kdc-states)
 
 ## QAAS client API
 
@@ -207,7 +206,14 @@ returns:
 
 ## 0x05:`getStatistics` request
 
-## Key
+## Error codes
+
+error codes: 
+- NoError          = 0
+- ErrorKeyNotFound = 1
+- ErrorNotRunning  = 2
+- ErrorInternal    = 3
+- ErrorInvalidReq  = 4
 
 # QKD centra darbība
 
