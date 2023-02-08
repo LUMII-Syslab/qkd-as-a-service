@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"github.com/gorilla/websocket"
+	"qkdc-service/constants"
 	"qkdc-service/models"
 )
 
@@ -36,7 +37,7 @@ func parseRKAGHRequest(seq DERSequence) (request *models.RKAGHRequest, cNonce in
 func encodeRKAGHResponse(response *models.RKAGHResponse, cNonce int) []byte {
 	res := DERSequence{}
 	res = append(res, CreateIntSeqElement(response.ErrId))
-	res = append(res, CreateIntSeqElement(0xff)) // reserveKeyAndGetHalf result
+	res = append(res, CreateIntSeqElement(constants.RserveKeyAndGetHalfResponse))
 	res = append(res, CreateIntSeqElement(cNonce))
 	res = append(res, CreateArrSeqElement(response.KeyId))
 	res = append(res, CreateArrSeqElement(response.ThisHalf))

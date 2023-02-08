@@ -4,25 +4,6 @@ import (
 	"errors"
 )
 
-func parseGKHRequest(seq DERSequence) (keyLength int, keyId []byte, callId int, err error) {
-	if len(seq) != 4 {
-		return 0, nil, 0, errors.New("sequence of length 4 was expected")
-	}
-	keyLength, keyId, callId = seq[1].AsInt(), seq[2].AsBytes(), seq[3].AsInt()
-	return
-}
-
-func encodeGKHResponse(cNonce int, errCode int, thisHalf []byte, otherHash []byte, hashAlgId []byte) []byte {
-	res := DERSequence{}
-	res = append(res, CreateIntSeqElement(errCode))
-	res = append(res, CreateIntSeqElement(0xfe)) // getKeyHalf result
-	res = append(res, CreateIntSeqElement(cNonce))
-	res = append(res, CreateArrSeqElement(thisHalf))
-	res = append(res, CreateArrSeqElement(otherHash))
-	res = append(res, CreateObjSeqElement(hashAlgId))
-	return res.ToByteArray()
-}
-
 func encodeErrResponse(errCode int) []byte {
 	res := DERSequence{}
 	res = append(res, CreateIntSeqElement(0xfe))    // getKeyHalf result

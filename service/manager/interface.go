@@ -23,6 +23,13 @@ func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, oth
 	return
 }
 
+func (k *KeyManager) GetKeyHalf(request *models.GKHRequest) (response *models.GKHResponse) {
+	response = new(models.GKHResponse)
+	response.ThisHalf, response.OtherHash, response.ErrId = k.GetKeyThisHalfOtherHash(request.KeyId)
+	response.HashAlgId = k.HashAlgId
+	return
+}
+
 func (k *KeyManager) ReserveKeyAndGetHalf(_ *models.RKAGHRequest) (response *models.RKAGHResponse) {
 	response = new(models.RKAGHResponse)
 
