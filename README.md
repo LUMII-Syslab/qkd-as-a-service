@@ -12,6 +12,9 @@ Table of Contents:
 	2. [0xfd: `getState` response](#0xfd-getstate-response)
 	3. [0x04: `setState` request](#0x04-setstate-request)
 	4. [0xfc: `setState` response](#0xfc-setstate-response)
+3. [Error codes & KDC states]
+	1. [Error codes](#error-codes)
+	2. [KDC states](#kdc-states)
 
 ## QAAS client API
 
@@ -152,11 +155,12 @@ explanation:
 
 ## QAAS admin API
 
+
 ### 0x03: `getState` request
 
 parameters:
 
-1. endpoint id = `0x01`
+1. endpoint id = `0x03`
 
 2. crypto nonce
 
@@ -173,6 +177,22 @@ explanation:
 `02` `01` `03`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x03` = 3; ( **endpoint id** )
 
 `02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
+
+### 0xfd: `getState` response
+
+returns:
+
+1. error code
+
+2. response id = `0xfd`
+
+3. crypto nonce
+
+4. kdc state id
+
+5. even key id
+
+6. odd key id
 
 ### 0x04: `setState` request
 
