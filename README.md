@@ -15,9 +15,9 @@ Table of Contents:
 3. [API Error codes & Other constants](#error-codes--other-constants)
 4. [QAAS software structure & operation](#qaas-software-structure--operation)
 	1. [Key Gathering](#key-gathering)
-	2. [Handling `reserveKeyAndGetHalf` requests]
-	3. [Handling `getKeyHalf` requests]
-	4. [KDC Synchronisation]
+	2. [Handling `reserveKeyAndGetHalf` requests](#handling-reservekeyandgethalf-requests)
+	3. [Handling `getKeyHalf` requests](#handling-getkeyhalf-requests)
+	4. [KDC Synchronisation](#kdc-synchronisation)
 
 ## QAAS client API
 
@@ -205,10 +205,15 @@ returns:
 6. odd key id
 
 
+TODO
 
 ### 0x04: `setState` request
 
+TODO
+
 ### 0x05:`getStatistics` request
+
+TODO
 
 ## Error codes & Other constants
 
