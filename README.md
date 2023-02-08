@@ -12,7 +12,12 @@ Table of Contents:
 	2. [0xfd: `getState` response](#0xfd-getstate-response)
 	3. [0x04: `setState` request](#0x04-setstate-request)
 	4. [0xfc: `setState` response](#0xfc-setstate-response)
-3. [Error codes & Other constants](#error-codes--other-constants)
+3. [API Error codes & Other constants](#error-codes--other-constants)
+4. [QAAS software structure & operation](#qaas-software-structure--operation)
+	1. [Key Gathering](#key-gathering)
+	2. [Handling `reserveKeyAndGetHalf` requests]
+	3. [Handling `getKeyHalf` requests]
+	4. [KDC Synchronisation]
 
 ## QAAS client API
 
@@ -213,6 +218,16 @@ error codes:
 - ErrorNotRunning  = 2
 - ErrorInternal    = 3
 - ErrorInvalidReq  = 4
+
+## QAAS software structure & operation
+
+### Key Gathering
+
+### Handling `reserveKeyAndGetHalf` requests
+
+### Handling `getKeyHalf` requests
+
+### KDC Synchronisation
 
 # QKD centra darbība
 
