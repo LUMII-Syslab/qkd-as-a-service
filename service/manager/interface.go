@@ -4,6 +4,7 @@ import (
 	"log"
 	"qkdc-service/constants"
 	"qkdc-service/logging"
+	"qkdc-service/models"
 )
 
 func NewKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger) *KeyManager {
@@ -23,7 +24,7 @@ func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, oth
 	return
 }
 
-func (k *KeyManager) ReserveKeyAndGetHalf() (keyId []byte, thisHalf []byte, otherHash []byte, err *logging.KDCError) {
+func (k *KeyManager) ReserveKeyAndGetHalf(request *models.RKAGHRequest) (response *models.RKAGHResponse, err error) {
 	key, err := k.extractKey()
 	if err != nil {
 		return

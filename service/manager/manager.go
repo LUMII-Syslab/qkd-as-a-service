@@ -36,6 +36,8 @@ type KeyManager struct {
 	keysDelayed uint64
 
 	logger *log.Logger
+
+	HashAlgId []byte
 }
 
 func newKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger) *KeyManager {
@@ -49,6 +51,7 @@ func newKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger) *KeyManage
 		aija:       aija,
 		running:    true,
 		logger:     logger,
+		HashAlgId:  []byte{0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x11},
 	}
 }
 
