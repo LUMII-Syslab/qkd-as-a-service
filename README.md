@@ -155,6 +155,9 @@ explanation:
 
 ## QAAS admin API
 
+- `getState` is used to determine the state and key identifiers of the first even and odd parity keys respectively.
+
+- `setState` is used to set the state of kdc and synchronize keys
 
 ### 0x03: `getState` request
 
@@ -179,10 +182,6 @@ explanation:
 `02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
 
 ### 0xfd: `getState` response
-
-description:
-
-> `getState` is used to determine the state and key identifiers of the first even and odd parity keys respectively.
 
 returns:
 
