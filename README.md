@@ -180,6 +180,8 @@ explanation:
 
 ### 0xfd: `getState` response
 
+> `getState` is used to determine the state of the kdc and for kdc synchronization purposes the first key identifier of each parity.
+
 returns:
 
 1. error code
@@ -189,6 +191,10 @@ returns:
 3. crypto nonce
 
 4. kdc state id
+	
+	- `EMPTY` = 0
+	- `RECEIVING` = 1
+	- `RUNNING` = 2
 
 5. even key id
 
