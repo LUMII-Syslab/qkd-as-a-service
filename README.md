@@ -22,6 +22,51 @@ Table of Contents:
 
 ## Starting the service & Configuration
 
+Repository's layout:
+
+```
+.
+├── centis
+│   ├── node_modules
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── public
+│   ├── README.md
+│   ├── src
+│   ├── tsconfig.json
+│   └── yarn.lock
+├── README.md
+└── service
+    ├── api
+    ├── config.toml
+    ├── configure.go
+    ├── constants
+    ├── gatherers
+    ├── go.mod
+    ├── go.sum
+    ├── main.go
+    ├── manager
+    ├── models
+    ├── scripts
+    └── utils
+```
+
+The project consists of the QAAS itself (`service`) and the administration panel (`centis`).
+
+To run the `service` go language has to be installed. Afterwards:
+
+- cd into `service`
+
+- run `go run .`
+
+To run 'centis' npm has to be installed. Afterwards:
+
+- cd into `centis`
+
+- run `npm install`
+
+- run `npm start`
+    
 ## QAAS client API
 
 ### 0x01: `reserveKeyAndGetHalf` request
