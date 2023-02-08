@@ -42,7 +42,7 @@ func (k *KeyManager) getKeyLeft(id []byte) (keyLeft []byte, errId int) {
 	var key *Key
 	key, errId = k.getKey(id)
 	if errId != constants.NoError {
-		return nil, errId
+		return
 	}
 	keyLeft = key.KeyVal[:(len(key.KeyVal)+1)/2]
 	return

@@ -210,8 +210,8 @@ export function parseGKHRequest(msg_arr): GKHResponse {
     let data = ASNDERToList(msg_arr);
     let result = {} as GKHResponse;
     result.raw = msg_arr
-    result.cNonce = data[1] as number;
-    result.errCode = data[2] as number;
+    result.cNonce = data[2] as number;
+    result.errCode = data[0] as number;
     result.thisHalf = data[3] as Uint8Array;
     result.otherHash = data[4] as Uint8Array;
     result.hashAlgId = data[5] as Uint8Array;
