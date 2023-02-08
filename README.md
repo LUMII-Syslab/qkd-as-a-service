@@ -1,6 +1,7 @@
 # QKD as a Service (QAAS)
 
-[QAAS client API](#qaas-client-api) 
+1. [QAAS client API](#qaas-client-api)
+  1. [0x01: `reserveKeyAndGetHalf` request](#0x01-reservekeyandgethalf-request)
 
 ## QAAS client API
 
