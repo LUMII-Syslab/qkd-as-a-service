@@ -12,8 +12,7 @@ Table of Contents:
 	2. [0xfd: `getState` response](#0xfd-getstate-response)
 	3. [0x04: `setState` request](#0x04-setstate-request)
 	4. [0xfc: `setState` response](#0xfc-setstate-response)
-3. [Error codes & Other constants]
-	1. [Error codes](#error-codes)
+3. [Error codes & Other constants](#error-codes--other-constants)
 
 ## QAAS client API
 
