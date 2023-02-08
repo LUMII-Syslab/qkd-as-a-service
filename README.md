@@ -1,6 +1,6 @@
 # QKD as a Service (QAAS)
 
-[QAAS client API](#QAAS client API ) 
+[QAAS client API](#qaas-client-api) 
 
 ## QAAS client API
 
