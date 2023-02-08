@@ -2,22 +2,25 @@
 
 Table of Contents:
 
-1. [QAAS client API](#qaas-client-api)
+1. [Starting the service & Configuration](#starting-the-service--configuration)
+2. [QAAS client API](#qaas-client-api)
 	1. [0x01: `reserveKeyAndGetHalf` request](#0x01-reservekeyandgethalf-request)
 	2. [0xff: `reserveKeyAndGetHalf` response](#0xff-reservekeyandgethalf-response)
 	3. [0x02: `getKeyHalf` request](#0x02-getKeyHalf-request)
 	4. [0xfe: `getKeyHalf` response](#0xfe-getKeyHalf-response)
-2. [QAAS admin API](#qaas-admin-api)
+3. [QAAS admin API](#qaas-admin-api)
 	1. [0x03: `getState` request](#0x03-getstate-request)
 	2. [0xfd: `getState` response](#0xfd-getstate-response)
 	3. [0x04: `setState` request](#0x04-setstate-request)
 	4. [0xfc: `setState` response](#0xfc-setstate-response)
-3. [API Error codes & Other constants](#error-codes--other-constants)
-4. [QAAS software structure & operation](#qaas-software-structure--operation)
+4. [API Error codes & Other constants](#error-codes--other-constants)
+5. [QAAS software structure & operation](#qaas-software-structure--operation)
 	1. [Key Gathering](#key-gathering)
 	2. [Handling `reserveKeyAndGetHalf` requests](#handling-reservekeyandgethalf-requests)
 	3. [Handling `getKeyHalf` requests](#handling-getkeyhalf-requests)
 	4. [KDC Synchronisation](#kdc-synchronisation)
+
+## Starting the service & Configuration
 
 ## QAAS client API
 
