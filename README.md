@@ -204,9 +204,9 @@ returns:
 
 ### 0x04: `setState` request
 
-## 0x05:`getStatistics` request
+### 0x05:`getStatistics` request
 
-## Error codes
+## Error codes & Other constants
 
 error codes: 
 - NoError          = 0
