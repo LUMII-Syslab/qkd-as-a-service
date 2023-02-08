@@ -15,13 +15,16 @@ func (c *Controller) handleGKHRequest(conn *websocket.Conn, sequence DERSequence
 		return
 	}
 
-	c.infoLogger.Printf("0x01 request %+v", request)
+	c.infoLogger.Printf("0x01 request %+v with c nonce %v", request, cNonce)
 
 	response := c.manager.GetKeyHalf(request)
 
 	c.infoLogger.Printf("0x01 response %+v", response)
 
 	err = conn.WriteMessage(websocket.BinaryMessage, encodeGKHResponse(response, cNonce+1))
+	if err != nil {
+		c.errorLogger.Println(err)
+	}
 }
 
 func parseGKHRequest(seq DERSequence) (request *models.GKHRequest, cNonce int, err error) {

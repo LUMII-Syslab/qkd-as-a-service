@@ -47,14 +47,15 @@ func (k *KeyManager) ReserveKeyAndGetHalf(_ *models.RKAGHRequest) (response *mod
 	return
 }
 
-func (k *KeyManager) GetState() (state int, keyId0 []byte, keyId1 []byte, errId int) {
+func (k *KeyManager) GetState(_ *models.GetStateRequest) (response *models.GetStateResponse) {
+	response = new(models.GetStateResponse)
 	keyManagerState := k.getManagerState()
 	if keyManagerState.ReservableSize == 0 {
-		state = constants.Empty
+		response.State = constants.Empty
 	} else if keyManagerState.Running == false {
-		state = constants.Receiving
+		response.State = constants.Receiving
 	} else {
-		state = constants.Running
+		response.State = constants.Running
 	}
 	return
 }
