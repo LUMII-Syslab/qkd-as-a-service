@@ -16,18 +16,18 @@ func main() {
 	var gatherer gatherers.KeyGatherer
 	switch config.Gatherer {
 	case "pseudorandom":
-		gatherer = gatherers.NewRandomKeyGatherer(32, 32)
+		gatherer = gatherers.NewRandomKeyGatherer(4, 4)
 	case "clavis":
 		gatherer = gatherers.NewClavisKeyGatherer(config.ClavisURL)
 	case "filesystem":
 		gatherer = gatherers.NewFileSystemKeyGatherer(config.FSGathererDir)
 	}
 
-	var infoEndpoint io.Writer
-	infoEndpoint = os.Stdout
+	var infoEndpoint io.Writer = os.Stdout
 	if !config.LogRequests {
 		infoEndpoint = io.Discard
 	}
+
 	if config.AijaEnabled {
 		aijaDebugLogger := log.New(os.Stdout, "AIJA DEBUG\t", log.Ldate|log.Ltime|log.Lshortfile)
 		aijaKeyManager := manager.NewKeyManager(config.MaxKeyCount, true, aijaDebugLogger)
@@ -35,8 +35,9 @@ func main() {
 
 		aijaInfoLogger := log.New(infoEndpoint, "AIJA INFO\t", log.Ldate|log.Ltime)
 		aijaErrorLogger := log.New(os.Stdout, "AIJA ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-		go api.ListenAndServe(aijaKeyManager, aijaInfoLogger, aijaErrorLogger, config.AijaAPIPort)
 
+		controller := api.NewController(aijaInfoLogger, aijaErrorLogger, aijaKeyManager)
+		go controller.ListenAndServe(config.AijaAPIPort)
 		go func() {
 			for {
 				time.Sleep(time.Second * 5)
@@ -54,7 +55,8 @@ func main() {
 		brencisInfoLogger := log.New(infoEndpoint, "BRENCIS INFO\t", log.Ldate|log.Ltime)
 		brencisErrorLogger := log.New(os.Stdout, "BRENCIS ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-		go api.ListenAndServe(brencisKeyManager, brencisInfoLogger, brencisErrorLogger, config.BrencisAPiPort)
+		controller := api.NewController(brencisInfoLogger, brencisErrorLogger, brencisKeyManager)
+		go controller.ListenAndServe(config.BrencisAPiPort)
 		go func() {
 			for {
 				time.Sleep(time.Second * 5)

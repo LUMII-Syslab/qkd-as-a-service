@@ -3,7 +3,7 @@ package manager
 import (
 	"log"
 	"qkdc-service/constants"
-	"qkdc-service/logging"
+	"qkdc-service/models"
 )
 
 func NewKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger) *KeyManager {
@@ -14,34 +14,50 @@ func (k *KeyManager) AddKey(keyId []byte, keyVal []byte) error {
 	return k.addKey(keyId, keyVal)
 }
 
-func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, otherHash []byte, err *logging.KDCError) {
-	thisHalf, err = k.getThisHalf(keyId)
-	if err != nil {
+func (k *KeyManager) GetKeyThisHalfOtherHash(keyId []byte) (thisHalf []byte, otherHash []byte, errId int) {
+	thisHalf, errId = k.getThisHalf(keyId)
+	if errId != constants.NoError {
 		return
 	}
-	otherHash, err = k.getOtherHash(keyId)
+	otherHash, errId = k.getOtherHash(keyId)
 	return
 }
 
-func (k *KeyManager) ReserveKeyAndGetHalf() (keyId []byte, thisHalf []byte, otherHash []byte, err *logging.KDCError) {
-	key, err := k.extractKey()
-	if err != nil {
-		return
-	}
-	keyId = key.KeyId
-	thisHalf, otherHash, err = k.GetKeyThisHalfOtherHash(keyId)
+func (k *KeyManager) GetKeyHalf(request *models.GKHRequest) (response *models.GKHResponse) {
+	response = new(models.GKHResponse)
+	response.ThisHalf, response.OtherHash, response.ErrId = k.GetKeyThisHalfOtherHash(request.KeyId)
+	response.HashAlgId = k.HashAlgId
 	return
 }
 
-func (k *KeyManager) GetState() int {
-	state := k.getManagerState()
-	if state.ReservableSize == 0 {
-		return constants.Empty
-	} else if state.Running == false {
-		return constants.Receiving
+func (k *KeyManager) ReserveKeyAndGetHalf(_ *models.RKAGHRequest) (response *models.RKAGHResponse) {
+	response = new(models.RKAGHResponse)
+
+	key, errId := k.extractKey()
+
+	response.ErrId = errId
+	if response.ErrId != constants.NoError {
+		return
+	}
+
+	response.KeyId = key.KeyId
+	response.ThisHalf, response.OtherHash, response.ErrId = k.GetKeyThisHalfOtherHash(response.KeyId)
+	response.HashAlgId = k.HashAlgId
+
+	return
+}
+
+func (k *KeyManager) GetState(_ *models.GetStateRequest) (response *models.GetStateResponse) {
+	response = new(models.GetStateResponse)
+	keyManagerState := k.getManagerState()
+	if keyManagerState.ReservableSize == 0 {
+		response.State = constants.Empty
+	} else if keyManagerState.Running == false {
+		response.State = constants.Receiving
 	} else {
-		return constants.Running
+		response.State = constants.Running
 	}
+	return
 }
 
 func (k *KeyManager) GetFullState() KeyManagerState {

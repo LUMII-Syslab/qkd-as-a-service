@@ -164,6 +164,9 @@ function GKHResponseTable({response}: { response: GKHResponse }) {
         </legend>
 
         <div className="collapse" id="gkh-response-table">
+            <div className="flex-grow-1 my-3 border p-2">
+                ASN.1 encoded response: <code>{response && response.raw && bytesToSpacedHexOctets(response.raw)}</code>
+            </div>
             <table className="table table-bordered w-100" style={{tableLayout: "fixed"}}>
                 <colgroup>
                     <col span={1} style={{width: "20%"}}/>

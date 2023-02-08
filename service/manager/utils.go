@@ -3,10 +3,9 @@ package manager
 import (
 	"golang.org/x/crypto/sha3"
 	"qkdc-service/constants"
-	"qkdc-service/logging"
 )
 
-func (k *KeyManager) getThisHalf(keyId []byte) ([]byte, *logging.KDCError) {
+func (k *KeyManager) getThisHalf(keyId []byte) (thisHalf []byte, errId int) {
 	if k.aija {
 		return k.getKeyLeft(keyId)
 	} else {
@@ -14,7 +13,7 @@ func (k *KeyManager) getThisHalf(keyId []byte) ([]byte, *logging.KDCError) {
 	}
 }
 
-func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, *logging.KDCError) {
+func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, int) {
 	if k.aija {
 		return k.getKeyRightHash(keyId)
 	} else {
@@ -22,53 +21,63 @@ func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, *logging.KDCError) {
 	}
 }
 
-func (k *KeyManager) getShake128Hash(data []byte) (hash []byte, err error) {
+func (k *KeyManager) getShake128Hash(data []byte) (hash []byte, errId int) {
 	h := sha3.NewShake128()
-	hash = make([]byte, 128)
-	_, err = h.Write(data)
+	hash = make([]byte, 0)
+	_, err := h.Write(data)
 	if err != nil {
+		errId = constants.ErrorInternal
 		return
 	}
 	_, err = h.Read(hash)
+	if err != nil {
+		errId = constants.ErrorInternal
+		return
+	}
+	hash = []byte{1, 2}
 	return
 }
 
-func (k *KeyManager) getKeyLeft(id []byte) ([]byte, *logging.KDCError) {
-	res, err := k.getKey(id)
-	if err != nil {
-		return nil, err
+func (k *KeyManager) getKeyLeft(id []byte) (keyLeft []byte, errId int) {
+	var key *Key
+	key, errId = k.getKey(id)
+	if errId != constants.NoError {
+		return
 	}
-	return res.KeyVal[:len(res.KeyVal)/2+1], nil
+	keyLeft = key.KeyVal[:(len(key.KeyVal)+1)/2]
+	return
 }
 
-func (k *KeyManager) getKeyLeftHash(id []byte) ([]byte, *logging.KDCError) {
-	data, kdcErr := k.getKeyLeft(id)
-	if kdcErr != nil {
-		return nil, kdcErr
+func (k *KeyManager) getKeyLeftHash(id []byte) (leftHash []byte, errId int) {
+	data, errId := k.getKeyLeft(id)
+	if errId != constants.NoError {
+		return
 	}
-	hash, err := k.getShake128Hash(data)
-	if err != nil {
-		return nil, logging.NewKDCError(constants.ErrorInternal, err)
+	leftHash, errId = k.getShake128Hash(data)
+	if errId != constants.NoError {
+		return
 	}
-	return hash, nil
+	return
 }
 
-func (k *KeyManager) getKeyRight(id []byte) ([]byte, *logging.KDCError) {
-	res, err := k.getKey(id)
-	if err != nil {
-		return nil, err
+func (k *KeyManager) getKeyRight(id []byte) (keyRight []byte, errId int) {
+	var key *Key
+	key, errId = k.getKey(id)
+	if errId != constants.NoError {
+		return
 	}
-	return res.KeyVal[len(res.KeyVal)/2+1:], nil
+	keyRight = key.KeyVal[(len(key.KeyVal)+1)/2:]
+	return
 }
 
-func (k *KeyManager) getKeyRightHash(id []byte) ([]byte, *logging.KDCError) {
-	data, kdcErr := k.getKeyRight(id)
-	if kdcErr != nil {
-		return nil, kdcErr
+func (k *KeyManager) getKeyRightHash(id []byte) (rightHash []byte, errId int) {
+	data, errId := k.getKeyRight(id)
+	if errId != constants.NoError {
+		return
 	}
-	hash, err := k.getShake128Hash(data)
-	if err != nil {
-		return nil, logging.NewKDCError(constants.ErrorInternal, err)
+	rightHash, errId = k.getShake128Hash(data)
+	if errId != constants.NoError {
+		return
 	}
-	return hash, nil
+	return
 }
