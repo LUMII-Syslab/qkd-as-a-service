@@ -2,3 +2,5 @@
 /libs
 install.sh
 .idea
+.DS_Store
+*.lock
