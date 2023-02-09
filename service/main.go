@@ -16,7 +16,7 @@ func main() {
 	var gatherer gatherers.KeyGatherer
 	switch config.Gatherer {
 	case "pseudorandom":
-		gatherer = gatherers.NewRandomKeyGatherer(4, 4)
+		gatherer = gatherers.NewRandomKeyGatherer(8, 4)
 	case "clavis":
 		gatherer = gatherers.NewClavisKeyGatherer(config.ClavisURL)
 	case "filesystem":

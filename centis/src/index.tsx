@@ -1,17 +1,19 @@
-import {StrictMode, useEffect, useState} from 'react';
+import {StrictMode, useContext, useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './styles/custom.scss';
 
 import KDCConfig from "./components/KeyDistributionCenterConf";
-import ReserveKeyAndGetHalf from "./components/ReserveKeyAndGetHalf";
 import GetKeyHalf from "./components/GetKeyHalf";
 import WatchKeys from "./components/WatchKeys";
+import ReserveKey from "./components/ReserveKey";
+import GetState from './components/GetState';
+
+import {ConfigContext} from "./utils/config-context";
 
 // @ts-ignore
 import diagram from './images/diagram.png';
-import GetState from './components/GetState';
 
 const root = createRoot(document.getElementById('root'));
 
@@ -22,11 +24,8 @@ root.render(
 );
 
 function App() {
-    let [config, setConfig] = useState({
-        aijaEndpoint: "ws://localhost:8080/ws",
-        brencisEndpoint: "ws://localhost:8081/ws",
-        password: "123456789"
-    })
+    const configContext = useContext(ConfigContext)
+    let [config, setConfig] = useState(configContext)
 
     let [aijaConnError, setAijaConnError] = useState(null as string)
     let [brencisConnError, setBrencisConnError] = useState(null as string)
@@ -81,13 +80,14 @@ function App() {
             </div>
             {(!aijaConnError && !brencisConnError) && !testingConnections &&
                 <>
-                    <h2 className={"mt-5"}>Requests</h2>
-                    <ReserveKeyAndGetHalf config={config}/>
-                    <GetKeyHalf config={config}/>
-                    <GetState config={config}/>
-                    <h2 className={"mt-5"}>Monitoring</h2>
-                    <WatchKeys config={config}/>
-
+                    <ConfigContext.Provider value={config}>
+                        <h2 className={"mt-5"}>Requests</h2>
+                        <ReserveKey/>
+                        <GetKeyHalf config={config}/>
+                        <GetState config={config}/>
+                        <h2 className={"mt-5"}>Monitoring</h2>
+                        <WatchKeys config={config}/>
+                    </ConfigContext.Provider>
                 </>
             }
         </main>

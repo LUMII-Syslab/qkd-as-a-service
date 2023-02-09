@@ -1,11 +1,12 @@
 import {useEffect, useRef, useState} from "react";
 import {
-    wsConnect,
-    wsSendRequest,
-    encodeRKAGHRequest,
-    parseRKAGHResponse,
     encodeGKHRequest, bytesToHexOctets, parseGKHRequest, bytesToSpacedHexOctets
 } from "../utils/utils";
+import {
+    wsConnect,
+    wsSendRequest
+} from "../utils/promise-ws";
+import {decodeReserveKeyResponse, encodeReserveKeyRequest} from "../utils/reserve-key-req";
 
 interface WatchKeysTableRow {
     KeyId: Uint8Array,
@@ -41,14 +42,14 @@ export default function WatchKeys({config}) {
 
             let result = {} as WatchKeysTableRow
 
-            let [rkaghReq, rkaghError] = encodeRKAGHRequest({
+            let [rkaghReq, rkaghError] = encodeReserveKeyRequest({
                 keyLength: 256,
                 cNonce: 42069
             })
             if (rkaghError) {
                 console.error(rkaghError)
             }
-            let rkaghResp = parseRKAGHResponse(await wsSendRequest(aijaWS, rkaghReq))
+            let rkaghResp = decodeReserveKeyResponse(await wsSendRequest(aijaWS, rkaghReq))
 
             let [gkhReq, gkhError] = encodeGKHRequest({
                 keyId: bytesToHexOctets(rkaghResp.keyId),

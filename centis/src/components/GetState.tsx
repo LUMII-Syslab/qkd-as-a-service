@@ -1,24 +1,34 @@
 import {
-    bytesToSpacedHexOctets, encodeGetStateRequest,
-    GetStateRequest,
-    GetStateResponse, parseGetStateResponse,
-    validateGetStateRequest,
+    bytesToSpacedHexOctets
+} from "../utils/utils";
+import {
     wsConnect,
     wsSendRequest
-} from "../utils/utils";
+} from "../utils/promise-ws";
+import {
+    GetStateRequest,
+    GetStateResponse,
+    validateGetStateRequest,
+    encodeGetStateRequest,
+    parseGetStateResponse
+} from "../utils/get-state-req";
 import {useEffect, useRef, useState} from "react";
 import {Collapse} from "bootstrap";
 
+
+// // show response table
+// let collapsable = document.getElementById('getstate-response-table')
+// if (!collapsable.classList.contains('show')) {
+//     new Collapse('#getstate-response-table')
+// }
 export default function GetState({config}) {
     let [request, setRequest] = useState({
         cNonce: 42069,
     } as GetStateRequest)
 
-    let [response, setResponse] = useState(null as GetStateResponse)
+    let [response, setResponse] = useState(null as Uint8Array)
     let [endpoint, setEndpoint] = useState(config.aijaEndpoint)
     let [error, setError] = useState(null as string)
-
-    console.log(response)
 
     function setKDC(kdc) {
         if (kdc === "Aija") {
@@ -90,15 +100,7 @@ function GetStateSubmission({
             const socket = await wsConnect(endpoint);
             let response = await wsSendRequest(socket, encodedRequest);
             socket.close();
-            let parsed = parseGetStateResponse(response);
-            console.log(parsed)
-            setResponse(parsed)
-
-            // show response table
-            let collapsable = document.getElementById('getstate-response-table')
-            if (!collapsable.classList.contains('show')) {
-                new Collapse('#getstate-response-table')
-            }
+            setResponse(response);
         } catch (error) {
             alert("websocket connection failed: " + error.message)
         }
@@ -113,7 +115,7 @@ function GetStateSubmission({
     </div>)
 }
 
-function GetStateResponseTable({response}: { response: GetStateResponse }) {
+function GetStateResponseTable({response}) {
     let [collapseIcon, setCollapseIcon] = useState("bi-caret-down")
     const respTableCollapse = useRef(null)
 
@@ -131,6 +133,9 @@ function GetStateResponseTable({response}: { response: GetStateResponse }) {
 
     }, [])
 
+    useEffect(()=>{
+    },[response])
+
     return (<fieldset>
         <legend>
             <button className="btn nav-link" onClick={() => {
@@ -140,6 +145,9 @@ function GetStateResponseTable({response}: { response: GetStateResponse }) {
         </legend>
 
         <div className="collapse" id="getstate-response-table">
+            <div className="mb-3 border p-2">
+                ASN.1 encoded response: <code>{response && bytesToSpacedHexOctets(response)}</code>
+            </div>
             <table className="table table-bordered">
                 <colgroup>
                     <col span={1} style={{width: "20%"}}/>

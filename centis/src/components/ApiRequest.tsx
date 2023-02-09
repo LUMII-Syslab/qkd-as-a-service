@@ -1,0 +1,118 @@
+import {useEffect, useRef, useState} from "react";
+import {bytesToHexOctets, bytesToSpacedHexOctets, GKHResponse} from "../utils/utils";
+import {Collapse} from "bootstrap";
+import {wsConnect, wsSendRequest} from "../utils/promise-ws";
+import {ReserveKeyRequest} from "../utils/reserve-key-req";
+
+export default function ApiRequest({name, encodedRequest, endpoint, responseDecoder, error, children}) {
+    let [encodedResponse, setEncodedResponse] = useState(null as Uint8Array)
+
+    return (
+        <fieldset className={"p-3 my-3 shadow-sm border"}>
+            <legend><code>{name}</code> request</legend>
+            <RequestConfig children={children}/>
+            {error && <div className="alert alert-danger my-3 alert-dismissible fade show" role="alert"> {error}</div>}
+            {!error && <RequestSubmission encodedRequest={encodedRequest} endpoint={endpoint} setEncodedResponse={setEncodedResponse}/>}
+            <ResponseTable encodedResponse={encodedResponse} responseDecoder={responseDecoder}/>
+        </fieldset>
+    )
+}
+
+function RequestConfig({children}) {
+    return (
+        <div className="row">
+            {children.map((child, index) => <div className={"col-3"} key={index}>{child}</div>)}
+        </div>
+    )
+}
+
+function RequestSubmission({encodedRequest, endpoint, setEncodedResponse}) {
+    function submit() {
+        wsConnect(endpoint)
+            .then(ws => wsSendRequest(ws, encodedRequest))
+            .then(setEncodedResponse)
+    }
+
+    return (
+        <div className="row">
+            <div className="my-3 w-100 d-flex">
+                <div className="flex-grow-1 me-3 border p-2">
+                    ASN.1 encoded request: <code>{encodedRequest && bytesToSpacedHexOctets(encodedRequest)}</code>
+                </div>
+                <button className="ms-3 btn btn-outline-primary btn-sm" onClick={submit}>SEND REQUEST</button>
+            </div>
+        </div>
+    )
+}
+
+function ResponseTable({encodedResponse, responseDecoder}) {
+    let [collapseIcon, setCollapseIcon] = useState("bi-caret-down")
+    const respTableCollapse = useRef(null)
+    const collapsableRef = useRef(null)
+
+    useEffect(() => {
+        const collapsable = collapsableRef.current
+        respTableCollapse.current = new Collapse(collapsable, {
+            toggle: !!encodedResponse
+        })
+        collapsable.addEventListener('hidden.bs.collapse', () => {
+            setCollapseIcon("bi-caret-down")
+        })
+        collapsable.addEventListener('shown.bs.collapse', () => {
+            setCollapseIcon("bi-caret-up")
+        })
+
+    }, [])
+
+    useEffect(() => {
+        if (encodedResponse) {
+            respTableCollapse.current.show()
+        }
+    }, [encodedResponse])
+
+    const decoded = responseDecoder(encodedResponse);
+
+    function formatObjectKey(name: string): string {
+        let res = ""
+        for (let i = 0; i < name.length; i++) {
+            if (name[i] === name[i].toUpperCase()) {
+                res += " "
+            }
+            res += name[i].toLowerCase()
+        }
+        return res
+    }
+
+    return (
+        <fieldset>
+            <legend>
+                <button className="btn nav-link" onClick={() => {
+                    respTableCollapse.current.toggle()
+                    setCollapseIcon(collapseIcon === "bi-caret-down" ? "bi-caret-up" : "bi-caret-down")
+                }}>response <i className={`bi ${collapseIcon} small align-bottom`}></i></button>
+            </legend>
+            <div className="collapse" ref={collapsableRef}>
+                <div className="mb-3 border p-2">
+                    ASN.1 encoded
+                    response: <code>{bytesToSpacedHexOctets(encodedResponse)}</code>
+                </div>
+                <table className="table table-bordered" style={{tableLayout: "fixed"}}>
+                    <colgroup>
+                        <col span={1} style={{width: "20%"}}/>
+                        <col span={1} style={{width: "80%"}}/>
+                    </colgroup>
+                    <tbody>
+                    {decoded && Object.keys(decoded).map((key) => {
+                        return (
+                            <tr key={key}>
+                                <td>{formatObjectKey(key)}</td>
+                                <td>{decoded[key]}</td>
+                            </tr>
+                        )
+                    })}
+                    </tbody>
+                </table>
+            </div>
+        </fieldset>
+    )
+}

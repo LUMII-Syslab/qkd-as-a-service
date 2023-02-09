@@ -7,9 +7,11 @@ import {
     GKHResponse,
     parseGKHRequest,
     validateGKHRequest,
+} from '../utils/utils';
+import {
     wsConnect,
     wsSendRequest
-} from '../utils/utils';
+} from "../utils/promise-ws";
 import {Collapse} from "bootstrap";
 
 
@@ -164,10 +166,10 @@ function GKHResponseTable({response}: { response: GKHResponse }) {
         </legend>
 
         <div className="collapse" id="gkh-response-table">
-            <div className="flex-grow-1 my-3 border p-2">
+            <div className="mb-3 border p-2">
                 ASN.1 encoded response: <code>{response && response.raw && bytesToSpacedHexOctets(response.raw)}</code>
             </div>
-            <table className="table table-bordered w-100" style={{tableLayout: "fixed"}}>
+            <table className="table table-bordered" style={{tableLayout: "fixed"}}>
                 <colgroup>
                     <col span={1} style={{width: "20%"}}/>
                     <col span={1} style={{width: "80%"}}/>
