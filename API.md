@@ -1,303 +1,292 @@
-# QKD API
+# QKD as a Service (QAAS)
 
-Alice un Bob ir IDQ Clavis3 iekārtas
+Table of Contents:
 
-Aija un Brencis ir Quantum Key Distribution Centres (QKDC), DELL datori
+1. [QAAS client API](#qaas-client-api)
+  1. [0x01: `reserveKeyAndGetHalf` request](#0x01-reservekeyandgethalf-request)
+  2. [0xff: `reserveKeyAndGetHalf` response](#0xff-reservekeyandgethalf-response)
+  3. [0x02: `getKeyHalf` request](#0x02-getKeyHalf-request)
+  4. [0xfe: `getKeyHalf` response](#0xfe-getKeyHalf-response)
+2. [QAAS admin API](#qaas-admin-api)
+  1. [0x03: `getState` request](#0x03-getstate-request)
+  2. [0xfd: `getState` response](#0xfd-getstate-response)
+  3. [0x04: `setState` request](#0x04-setstate-request)
+  4. [0xfc: `setState` response](#0xfc-setstate-response)
+3. [API Error codes & Other constants](#error-codes--other-constants)
+4. [QAAS software structure & operation](#qaas-software-structure--operation)
+  1. [Key Gathering](#key-gathering)
+  2. [Handling `reserveKeyAndGetHalf` requests](#handling-reservekeyandgethalf-requests)
+  3. [Handling `getKeyHalf` requests](#handling-getkeyhalf-requests)
+  4. [KDC Synchronisation](#kdc-synchronisation)
 
-Aija un Brencis realizē divus API: QKD Client API (starp QKD klientu un QKD service) and Synchronization API (nav publisks, izmanto starp Ariju un Brenci)
+## Starting the service & Configuration
 
-Divus QKD klientus, kas grib izveidot TLS konekciju ar QKD palīdzību, sauksim par Sender and Receiver (TLS konekciju iniciē Sender) - in order not to confuse them with the client and the server from the QKD Client API viewpoint.
+Repository's layout:
 
-TLS konekciju starp Sender un Receiver sauksim par **TLS with remote QKDC**.
+```
+.
+├── centis
+│   ├── node_modules
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── public
+│   ├── README.md
+│   ├── src
+│   ├── tsconfig.json
+│   └── yarn.lock
+├── README.md
+└── service
+    ├── api
+    ├── config.toml
+    ├── configure.go
+    ├── constants
+    ├── gatherers
+    ├── go.mod
+    ├── go.sum
+    ├── main.go
+    ├── manager
+    ├── models
+    ├── scripts
+    └── utils
+```
 
-TLS konekciju starp Aiju un Brenci (Synchronization API) sauksim par **TLS with direct QKD**.
+The project consists of the QAAS itself (`service`) and the administration panel (`centis`).
 
-Tie būs 2 atšķirīgi TLS papildinājumi no mūsu puses.
+To run the `service` go language has to be installed. Afterwards:
 
-Gan Aija, gan Brencis visu laiku saņem atslēgas no Alice un Bob (caur zmq+msgpack) un ieliek atmiņā (līdz 1M atslēgam, kas atbilst 1+ diennaktij) divos “maisos”: pāra un nepāra; vecās atslēgas (pirms pēdējā miljona) tiek automātiski izmestas (e.g., scheduled thread reizi minūtē)
+- cd into `service`
 
-Gan Aijā, gan Brencī darbojas QKDC web service (valodā Go), kas arī realizē QKDC Client API. Turklāt, Brencis pildīs Synchronization API servera lomu, bet Aija pieslēdzas Brencim kā Synchronization API client.
+- run `go run .`
 
-Visi API tiek izmantoti caur web sockets.
+To run 'centis' npm has to be installed. Afterwards:
 
-# QKDC Client API
+- cd into `centis`
 
-Klienti (Sender un Receiver) pieslēdzas QKDC Aijai un QKDC Brencim, kur darbojas HTTPS proxy (HAProxy with open-quantum-safe library, liboqs), kas forwardē koneckijas uz QKDC web service (valodā Go), kas klausās nešifrētu HTTP web socket konekciju un realizē QKDC Client API.
+- run `npm install`
 
-Klienti (Sender un Receiver) validē Aiju un Brenci, pārbaudot, ka to serveru sertifikāti ir parakstīti ar uzticamo CA no ca.truststore (HAProxy sūta visiem klientiem savu servera sertifikātu).
+- run `npm start`
+  
+## QAAS client API
 
-HAProxy uz Aijas un uz Brenča autentificē klientus (Sender un Receiver), pārbaudot to klienta sertifikātus - vai tie ir parakstīti ar uzticamo CA no ca.truststore (tur būs Aijas CA un Brenča CA).
+### 0x01: `reserveKeyAndGetHalf` request
 
-# 
+parameters:
 
-Iespējamas 4 konekcijas: (Sender,Receiver)<—>(Aija,Brencis)
+1. endpoint id = `0x01`
 
-Funkcijas:
+2. key length
 
-- [not used] reserveKey() → id (16 baiti) - it kā būtu loģiski izveidot šādu funkciju, bet lai samazinātu round-trip skaitu, reserveKey() vietā būs nākamā funkcija
-- 0x01: reserveKeyAndGetKeyHalf(…) → id, keyL|keyR, hashR|hashL
-  - Aija drīkst rezervēt tikai pāra atslēgas (0 mod 2), bet Brencis - nepāra (1 mod 2)
-- 0x02: getKeyHalf(id, …)
-  → keyL (128 bit), hashR (atgriež Aija)
-  → keyR (128 bit), hashL (atgriež Brencis)
-  - ja sender mums jau prasīja reserveKeyAndGetKeyHalf, tad getKeyHalf drīkst izsaukt tikai receiver tieši vienu reizi; pēc tam atslēga <id> tiek izdzēsta
-  - ja sender rezervēja atslēgu ne pie mums, tad jābūt tieši 2 getKeyHalf izsaukumiem (viens no sender, otrs - no receiver); pēc 2. izsaukuma, atslēga <id> tiek izdzēsta (vai pēc 1 sekundes kopš reserveKey - kas iestāsies ātrāk)
+3. crypto nonce
 
-Lai nokodētu funkcijas izsaukumu, kā arī atbildi, mēs izmantosim bināro ASN.1 notāciju. Uz doto brīdi katra ziņojuma garumam jābūt <2+127 baitiem (QKD web serviss to var pārbaudīt).
+encoded request example
 
-Lapa, kur var atkodēt ASN.1 ziņojumu: [https://lapo.it/asn1js/](https://lapo.it/asn1js/)
-
-## 0x01: **reserveKeyAndGetKeyHalf**
-
-TODO: extend with the domain name!
-
-Call example:
-
-```bnf
+```
 30 0B 02 01 01 02 02 01 00 02 02 30 39
 ```
 
-30 0B
+explanation:
 
-sequence (0x30), len=0x0B=11 baiti (kopējais garums, neskaitot tekošos 2 baitus)
+`30` `0b`: sequence type (`0x30`) with length `0x0b` = 11 bytes;
 
-02 01 **01**
+`02` `01` `01`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x01` = 1; ( **endpoint id** )
 
-integer (0x02), 1 baits, value = 1 === reserveKeyAndGetKeyHalf
+`02` `02` `01 00`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x0100` = 256; ( **key length** )
 
-02 02 **01 00**
+`02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
 
-integer(0x02), 2 bytes long: key length 0x0100=256 bits (in the future, we may need longer keys; QKDs can combine shorter keys, if needed)
+### 0xff: `reserveKeyAndGetHalf` response
 
-02 02 **30 39**
+returns:
 
-integer(0x02), any number of bytes long (2 bytes in this example): call#
+1. error code
 
-call# is used as nonce as well as a call id; call# must be ≥0 (the highest bit ≠ 1 in 2’s complement)
+2. response id = `0xff`
 
-Notice that reserveKeyAndGetKeyHalf can only be invoked from the sender client; thus, the sender bit is not beeing sent (the TLS handshake with QKD keys is always initiated by the sender)
+3. crypto nonce
 
-return:
+4. key identifier
 
-```bnf
-30 48 02 01 **FF** 02 02 **30 39** 04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F** 04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F** 04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F** 06 09 **60 86 48 01 65 03 04 02 11**
+5. half of key bytes
+
+6. hash(the other half)
+
+7. hash algorithm id = `0x608648016503040211`
+
+encoded return example:
+
+```
+30 23 02 01 00 02 01 ff 02 02 a4 55 04 04 28 8b de 07 04 02 21 a1 04 02 01 02 06 09 60 86 48 01 65 03 04 02 11
 ```
 
-30 48
+explanation:
 
-sequence (0x30), len=0x48=72=2+3+(4=call#)+(2+16=key id)+(2+16=keyL)+(2+16=hashR)+11(algorithm shake128)
+`30` `23`: sequence type (`0x30`) with length `0x23` = 35 bytes;
 
-02 01 **FF**
+`02` `01` `00`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x00` = 0; ( **error code** )
 
-integer (0x20, 1 baits, value = -1 === reserveKeyAndGetKeyHalf result
+`02` `01` `ff`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0xff` = 255; ( **response id** )
 
-02 02 **30 39**
+`02` `02` `a4 55`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0xa455` = 42069; ( **crypto nonce** )
 
-integer(0x20), 2 bytes long: call# === nonce (can be longer or shorter ASN.1 integer up to 127 bytes long; must be ≥0, the highest bit ≠ 1 in 2’s complement)
+`04` `04` `28 8b de 07`: byte array (`0x04`) with length `0x04` = 4 bytes; ( **key identifier** )
 
-02 01 **00**
+`04` `02` `21 a1`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **half of key bytes** )
 
-integer(0x20), 1 byte long: error code (if non-zero, a web socket will send back also a string message)
+`04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **hash(the other half)** )
 
-04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F**
+`06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** )
 
-byte array (0x04, octet string), len=0x10=16: key id (128 biti)
+### 0x02: `getKeyHalf` request
 
-04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F**
+1. endpoint id = `0x01`
 
-byte array (0x04, octet string), len=0x10=16: key[left] (if returned from Aija) or key[right] (if from Brencis)
+2. key length
 
-04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F**
+3. key identifier
 
-byte array (0x04, octet string), len=0x10=16: shake128(key[right]) (if returned from Aija) or shake128(key[left]) if returnedfrom Brencis
+4. crypto nonce
 
-06 09 **60 86 48 01 65 03 04 02 11**
+encoded request example
 
-object identifier (0x06), 9 bytes, hash algorithm id: currently shake 128 hash algorithm with NIST id 2.16.840.1.101.3.4.2.11=[2*40+16=96=0x60; 840=0x348=0x86,0x48 [7-bit encoding]; 0x01; 0x65; 0x03; 0x04; 0x02; 0x11] ([https://datatracker.ietf.org/doc/html/rfc8702](https://datatracker.ietf.org/doc/html/rfc8702))
-
-## **getKeyHalf**
-
-Call example:
-
-```bnf
-30 1C 02 01 **02** 02 02 **01 00** 04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F** 01 01 **00** 02 02 **30 3A**
+```
+30 11 02 01 02 02 02 01 00 04 04 40 af a0 1f 02 02 30 39
 ```
 
-30 1C 
+explanation:
 
-sequence (0x30), len=0x1C=28
+`30` `11`: sequence type (`0x30`) with length `0x11` = 17 bytes;
 
-02 01 **02**
+`02` `01` `02`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x02` = 2; ( **endpoint id** )
 
-integer (0x02), 1 byte, value = 2 === getKeyHalf
+`02` `02` `01 00`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x0100` = 256; ( **key length** )
 
-02 02 **01 00**
+`04` `04` `40 af a0 1f`: byte array (`0x04`) with length `0x04` = 4 bytes; ( **key identifier** )
 
-integer(0x02), 2 bytes long: key length 0x0100=256 bits (in the future, we may need longer keys; QKDs can combine shorter keys, if needed)
+`02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
 
-04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F**
 
-byte array (0x04, octet string), len=0x10=16: key id (128 biti)
+### 0xfe: `getKeyHalf` response
 
-01 01 **00**
+returns:
 
-boolean (0x01), 1 byte long: value=00=false for submitter; FF=true for receiver
+1. error code
 
-02 02 **30 3A**
+2. response id = `0xff`
 
-integer(0x20), 2 bytes long: call# === nonce (can be longer or shorter ASN.1 integer up to 127 bytes long; must be ≥0, the highest bit ≠ 1 in 2’s complement)
+3. crypto nonce
 
-return:
+4. half of key bytes
 
-```bnf
-30 39 02 01 **FE** 02 02 **30 3A** 02 01 **00** 04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F** 04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F** 06 09 **60 86 48 01 65 03 04 02 11**
+5. hash(the other half)
+
+6. hash algorithm id = `0x608648016503040211`
+
+encoded response example:
+
+```
+30 1d 02 01 00 02 01 fe 02 02 30 3a 04 02 e1 5c 04 02 01 02 06 09 60 86 48 01 65 03 04 02 11
 ```
 
-30 39
+explanation:
 
-sequence (0x30), len=0x37=55=2+3+(4=call#)+(2+16=keyL)+(2+16=hashR)+11(algorithm shake128)
+`30` `1d`: sequence type (`0x30`) with length `0x1d` = 29 bytes;
 
-02 01 **FE** 
+`02` `01` `00`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x00` = 0; ( **error code** )
 
-integer (0x02), length=1 byte, value= -2 === getKeyHalf result
+`02` `01` `fe`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0xfe` = 254; ( **response id** )
 
-02 02 **30 3A**
+`02` `02` `30 3a`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x303a` = 12346; ( **crypto nonce** )
 
-integer(0x02), 2 bytes long: call#
+`04` `02` `e1 5c`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **half of key bytes** )
 
-02 01 **00**
+`04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **hash(the other half)** )
 
-integer(0x02), 1 byte long: error code (if non-zero, a web socket will send a string message)
+`06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** )
 
-04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F**
+## QAAS admin API
 
-byte array (0x04, octet string), len=0x10=16: key[left] (if returned from Aija) or key[right] (if from Brencis)
+- `getState` is used to determine the state and key identifiers of the first even and odd parity keys respectively.
 
-04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F**
+- `setState` is used to set the state of kdc and synchronize keys.
 
-byte array (0x04, octet string), len=0x10=16: shake128(key[right]) if returned from Aija or shake128(key[left]) if returned from Brencis
+### 0x03: `getState` request
 
-06 09 **60 86 48 01 65 03 04 02 11**
+parameters:
 
-object identifier (0x06), 9 bytes, hash algorithm id: currently shake 128 hash algorithm with NIST id 2.16.840.1.101.3.4.2.11=[2*40+16=96=0x60; 840=0x348=0x86,0x48 [7-bit encoding]; 0x01; 0x65; 0x03; 0x04; 0x02; 0x11] ([https://datatracker.ietf.org/doc/html/rfc8702](https://datatracker.ietf.org/doc/html/rfc8702))
+1. endpoint id = `0x03`
 
-**other**
+2. crypto nonce
 
-- the server checks the limit on message lengths (currently, ≤2+127 bytes)
-- the server ensures thread safety
-- the server checks for call# - each subsequent call# from the same user must be greater than the previous
+encoded request example:
 
-# Synchronization API (deprecated, use Control Protocol instead)
-
-Web socket starp Aiju un Brenci (uz Brenča darbojas PQC HAProxy).
-
-Aija validē Brenci, kuram servera sertifikātam jābūt parakstītam ar uzticamo CA no ca.truststore.
-
-HAProxy uz Brenča autentificē Aiju, pārbaudot Aijas klienta sertifikātu - vai tas ir parakstīts ar uzticamo CA (no ca.truststore).
-
-Synchronization API is needed, since it is costy to restart the QDK process (30 mins for Clavis3). However, sometimes Aija and Brencis web services need to be restarted (e.g., due to maintenance or software/hardware failure). However, we cannot guarantee the exactly same time moment when Aija and Brencis re-join Alice and Bob. Thus, one of Aija/Brencis could have more keys than the other.
-
-Funkcijas:
-
-- 0x04: syncFirstKey(id) → first-common-key-id
-  - palaižot Brenci, tas uzreiz mēģina ņemt atslēgas no Clavis;
-  - palaižot Aiju, tā mēģina pievienoties Brencim (caur IPSec?)
-  - gan Aija, gan Brencis izdzēš atslēgas, kas iegūtas agrāk par first-common-key-id;
-- 0x05: mirrorReserveKey(id) → void
-  - Aija sūta Brencim pāra atslēgas id, ko rezervējusi, atbildot uz Sender/Receiver reserveKey (ja process sākās pie Brenča, tas sūta Aijai nepāra atslēgas id…)
-  - kopš šī brīža, gan Aija, gan Brencis izmet doto atslēgu no atmiņas vai nu pēc diviem getKeyHalf izsaukumiem, vai pēc 1 sekundes (kas iestāsies ātrāk)
-  - funkcija ir vajadzīga, jo pēc atslēgas rezervācijas internets var pazust un Brencis nekad neizmetīs atslēgu, ko rezervēja Aija (un otrādi)
-
-## syncFirstKey
-
-```bnf
-30 15 02 01 **04** 04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F**
+```
+30 07 02 01 03 02 02 30 39
 ```
 
-30 15
+explanation:
 
-sequence (0x30), len=0x15=21
+`30` `07`: sequence type (`0x30`) with length `0x07` = 7 bytes;
 
-02 01 **04**
+`02` `01` `03`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x03` = 3; ( **endpoint id** )
 
-integer (0x02), 1 bytes, value = 4 === syncFirstKey
+`02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
 
-04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F**
+### 0xfd: `getState` response
 
-byte array (0x04, octet string), len=0x10=16: key id (128 biti)
+returns:
 
-return:
+1. error code
 
-```bnf
-30 18 02 01 **FC** 02 01 **00** 04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F**
-```
+2. response id = `0xfd`
 
-30 18
+3. crypto nonce
 
-sequence (0x30), len=0x18 = 24
+4. kdc state id
+	
+	- `EMPTY` = 0		( when there are no keys received from QKD device )
+	- `RECEIVING` = 1	( when at least one key has been received )
+	- `RUNNING` = 2		( when keys can be reserved by the users )
 
-02 01 **FC**
+5. even key id
 
-integer (0x02), 1 byte, value = 0xFC === -4 syncFirstKey result
+6. odd key id
 
-02 01 **00**
 
-integer(0x02), 1 byte long: error code (if non-zero, a web socket will send a string message)
+TODO
 
-04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F**
+### 0x04: `setState` request
 
-byte array (0x04, octet string), len=0x10=16: first-common-key-id
+TODO
 
-## mirrorReserveKey
+### 0x05:`getStatistics` request
 
-```bnf
-30 15 02 01 **05** 04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F**
-```
+TODO
 
-30 15
+## Error codes & Other constants
 
-sequence (0x30), len=0x15=21
+error codes: 
+- NoError          = 0
+- ErrorKeyNotFound = 1
+- ErrorNotRunning  = 2
+- ErrorInternal    = 3
+- ErrorInvalidReq  = 4
 
-02 01 **05**
+## QAAS software structure & operation
 
-integer (0x20), 1 byte, value = 5 === mirrorReserveKey
+TODO
 
-04 10 **00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F**
+### Key Gathering
 
-byte array (0x04, octet string), len=0x10=16: key id (128 biti)
+TODO
 
-return:
+### Handling `reserveKeyAndGetHalf` requests
 
-```bnf
-30 06 02 01 **FB** 02 01 **00**
-```
+TODO
 
-30 06
+### Handling `getKeyHalf` requests
 
-sequence (30), len=6
+TODO
 
-02 01 **FB**
+### KDC Synchronisation
 
-integer (0x02), 1 bytes, value = 0xFB === -5 mirrorReserveKey result
-
-02 01 **00**
-
-integer(0x02), 1 byte long: error code (if non-zero, a web socket will send a string message)
-
-Ik pēc 1 min. (?) Aija un Brencis pārtrauc Synchronization API savienojumu un izveido jaunu (lai nav visu laiku viena un tā pati simetriska atslēga). Pluss, ja ir failure, šis links ātri atjaunojas.
-
-Clavis3 QKD speed: ~400 keys / minute, we can borrow 1 for the synchronization link.
-
-## Vassal KDC
-
-Vassal KDC (VKDC) parazitē uz QKDC; tie krāj atslēgas no īstajiem QKCD Aijas un Brenča un izdala saviem “klientiem”.
-
-Sākumā VKDC1 un VKDC2 darbojas kā Sender un Receiver un dabū vienu simetrisko atslēgu, ko lieto TLS savienojumam starp VKDC1 un VKDC2. Tad VKDC1 ik pa brīdim prasa Aijai vai Brencim (ar varbūtību 1/2) norezervēt QKD key, tad saņem visu atslēgu no Aijas un Brenča (pa pusēm), un nosūta key id VKDC2, kurš arī saņem visu atslēgu no Aijas un Brenča (pa pusēm). VKDC1 un VKDC2 nokešo šādi iegūtas atslēgas, lai izdalītu tās saviem lietotājiem (bet ne mūsu lietotājiem). The rule in Feodal Medieval Europe: “My vassal's vassal is not my vassal”.
-
-Pēc 1 min. (?) VKDC1 vai VKDC2 pārtrauc savu TLS savienojumu, un izveido jaunu (lai nav visu laiku viena un tā pati simetriska atslēga, ar ko šifrē visas pārējās); jaunu savienojumu izveido lazy stilā - tad, kad vajag (kad abu VKDC atslēgu pool nav pilns).
-
-Authorization, Server validation for VKDC: the same.
-
-“Mazu” VKDC var lietot pašos Sender un Receiver, kas bieži komunicē savā starpā,  lai samazinātu round-trip time (atslēga tiek ņemta no lokālā VKDC, kas darbojas uz tā paša datora, nevis uz Aijas vai Brenča);
-
-Bez round-trip benefit, ir vēl šāds benefit: nevajag bieži pārbaudīt Aijas un Brenča sertifikātus, kā arī Aijai un Brencim nevajag katru reizi pārbaudīt Sender un Receiver.
+TODO
