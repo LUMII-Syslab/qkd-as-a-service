@@ -63,6 +63,8 @@ type KeyManagerState struct {
 	KeysServed     uint64
 	KeysDelayed    uint64
 	Running        bool
+	OldestOddKey   *Key
+	OldestEvenKey  *Key
 }
 
 func (k *KeyManager) getManagerState() KeyManagerState {
@@ -74,6 +76,8 @@ func (k *KeyManager) getManagerState() KeyManagerState {
 		KeysAdded:      k.keysAdded,
 		KeysServed:     k.keysServerd,
 		Running:        k.running,
+		OldestOddKey:   k.getOldestKey(false),
+		OldestEvenKey:  k.getOldestKey(true),
 	}
 }
 
@@ -162,10 +166,18 @@ func (k *KeyManager) extractKey() (key *Key, errId int) {
 	return &result, constants.NoError
 }
 
-// getFirstKey returns the first key in the queue that is either even or odd
-func (k *KeyManager) getFirstKey(even bool) ([]byte, error) {
+// getOldestKey returns the first key in the queue that is either even or odd
+func (k *KeyManager) getOldestKey(even bool) *Key {
 	k.mutex.Lock()
-
-	k.mutex.Unlock()
-	return []byte{}, nil
+	defer k.mutex.Unlock()
+	if k.all.Len() == 0 {
+		return nil
+	}
+	for i := 0; i < k.all.Len(); i++ {
+		if (utils.ByteSum(k.all.At(i).KeyVal)%2 == 0) == even {
+			val := k.all.At(i)
+			return &val
+		}
+	}
+	return nil
 }
