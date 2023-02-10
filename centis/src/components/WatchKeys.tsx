@@ -1,11 +1,13 @@
 import {useEffect, useRef, useState} from "react";
 import {
+    bytesToHexOctets, bytesToSpacedHexOctets
+} from "../utils/formatting-bytes";
+import {
     wsConnect,
-    wsSendRequest,
-    encodeRKAGHRequest,
-    parseRKAGHResponse,
-    encodeGKHRequest, bytesToHexOctets, parseGKHRequest, bytesToSpacedHexOctets
-} from "../utils/utils";
+    wsSendRequest
+} from "../utils/promise-ws";
+import {encodeReserveKeyRequest, decodeReserveKeyResponse} from "../utils/reserve-key-req";
+import {encodeGetKeyRequest, decodeGetKeyResponse} from "../utils/get-key-req";
 
 interface WatchKeysTableRow {
     KeyId: Uint8Array,
@@ -41,16 +43,16 @@ export default function WatchKeys({config}) {
 
             let result = {} as WatchKeysTableRow
 
-            let [rkaghReq, rkaghError] = encodeRKAGHRequest({
+            let [rkaghReq, rkaghError] = encodeReserveKeyRequest({
                 keyLength: 256,
                 cNonce: 42069
             })
             if (rkaghError) {
                 console.error(rkaghError)
             }
-            let rkaghResp = parseRKAGHResponse(await wsSendRequest(aijaWS, rkaghReq))
+            let rkaghResp = decodeReserveKeyResponse(await wsSendRequest(aijaWS, rkaghReq))
 
-            let [gkhReq, gkhError] = encodeGKHRequest({
+            let [gkhReq, gkhError] = encodeGetKeyRequest({
                 keyId: bytesToHexOctets(rkaghResp.keyId),
                 cNonce: 42069,
                 keyLength: 256,
@@ -58,7 +60,7 @@ export default function WatchKeys({config}) {
             if (gkhError) {
                 console.error(gkhError)
             }
-            let gkhResp = parseGKHRequest(await wsSendRequest(brencisWS, gkhReq))
+            let gkhResp = encodeGetKeyRequest(await wsSendRequest(brencisWS, gkhReq))
             result.KeyId = rkaghResp.keyId
             result.Left = rkaghResp.thisHalf
             result.Right = gkhResp.thisHalf

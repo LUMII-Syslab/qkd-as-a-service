@@ -1,6 +1,6 @@
 export default function KeyDistributionCenterConf({config, setConfig}: { config: any, setConfig: any }) {
     let handleAijaEndpointChange = (event: any) =>
-        setConfig({...config, brencisEndpoint: event.target.value})
+        setConfig({...config, aijaEndpoint: event.target.value})
 
     let handleBrencisEndpointChange = (event: any) =>
         setConfig({...config, brencisEndpoint: event.target.value})

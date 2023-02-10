@@ -1,31 +1,45 @@
 package api
 
-import "github.com/gorilla/websocket"
+import (
+	"errors"
+	"github.com/gorilla/websocket"
+	"qkdc-service/constants"
+	"qkdc-service/models"
+)
 
 func (c *Controller) handleSetStateRequest(conn *websocket.Conn, sequence DERSequence) {
-	// TODO: implement
-	//infoLogger.Println("0x04 sequence: (%v)", sequence)
-	//state, keyId0, keyId1, cNonce, err := parseSetStateRequest(sequence)
-	//if err != nil {
-	//	err = conn.WriteMessage(msgType, encodeErrResponse(constants.ErrorInvalidReq))
-	//	errorLogger.Println(err)
-	//	continue
-	//}
-	//
-	//infoLogger.Println("0x04 sequence: (%v)", state)
-	//infoLogger.Println("0x04 sequence: (%v)", keyId0)
-	//infoLogger.Println("0x04 sequence: (%v)", keyId1)
-	//infoLogger.Println("0x04 sequence: (%v)", cNonce)
-	//
-	//kdcErr := manager.SetState(state, keyId0, keyId1)
-	//errCode := 0
-	//if kdcErr != nil {
-	//	errCode = kdcErr.Code
-	//	errorLogger.Println(kdcErr.ToString())
-	//}
-	//
-	//infoLogger.Println("0x04 response c nonce: ", cNonce)
-	//infoLogger.Println("0x04 response err code:", errCode)
-	//
-	//err = conn.WriteMessage(msgType, encodeSetStateResponse(cNonce, errCode))
+	request, cNonce, err := parseSetStateRequest(sequence)
+	if err != nil {
+		c.errorLogger.Println(err)
+		return
+	}
+
+	c.infoLogger.Printf("0x03 request with c nonce %v", cNonce)
+
+	response := c.manager.SetState(request)
+
+	c.infoLogger.Printf("0x03 response %+v", response)
+
+	err = conn.WriteMessage(websocket.BinaryMessage, encodeSetStateResponse(response, cNonce+1))
+	if err != nil {
+		c.errorLogger.Println(err)
+	}
+}
+
+func parseSetStateRequest(seq DERSequence) (request *models.SetStateRequest, cNonce int, err error) {
+	if len(seq) != 2 {
+		err = errors.New("sequence of length 2 was expected")
+		return
+	}
+	request = &models.SetStateRequest{}
+	cNonce, request.KeyId0, request.KeyId1 = seq[1].AsInt(), seq[2].AsBytes(), seq[3].AsBytes()
+	return
+}
+
+func encodeSetStateResponse(response *models.SetStateResponse, cNonce int) []byte {
+	res := DERSequence{}
+	res = append(res, CreateIntSeqElement(response.ErrId))
+	res = append(res, CreateIntSeqElement(constants.SetStateResponse))
+	res = append(res, CreateIntSeqElement(cNonce))
+	return res.ToByteArray()
 }
