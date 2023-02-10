@@ -62,6 +62,13 @@ func (k *KeyManager) GetState(_ *models.GetStateRequest) (response *models.GetSt
 	return
 }
 
+func (k *KeyManager) SetState(_ *models.SetStateRequest) (response *models.SetStateResponse) {
+	response = new(models.SetStateResponse)
+	response.ErrId = constants.NoError
+	// TODO: implement
+	return
+}
+
 func (k *KeyManager) GetFullState() KeyManagerState {
 	return k.getManagerState()
 }
