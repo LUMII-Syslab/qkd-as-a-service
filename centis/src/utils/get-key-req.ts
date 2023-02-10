@@ -1,4 +1,4 @@
-import {ASNDERToList, hexOctetsToUint8Array, validateGKHRequest} from "./utils";
+import {ASNDERToList, hexOctetsToUint8Array} from "./formatting-bytes";
 
 export class GetKeyRequest {
     keyLength: number

@@ -1,4 +1,4 @@
-import { ASNDERToList } from "./utils";
+import { ASNDERToList } from "./formatting-bytes";
 
 export class GetStateRequest {
     cNonce: number

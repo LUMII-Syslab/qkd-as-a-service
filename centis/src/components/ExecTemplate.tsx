@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from "react";
-import {bytesToHexOctets, bytesToSpacedHexOctets} from "../utils/utils";
+import {bytesToHexOctets, bytesToSpacedHexOctets} from "../utils/formatting-bytes";
 import {Collapse} from "bootstrap";
 import {wsConnect, wsSendRequest} from "../utils/promise-ws";
 

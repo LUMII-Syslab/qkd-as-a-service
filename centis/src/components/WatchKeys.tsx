@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import {
-    bytesToHexOctets, parseGKHRequest, bytesToSpacedHexOctets
-} from "../utils/utils";
+    bytesToHexOctets, bytesToSpacedHexOctets
+} from "../utils/formatting-bytes";
 import {
     wsConnect,
     wsSendRequest
@@ -60,7 +60,7 @@ export default function WatchKeys({config}) {
             if (gkhError) {
                 console.error(gkhError)
             }
-            let gkhResp = parseGKHRequest(await wsSendRequest(brencisWS, gkhReq))
+            let gkhResp = encodeGetKeyRequest(await wsSendRequest(brencisWS, gkhReq))
             result.KeyId = rkaghResp.keyId
             result.Left = rkaghResp.thisHalf
             result.Right = gkhResp.thisHalf

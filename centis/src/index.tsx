@@ -14,6 +14,7 @@ import {ConfigContext} from "./utils/config-context";
 // @ts-ignore
 import diagram from './images/diagram.png';
 import ExecGetState from "./components/ExecGetState";
+import ExecSetState from "./components/ExecSetState";
 
 const root = createRoot(document.getElementById('root'));
 
@@ -85,6 +86,7 @@ function App() {
                         <ExecReserveKey/>
                         <ExecGetKeyHalf/>
                         <ExecGetState/>
+                        <ExecSetState/>
                         <h2 className={"mt-5"}>Monitoring</h2>
                         <WatchKeys config={config}/>
                     </ConfigContext.Provider>

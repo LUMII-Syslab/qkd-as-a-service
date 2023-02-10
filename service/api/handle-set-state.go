@@ -31,7 +31,8 @@ func parseSetStateRequest(seq DERSequence) (request *models.SetStateRequest, cNo
 		err = errors.New("sequence of length 2 was expected")
 		return
 	}
-	cNonce = seq[1].AsInt()
+	request = &models.SetStateRequest{}
+	cNonce, request.KeyId0, request.KeyId1 = seq[1].AsInt(), seq[2].AsBytes(), seq[3].AsBytes()
 	return
 }
 
