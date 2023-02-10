@@ -5,13 +5,13 @@ import {
     ReserveKeyRequest,
     validateReserveKeyRequest
 } from "../utils/reserve-key-req";
-import ApiRequest from "./ApiRequest";
+import ExecTemplate from "./ExecTemplate";
 import SelectKdc from "./SelectKdc";
 import InputKeyLength from "./InputKeyLength";
 import InputCryptoNonce from "./InputCryptoNonce";
 import {ConfigContext} from "../utils/config-context";
 
-export default function ReserveKey() {
+export default function ExecReserveKey() {
     const config = useContext(ConfigContext)
 
     let [request, setRequest] = useState({
@@ -26,11 +26,11 @@ export default function ReserveKey() {
     let encoded = (request && !error) ? encodeReserveKeyRequest(request) : null
 
     return (
-        <ApiRequest name="ReserveKeyAndGetHalf" encodedRequest={encoded} endpoint={endpoint}
-                    responseDecoder={decodeReserveKeyResponse} error={error}>
+        <ExecTemplate name="ReserveKeyAndGetHalf" encodedRequest={encoded} endpoint={endpoint}
+                      responseDecoder={decodeReserveKeyResponse} error={error}>
             <div className="col-12 col-lg-4 my-2"><SelectKdc kdc={kdc} setKDC={setKDC}/></div>
             <div className="col-12 col-lg-4 my-2"><InputKeyLength request={request} setRequest={setRequest}/></div>
             <div className="col-12 col-lg-4 my-2"><InputCryptoNonce request={request} setRequest={setRequest}/></div>
-        </ApiRequest>
+        </ExecTemplate>
     )
 }

@@ -1,10 +1,9 @@
 import {useEffect, useRef, useState} from "react";
-import {bytesToHexOctets, bytesToSpacedHexOctets, GKHResponse} from "../utils/utils";
+import {bytesToHexOctets, bytesToSpacedHexOctets} from "../utils/utils";
 import {Collapse} from "bootstrap";
 import {wsConnect, wsSendRequest} from "../utils/promise-ws";
-import {ReserveKeyRequest} from "../utils/reserve-key-req";
 
-export default function ApiRequest({name, encodedRequest, endpoint, responseDecoder, error, children}) {
+export default function ExecTemplate({name, encodedRequest, endpoint, responseDecoder, error, children}) {
     let [encodedResponse, setEncodedResponse] = useState(null as Uint8Array)
 
     return (
