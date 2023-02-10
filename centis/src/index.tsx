@@ -8,12 +8,12 @@ import KDCConfig from "./components/KeyDistributionCenterConf";
 import ExecGetKeyHalf from "./components/ExecGetKeyHalf";
 import WatchKeys from "./components/WatchKeys";
 import ExecReserveKey from "./components/ExecReserveKey";
-import GetState from './components/GetState';
 
 import {ConfigContext} from "./utils/config-context";
 
 // @ts-ignore
 import diagram from './images/diagram.png';
+import ExecGetState from "./components/ExecGetState";
 
 const root = createRoot(document.getElementById('root'));
 
@@ -84,7 +84,7 @@ function App() {
                         <h2 className={"mt-5"}>Requests</h2>
                         <ExecReserveKey/>
                         <ExecGetKeyHalf/>
-                        <GetState config={config}/>
+                        <ExecGetState/>
                         <h2 className={"mt-5"}>Monitoring</h2>
                         <WatchKeys config={config}/>
                     </ConfigContext.Provider>
