@@ -83,7 +83,7 @@ function App() {
                     <ConfigContext.Provider value={config}>
                         <h2 className={"mt-5"}>Requests</h2>
                         <ReserveKey/>
-                        <GetKeyHalf config={config}/>
+                        <GetKeyHalf/>
                         <GetState config={config}/>
                         <h2 className={"mt-5"}>Monitoring</h2>
                         <WatchKeys config={config}/>

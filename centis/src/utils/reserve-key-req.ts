@@ -1,16 +1,11 @@
 import {ASNDERToList} from "./utils";
 
-export interface ReserveKeyRequest {
+export class ReserveKeyRequest {
     keyLength: number
     cNonce: number
 }
 
-const emptyReserveKeyRequest = {
-    keyLength: null,
-    cNonce: null,
-}
-
-class ReserveKeyResponse {
+export class ReserveKeyResponse {
     errCode: number
     cryptoNonce: number
     keyId: Uint8Array

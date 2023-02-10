@@ -12,7 +12,8 @@ export default function ApiRequest({name, encodedRequest, endpoint, responseDeco
             <legend><code>{name}</code> request</legend>
             <RequestConfig children={children}/>
             {error && <div className="alert alert-danger my-3 alert-dismissible fade show" role="alert"> {error}</div>}
-            {!error && <RequestSubmission encodedRequest={encodedRequest} endpoint={endpoint} setEncodedResponse={setEncodedResponse}/>}
+            {!error && <RequestSubmission encodedRequest={encodedRequest} endpoint={endpoint}
+                                          setEncodedResponse={setEncodedResponse}/>}
             <ResponseTable encodedResponse={encodedResponse} responseDecoder={responseDecoder}/>
         </fieldset>
     )
@@ -21,7 +22,7 @@ export default function ApiRequest({name, encodedRequest, endpoint, responseDeco
 function RequestConfig({children}) {
     return (
         <div className="row">
-            {children.map((child, index) => <div className={"col-3"} key={index}>{child}</div>)}
+            {children}
         </div>
     )
 }
@@ -103,12 +104,21 @@ function ResponseTable({encodedResponse, responseDecoder}) {
                     </colgroup>
                     <tbody>
                     {decoded && Object.keys(decoded).map((key) => {
-                        return (
-                            <tr key={key}>
-                                <td>{formatObjectKey(key)}</td>
-                                <td>{decoded[key]}</td>
-                            </tr>
-                        )
+                        if (decoded[key] instanceof Uint8Array) {
+                            return (
+                                <tr key={key}>
+                                    <td>{formatObjectKey(key)}</td>
+                                    <td><code>{bytesToHexOctets(decoded[key])}</code></td>
+                                </tr>
+                            )
+                        } else {
+                            return (
+                                <tr key={key}>
+                                    <td>{formatObjectKey(key)}</td>
+                                    <td>{decoded[key]}</td>
+                                </tr>
+                            )
+                        }
                     })}
                     </tbody>
                 </table>

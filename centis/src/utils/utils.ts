@@ -87,44 +87,6 @@ export interface GKHResponse {
     raw: Uint8Array
 }
 
-export function encodeGKHRequest(request: GKHRequest): [Uint8Array, Error] {
-    let error = validateGKHRequest(request)
-    if (error) {
-        return [null, new Error(error)]
-    }
-
-    let keyId = hexOctetsToUint8Array(request.keyId)
-    const req = new Uint8Array(15 + keyId.length)
-    // sequence
-    req[0] = 0x30;
-    req[1] = 13 + keyId.length    // a sequence of 13+len(keyId) bytes will follow
-
-    // getKeyHalf request
-    req[2] = 0x02;
-    req[3] = 0x01    // an integer of 1 byte will follow
-    req[4] = 0x02
-
-    // key length
-    req[5] = 0x02;
-    req[6] = 0x02    // an integer of 2 bytes will follow
-    req[7] = 0x01;
-    req[8] = 0x00    // requested key length (256)
-
-    // key id
-    req[9] = 0x04;
-    req[10] = keyId.length  // a byte array of keyId.length bytes will follow
-    for (let i = 0; i < keyId.length; i++)
-        req[i + 11] = keyId[i];
-
-    // call#
-    req[11 + keyId.length] = 0x02;
-    req[12 + keyId.length] = 0x02   // an integer of 2 bytes will follow
-    req[13 + keyId.length] = request.cNonce >> 8;
-    req[14 + keyId.length] = request.cNonce % 256
-
-    return [req, null];
-}
-
 export function parseGKHRequest(msg_arr): GKHResponse {
     let data = ASNDERToList(msg_arr);
     let result = {} as GKHResponse;
