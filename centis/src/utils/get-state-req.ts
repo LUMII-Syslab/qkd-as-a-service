@@ -5,7 +5,7 @@ export class GetStateRequest {
 }
 
 export class GetStateResponse {
-    errCode: number
+    errorId: number
     responseId: number
     cryptoNonce: number
     stateId: number
@@ -43,7 +43,7 @@ export function decodeGetStateResponse(encodedResponse): GetStateResponse {
     let result = new GetStateResponse();
     if(!encodedResponse) return result;
     let data = ASNDERToList(encodedResponse);
-    result.errCode = data[0] as number;
+    result.errorId = data[0] as number;
     result.responseId = data[1] as number;
     result.cryptoNonce = data[2] as number;
     result.stateId = data[3] as number;

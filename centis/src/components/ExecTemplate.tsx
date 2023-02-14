@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from "react";
 import {bytesToHexOctets, bytesToSpacedHexOctets} from "../utils/formatting-bytes";
 import {Collapse} from "bootstrap";
 import {wsConnect, wsSendRequest} from "../utils/promise-ws";
+import {errorIds} from "../utils/translate-ids";
 
 export default function ExecTemplate({name, encodedRequest, endpoint, responseDecoder, error, children}) {
     let [encodedResponse, setEncodedResponse] = useState(null as Uint8Array)
@@ -108,6 +109,14 @@ function ResponseTable({encodedResponse, responseDecoder}) {
                                 <tr key={key}>
                                     <td>{formatObjectKey(key)}</td>
                                     <td><code>{bytesToHexOctets(decoded[key])}</code></td>
+                                </tr>
+                            )
+                        }
+                        else if (formatObjectKey(key)==="error id") {
+                            return (
+                                <tr key={key}>
+                                    <td>{formatObjectKey(key)}</td>
+                                    <td>{decoded[key]!==undefined && (<><code>{decoded[key]}</code> ( {errorIds[decoded[key]]} )</>)}</td>
                                 </tr>
                             )
                         }
