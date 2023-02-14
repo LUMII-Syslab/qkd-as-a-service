@@ -40,7 +40,7 @@ func main() {
 		go controller.ListenAndServe(config.AijaAPIPort)
 		go func() {
 			for {
-				time.Sleep(time.Second * 5)
+				time.Sleep(time.Second * 10)
 				state := aijaKeyManager.GetFullState()
 				aijaInfoLogger.Printf("state: %+v", state)
 			}
@@ -59,7 +59,7 @@ func main() {
 		go controller.ListenAndServe(config.BrencisAPiPort)
 		go func() {
 			for {
-				time.Sleep(time.Second * 5)
+				time.Sleep(time.Second * 10)
 				state := brencisKeyManager.GetFullState()
 				brencisInfoLogger.Printf("state: %+v", state)
 			}

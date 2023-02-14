@@ -14,13 +14,13 @@ func (c *Controller) handleSetStateRequest(conn *websocket.Conn, sequence DERSeq
 		return
 	}
 
-	c.infoLogger.Printf("0x03 request with c nonce %v", cNonce)
-
+	c.infoLogger.Printf("%#02x request  cNonce=%v: %+v", constants.SetStateRequest, cNonce, *request)
 	response := c.manager.SetState(request)
 
-	c.infoLogger.Printf("0x03 response %+v", response)
+	cNonce += 1
 
-	err = conn.WriteMessage(websocket.BinaryMessage, encodeSetStateResponse(response, cNonce+1))
+	c.infoLogger.Printf("%#02x response cNonce=%v: %+v", constants.SetStateResponse, cNonce, *response)
+	err = conn.WriteMessage(websocket.BinaryMessage, encodeSetStateResponse(response, cNonce))
 	if err != nil {
 		c.errorLogger.Println(err)
 	}

@@ -6,14 +6,14 @@ const (
 	Running   = 2
 	DefMxReq  = 1000
 
-	ReserveKeyAndGetHalfRequest = 0x01
-	RserveKeyAndGetHalfResponse = 0xff
-	GetKeyHalfRequest           = 0x02
-	GetKeyHalfResponse          = 0xfe
-	GetStateRequest             = 0x03
-	GetStateResponse            = 0xfd
-	SetStateRequest             = 0x04
-	SetStateResponse            = 0xfc
+	ReserveKeyRequest  = 0x01
+	ReserveKeyResponse = 0xff
+	GetKeyHalfRequest  = 0x02
+	GetKeyHalfResponse = 0xfe
+	GetStateRequest    = 0x03
+	GetStateResponse   = 0xfd
+	SetStateRequest    = 0x04
+	SetStateResponse   = 0xfc
 
 	NoError          = 0
 	ErrorKeyNotFound = 1

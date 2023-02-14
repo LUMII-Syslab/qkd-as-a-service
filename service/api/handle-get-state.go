@@ -14,13 +14,13 @@ func (c *Controller) handleGetStateRequest(conn *websocket.Conn, sequence DERSeq
 		return
 	}
 
-	c.infoLogger.Printf("0x03 request with c nonce %v", cNonce)
-
+	c.infoLogger.Printf("%#02x request  cNonce=%v: %+v", constants.GetStateRequest, cNonce, *request)
 	response := c.manager.GetState(request)
 
-	c.infoLogger.Printf("0x03 response %+v", response)
+	cNonce += 1
 
-	err = conn.WriteMessage(websocket.BinaryMessage, encodeGetStateResponse(response, cNonce+1))
+	c.infoLogger.Printf("%#02x response cNonce=%v: %+v", constants.GetStateResponse, cNonce, *response)
+	err = conn.WriteMessage(websocket.BinaryMessage, encodeGetStateResponse(response, cNonce))
 	if err != nil {
 		c.errorLogger.Println(err)
 	}
@@ -32,6 +32,7 @@ func parseGetStateRequest(seq DERSequence) (request *models.GetStateRequest, cNo
 		return
 	}
 	cNonce = seq[1].AsInt()
+	request = &models.GetStateRequest{}
 	return
 }
 
