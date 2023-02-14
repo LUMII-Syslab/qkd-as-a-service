@@ -1,4 +1,4 @@
-export default function KeyDistributionCenterConf({config, setConfig}: { config: any, setConfig: any }) {
+export default function QAASRequstConf({config, setConfig}: { config: any, setConfig: any }) {
     let handleAijaEndpointChange = (event: any) =>
         setConfig({...config, aijaEndpoint: event.target.value})
 
@@ -10,7 +10,7 @@ export default function KeyDistributionCenterConf({config, setConfig}: { config:
 
     return (
         <fieldset className="p-3 shadow-sm border mt-3">
-            <legend>KDC config</legend>
+            <legend>QAAS request config</legend>
             <div className="row">
                 <div className="col-12 col-md-4">
                     <div className="form-floating">

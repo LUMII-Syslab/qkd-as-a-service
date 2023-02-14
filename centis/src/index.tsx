@@ -4,7 +4,7 @@ import {createRoot} from 'react-dom/client';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './styles/custom.scss';
 
-import KDCConfig from "./components/KeyDistributionCenterConf";
+import KDCConfig from "./components/QAASRequstConf";
 import ExecGetKeyHalf from "./components/ExecGetKeyHalf";
 import WatchKeys from "./components/WatchKeys";
 import ExecReserveKey from "./components/ExecReserveKey";
