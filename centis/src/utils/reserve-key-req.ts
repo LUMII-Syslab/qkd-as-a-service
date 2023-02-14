@@ -7,6 +7,7 @@ export class ReserveKeyRequest {
 
 export class ReserveKeyResponse {
     errCode: number
+    responseId: number
     cryptoNonce: number
     keyId: Uint8Array
     thisHalf: Uint8Array
@@ -54,6 +55,7 @@ export function decodeReserveKeyResponse(encodedResponse): ReserveKeyResponse {
     if(!encodedResponse) return result;
     let data = ASNDERToList(encodedResponse);
     result.errCode = data[0] as number;
+    result.responseId = data[1] as number;
     result.cryptoNonce = data[2] as number;
     result.keyId = data[3] as Uint8Array;
     result.thisHalf = data[4] as Uint8Array;

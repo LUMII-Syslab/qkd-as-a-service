@@ -53,7 +53,7 @@ function ResponseTable({encodedResponse, responseDecoder}) {
     useEffect(() => {
         const collapsable = collapsableRef.current
         respTableCollapse.current = new Collapse(collapsable, {
-            toggle: !!encodedResponse
+            toggle: false
         })
         collapsable.addEventListener('hidden.bs.collapse', () => {
             setCollapseIcon("bi-caret-down")
@@ -110,7 +110,16 @@ function ResponseTable({encodedResponse, responseDecoder}) {
                                     <td><code>{bytesToHexOctets(decoded[key])}</code></td>
                                 </tr>
                             )
-                        } else {
+                        }
+                        else if (formatObjectKey(key)==="response id") {
+                            return (
+                                <tr key={key}>
+                                    <td>{formatObjectKey(key)}</td>
+                                    <td><code>{decoded[key] && `0x${decoded[key].toString(16)}`}</code></td>
+                                </tr>
+                            )
+                        }
+                        else {
                             return (
                                 <tr key={key}>
                                     <td>{formatObjectKey(key)}</td>

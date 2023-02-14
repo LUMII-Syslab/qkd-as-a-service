@@ -10,6 +10,7 @@ export class SetStateRequest {
 
 export class SetStateResponse {
     errCode: number
+    responseId: number
     cryptoNonce: number
 }
 
@@ -18,7 +19,7 @@ export function validateSetStateRequest(request: SetStateRequest): string {
         return "Crypto nonce must be between 0 and 65535"
     }
 
-    if (request.stateId != 0 && request.stateId != 1 && request.stateId != 2) {
+    if (request.stateId !== 0 && request.stateId !== 1 && request.stateId !== 2) {
         return "State ID must be 0, 1 or 2";
     }
 
@@ -74,6 +75,7 @@ export function decodeSetStateResponse(encodedResponse): SetStateResponse {
     if (!encodedResponse) return result;
     let data = ASNDERToList(encodedResponse);
     result.errCode = data[0] as number;
+    result.responseId = data[1] as number;
     result.cryptoNonce = data[2] as number;
     return result;
 }

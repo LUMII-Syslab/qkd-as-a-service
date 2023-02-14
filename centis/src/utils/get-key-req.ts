@@ -8,6 +8,7 @@ export class GetKeyRequest {
 
 export class GetKeyResponse {
     errCode: number
+    responseId: number
     cryptoNonce: number
     thisHalf: Uint8Array
     otherHash: Uint8Array
@@ -69,6 +70,7 @@ export function decodeGetKeyResponse(encodedResponse): GetKeyResponse {
     if(!encodedResponse) return result;
     let data = ASNDERToList(encodedResponse);
     result.errCode = data[0] as number;
+    result.responseId = data[1] as number;
     result.cryptoNonce = data[2] as number;
     result.thisHalf = data[3] as Uint8Array;
     result.otherHash = data[4] as Uint8Array;
