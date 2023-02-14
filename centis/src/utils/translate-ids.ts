@@ -6,3 +6,9 @@ export var errorIds = {
     3: "internal error",
     4: "invalid request"
 }
+
+export var stateIds = {
+    0: "empty",
+    1: "receiving",
+    2: "running"
+}
