@@ -13,7 +13,7 @@ export default function StatisticsChart() {
         let chart = new Chart(chartCanvas.current as ChartItem, {
             type: 'line',
             data: {
-                labels: ['1', '2', '3'],
+                labels: [],
                 datasets: [{
                     label: 'Aija reservable Keys',
                     data: [],
@@ -30,8 +30,16 @@ export default function StatisticsChart() {
             options: {
                 animation:{
                     duration: 0
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 5,
+                        },
+                    }
                 }
-            }
+            },
         });
         let interval = setInterval(async () => {
             let aijaWs = await wsConnect(config.aijaEndpoint) as WebSocket
@@ -48,7 +56,7 @@ export default function StatisticsChart() {
             console.log(aijaResponse)
             console.log(brencisResponse)
 
-            chart.data.labels.push((chart.data.labels.length + 1).toString())
+            chart.data.labels.push(new Date().toLocaleString('sv'))
             chart.data.datasets[0].data.push(aijaResponse.reservable)
             chart.data.datasets[1].data.push(brencisResponse.reservable)
             chart.update()
