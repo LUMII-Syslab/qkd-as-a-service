@@ -57,18 +57,22 @@ func (k *KeyManager) GetState(_ *models.GetStateRequest) (response *models.GetSt
 	} else {
 		response.State = constants.Running
 	}
+	response.KeysStored = keyManagerState.AllSize
+	response.Reservable = keyManagerState.ReservableSize
+	response.KeysServed = keyManagerState.KeysServed
+	response.KeysAdded = keyManagerState.KeysAdded
+	response.KeyId0 = keyManagerState.OldestEvenKey.KeyId
+	response.KeyId1 = keyManagerState.OldestOddKey.KeyId
+	return
+}
+
+func (k *KeyManager) SetState(_ *models.SetStateRequest) (response *models.SetStateResponse) {
+	response = new(models.SetStateResponse)
+	response.ErrId = constants.NoError
+	// TODO: implement
 	return
 }
 
 func (k *KeyManager) GetFullState() KeyManagerState {
 	return k.getManagerState()
-}
-
-func (k *KeyManager) GetFirstKeys() (evenKey []byte, oddKey []byte, err error) {
-	evenKey, err = k.getFirstKey(true)
-	if err != nil {
-		return
-	}
-	oddKey, err = k.getFirstKey(false)
-	return
 }

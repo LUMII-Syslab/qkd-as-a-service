@@ -61,7 +61,7 @@ func (c *Controller) ListenAndServe(APIPort int) {
 			requestId := sequence[0].AsInt()
 
 			switch requestId {
-			case constants.ReserveKeyAndGetHalfRequest:
+			case constants.ReserveKeyRequest:
 				c.handleRKAGHRequest(conn, sequence)
 			case constants.GetKeyHalfRequest:
 				c.handleGKHRequest(conn, sequence)

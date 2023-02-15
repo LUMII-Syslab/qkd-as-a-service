@@ -2,6 +2,7 @@ package gatherers
 
 import (
 	"crypto/rand"
+	"log"
 	"time"
 )
 
@@ -28,7 +29,7 @@ func (kg *RandomKeyGatherer) Start() error {
 		}
 		err := kg.distributeKey(keyId, keyVal)
 		if err != nil {
-			return err
+			log.Println(err)
 		}
 	}
 }

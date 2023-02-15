@@ -15,13 +15,13 @@ func (c *Controller) handleGKHRequest(conn *websocket.Conn, sequence DERSequence
 		return
 	}
 
-	c.infoLogger.Printf("0x01 request %+v with c nonce %v", request, cNonce)
-
+	c.infoLogger.Printf("%#02x request  cNonce=%v: %+v", constants.GetKeyHalfRequest, cNonce, *request)
 	response := c.manager.GetKeyHalf(request)
 
-	c.infoLogger.Printf("0x01 response %+v", response)
+	cNonce += 1
 
-	err = conn.WriteMessage(websocket.BinaryMessage, encodeGKHResponse(response, cNonce+1))
+	c.infoLogger.Printf("%#02x response cNonce=%v: %+v", constants.GetKeyHalfResponse, cNonce, *response)
+	err = conn.WriteMessage(websocket.BinaryMessage, encodeGKHResponse(response, cNonce))
 	if err != nil {
 		c.errorLogger.Println(err)
 	}
