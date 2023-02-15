@@ -42,7 +42,7 @@ export default function StatisticsChart() {
     }, [])
 
     return (
-        <div>
+        <div className="my-4">
             <canvas ref={chartCanvas}></canvas>
         </div>
     )

@@ -83,6 +83,7 @@ function App() {
             {(!aijaConnError && !brencisConnError) && !testingConnections &&
                 <>
                     <ConfigContext.Provider value={config}>
+                        <StatisticsChart/>
                         <h2 className={"mt-5"}>Requests</h2>
                         <ExecReserveKey/>
                         <ExecGetKeyHalf/>
@@ -90,7 +91,6 @@ function App() {
                         <ExecSetState/>
                         <h2 className={"mt-5"}>Monitoring</h2>
                         <WatchKeys config={config}/>
-                        <StatisticsChart/>
                     </ConfigContext.Provider>
                 </>
             }
