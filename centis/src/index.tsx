@@ -15,6 +15,7 @@ import {ConfigContext} from "./utils/config-context";
 import diagram from './images/diagram.png';
 import ExecGetState from "./components/ExecGetState";
 import ExecSetState from "./components/ExecSetState";
+import StatisticsChart from "./components/StatisticsChart";
 
 const root = createRoot(document.getElementById('root'));
 
@@ -89,6 +90,7 @@ function App() {
                         <ExecSetState/>
                         <h2 className={"mt-5"}>Monitoring</h2>
                         <WatchKeys config={config}/>
+                        <StatisticsChart/>
                     </ConfigContext.Provider>
                 </>
             }
