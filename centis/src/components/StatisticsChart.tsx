@@ -15,8 +15,8 @@ export default function StatisticsChart() {
             type: 'line',
             data: {
                 labels: [],
-                datasets: [{label: 'Aija reservable Keys', data: [], tension: 0.3, pointRadius:0},
-                    {label: 'Brencis reservable Keys', data: [], tension: 0.3, pointRadius:0}]
+                datasets: [{label: 'Aija reservable Keys', data: [], tension: 0.3,borderColor: '#27ae60', backgroundColor: '#2ecc71'},
+                    {label: 'Brencis reservable Keys', data: [], tension: 0.3, borderColor: '#2980b9', backgroundColor: '#3498db'}]
             },
             options: {
                 animation: {duration: 0},
@@ -34,8 +34,8 @@ export default function StatisticsChart() {
             type: 'line',
             data: {
                 labels: [],
-                datasets: [{label: 'keys added', data: [], tension: 0.3},
-                    {label: 'keys served', data: [], tension: 0.3}]
+                datasets: [{label: 'keys added', data: [], tension: 0.3, borderColor: '#16a085', backgroundColor: '#1abc9c'},
+                    {label: 'keys served', data: [], tension: 0.3, borderColor:'#8e44ad', backgroundColor: '#9b59b6'}]
             },
             options: {
                 animation: {duration: 0},
