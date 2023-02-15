@@ -15,13 +15,13 @@ func (c *Controller) handleRKAGHRequest(conn *websocket.Conn, sequence DERSequen
 		return
 	}
 
-	c.infoLogger.Printf("0x01 request %+v with c nonce %v", request, cNonce)
-
+	c.infoLogger.Printf("%#02x request  cNonce=%v: %+v", constants.ReserveKeyRequest, cNonce, *request)
 	response := c.manager.ReserveKeyAndGetHalf(request)
 
-	c.infoLogger.Printf("0x01 response %+v", response)
+	cNonce += 1
 
-	err = conn.WriteMessage(websocket.BinaryMessage, encodeRKAGHResponse(response, cNonce+1))
+	c.infoLogger.Printf("%#02x response cNonce=%v: %+v", constants.ReserveKeyResponse, cNonce, *response)
+	err = conn.WriteMessage(websocket.BinaryMessage, encodeRKAGHResponse(response, cNonce))
 	if err != nil {
 		c.errorLogger.Println(err)
 	}
@@ -40,7 +40,7 @@ func parseRKAGHRequest(seq DERSequence) (request *models.RKAGHRequest, cNonce in
 func encodeRKAGHResponse(response *models.RKAGHResponse, cNonce int) []byte {
 	res := DERSequence{}
 	res = append(res, CreateIntSeqElement(response.ErrId))
-	res = append(res, CreateIntSeqElement(constants.RserveKeyAndGetHalfResponse))
+	res = append(res, CreateIntSeqElement(constants.ReserveKeyResponse))
 	res = append(res, CreateIntSeqElement(cNonce))
 	res = append(res, CreateArrSeqElement(response.KeyId))
 	res = append(res, CreateArrSeqElement(response.ThisHalf))

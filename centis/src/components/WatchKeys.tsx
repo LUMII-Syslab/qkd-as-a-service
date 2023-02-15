@@ -1,11 +1,13 @@
 import {useEffect, useRef, useState} from "react";
 import {
+    bytesToHexOctets, bytesToSpacedHexOctets
+} from "../utils/formatting-bytes";
+import {
     wsConnect,
-    wsSendRequest,
-    encodeRKAGHRequest,
-    parseRKAGHResponse,
-    encodeGKHRequest, bytesToHexOctets, parseGKHRequest, bytesToSpacedHexOctets
-} from "../utils/utils";
+    wsSendRequest
+} from "../utils/promise-ws";
+import {encodeReserveKeyRequest, decodeReserveKeyResponse, ReserveKeyRequest} from "../utils/reserve-key-req";
+import {encodeGetKeyRequest, decodeGetKeyResponse, GetKeyRequest} from "../utils/get-key-req";
 
 interface WatchKeysTableRow {
     KeyId: Uint8Array,
@@ -41,29 +43,27 @@ export default function WatchKeys({config}) {
 
             let result = {} as WatchKeysTableRow
 
-            let [rkaghReq, rkaghError] = encodeRKAGHRequest({
+            let rkaghReq = encodeReserveKeyRequest({
                 keyLength: 256,
-                cNonce: 42069
-            })
-            if (rkaghError) {
-                console.error(rkaghError)
-            }
-            let rkaghResp = parseRKAGHResponse(await wsSendRequest(aijaWS, rkaghReq))
+                cNonce: 12345
+            } as ReserveKeyRequest)
 
-            let [gkhReq, gkhError] = encodeGKHRequest({
+            let rkaghResp = decodeReserveKeyResponse(await wsSendRequest(aijaWS, rkaghReq))
+
+            let gkhReq = encodeGetKeyRequest({
                 keyId: bytesToHexOctets(rkaghResp.keyId),
-                cNonce: 42069,
+                cNonce: 12345,
                 keyLength: 256,
-            })
-            if (gkhError) {
-                console.error(gkhError)
-            }
-            let gkhResp = parseGKHRequest(await wsSendRequest(brencisWS, gkhReq))
+            } as GetKeyRequest)
+
+            let gkhResp = decodeGetKeyResponse(await wsSendRequest(brencisWS, gkhReq))
+
             result.KeyId = rkaghResp.keyId
             result.Left = rkaghResp.thisHalf
             result.Right = gkhResp.thisHalf
             result.HashLeft = gkhResp.otherHash
             result.HashRight = rkaghResp.otherHash
+
             tableRows.unshift(result)
             while(tableRows.length > tableRowCount) tableRows.pop()
             setTableRows([...tableRows])
@@ -76,7 +76,7 @@ export default function WatchKeys({config}) {
                 <div className="form-floating col-3">
                     <input type="number" id="wk-delay"
                            className="form-control"
-                           defaultValue={0} onChange={
+                           defaultValue={requestDelay} onChange={
                         (e) => {
                             setRequestDelay(parseInt(e.target.value));
                         }
