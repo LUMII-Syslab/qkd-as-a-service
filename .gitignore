@@ -2,3 +2,6 @@
 /libs
 install.sh
 .idea
+.DS_Store
+*.lock
+!/centis/yarn.lock
