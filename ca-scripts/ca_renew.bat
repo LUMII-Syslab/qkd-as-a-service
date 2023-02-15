@@ -31,4 +31,4 @@ popd
 :DOS2UNIX_OK
 
 C:\cygwin64\bin\dos2unix -q "%~dp0\ca_renew.sh"
-C:\cygwin64\bin\bash "%~dp0\ca_renew.sh"
+C:\cygwin64\bin\bash "%~dp0\ca_renew.sh" %1 %2
