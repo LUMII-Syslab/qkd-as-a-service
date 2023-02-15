@@ -42,7 +42,12 @@ func encodeGetStateResponse(response *models.GetStateResponse, cNonce int) []byt
 	res = append(res, CreateIntSeqElement(constants.GetStateResponse))
 	res = append(res, CreateIntSeqElement(cNonce))
 	res = append(res, CreateIntSeqElement(response.State))
+	res = append(res, CreateIntSeqElement(response.KeysStored))
+	res = append(res, CreateIntSeqElement(response.Reservable))
+	res = append(res, CreateIntSeqElement(response.KeysServed))
+	res = append(res, CreateIntSeqElement(response.KeysAdded))
 	res = append(res, CreateArrSeqElement(response.KeyId0))
 	res = append(res, CreateArrSeqElement(response.KeyId1))
+
 	return res.ToByteArray()
 }

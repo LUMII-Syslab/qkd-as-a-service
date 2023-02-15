@@ -1,6 +1,7 @@
 import Chart, {ChartItem} from 'chart.js/auto';
 import {useContext, useEffect, useRef} from "react";
 import {ConfigContext} from "../utils/config-context";
+import {wsConnect, wsSendRequest} from "../utils/promise-ws";
 
 export default function StatisticsChart() {
     const config = useContext(ConfigContext)
@@ -26,8 +27,10 @@ export default function StatisticsChart() {
                 ]
             }
         });
-        let interval = setInterval(() => {
-            // let aijaWs = new WebSocket(config.aijaEndpoint);
+        let interval = setInterval(async () => {
+            let aijaWs = await wsConnect(config.aijaEndpoint)
+            let brencisWS = await wsConnect(config.brencisEndpoint);
+
             chart.data.labels.push((chart.data.labels.length + 1).toString())
             chart.data.datasets[0].data.push(Math.floor(Math.random() * 100))
             chart.update()
