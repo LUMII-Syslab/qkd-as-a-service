@@ -33,10 +33,19 @@ func (e SequenceElement) encode() []byte {
 	return res
 }
 
-func CreateIntSeqElement(x int) SequenceElement {
+func CreateIntSeqElement(x interface{}) SequenceElement {
 	res := SequenceElement{}
 	res.id = IntId
-	res.value = utils.IntToBytes(int(x))
+	switch x.(type) {
+	case int:
+		res.value = utils.IntToBytes(int64(x.(int)))
+	case int64:
+		res.value = utils.IntToBytes(x.(int64))
+	case uint64:
+		res.value = utils.IntToBytes(int64(x.(uint64)))
+	default:
+		panic("unsupported type")
+	}
 	return res
 }
 

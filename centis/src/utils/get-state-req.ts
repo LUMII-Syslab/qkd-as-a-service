@@ -9,6 +9,10 @@ export class GetStateResponse {
     responseId: number
     cryptoNonce: number
     stateId: number
+    keysStored: number
+    reservable: number
+    keysServed: number
+    keysAdded: number
     evenKeyId: Uint8Array
     oddKeyId: Uint8Array
 }
@@ -47,6 +51,10 @@ export function decodeGetStateResponse(encodedResponse): GetStateResponse {
     result.responseId = data[1] as number;
     result.cryptoNonce = data[2] as number;
     result.stateId = data[3] as number;
+    result.keysStored = data[4] as number;
+    result.reservable = data[5] as number;
+    result.keysServed = data[6] as number;
+    result.keysAdded = data[7] as number;
     result.evenKeyId = data[4] as Uint8Array;
     result.oddKeyId = data[5] as Uint8Array;
     return result;

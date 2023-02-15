@@ -57,6 +57,10 @@ func (k *KeyManager) GetState(_ *models.GetStateRequest) (response *models.GetSt
 	} else {
 		response.State = constants.Running
 	}
+	response.KeysStored = keyManagerState.AllSize
+	response.Reservable = keyManagerState.ReservableSize
+	response.KeysServed = keyManagerState.KeysServed
+	response.KeysAdded = keyManagerState.KeysAdded
 	response.KeyId0 = keyManagerState.OldestEvenKey.KeyId
 	response.KeyId1 = keyManagerState.OldestOddKey.KeyId
 	return
