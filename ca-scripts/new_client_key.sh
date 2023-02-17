@@ -56,7 +56,8 @@ echo yes | keytool -importcert -alias ${CLIENT_ALIAS} -keystore ${CLIENT_KEYSTOR
 #               ${OQS_OPENSSL_FLAGS}
 
 rm ${PEM_TMP}
-rm ${DER_TMP}
+echo "Deploying DER (PKCS#12, PFX)..."
+mv ${DER_TMP} ${CLIENT_PKCS}
 
 echo "Validating..."
 keytool -keystore ${CLIENT_KEYSTORE} -storepass ${CLIENT_STOREPASS} -v -list -storetype pkcs12 -alias ${CLIENT_ALIAS}

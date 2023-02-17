@@ -33,6 +33,7 @@ export ALL_CA_STOREPASS=ca-truststore-pass
 export CLIENT_KEY=${DIR}/${CLIENT_NAME}/client.key
 export CLIENT_CSR=${DIR}/${CLIENT_NAME}/client.csr
 export CLIENT_CRT=${DIR}/${CLIENT_NAME}/client.crt
+export CLIENT_PKCS=${DIR}/${CLIENT_NAME}/client.pfx
 export CLIENT_ALIAS=client
 export CLIENT_KEYSTORE=${DIR}/${CLIENT_NAME}/token.keystore
 export CLIENT_STOREPASS=token-pass
