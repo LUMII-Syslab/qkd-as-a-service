@@ -19,7 +19,7 @@ export PATH=/usr/bin:$PATH
 export DIR=$(dirname $0)
 export CA_NAME=$1
 export SIG_ALG=$2
-export OQS_OPENSSL_REQ_ARGS={@:3}
+export OQS_OPENSSL_REQ_ARGS=${@:3}
 if [ -z $CA_NAME ]; then
     echo -n "Please, specify the name of your CA [ca]: "
     read INP

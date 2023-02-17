@@ -25,8 +25,8 @@ export SERVER_KEYPAIR_FILE=$4
 source $DIR/_vars.sh
 source $CA_VARS
 
-${OQS_OPENSSL} req -new -newkey ${SIG_ALG} -keyout ${DIR}/server.key -out ${DIR}/server.csr -nodes -config ${SERVER_CONFIG_FILE} ${OQS_OPENSSL_REQ_ARGS}
-${OQS_OPENSSL} x509 -req -in server.csr -out ${DIR}/server.crt -CA ${CA_CRT} -CAkey ${CA_KEY} -CAcreateserial -days ${DAYS} -extensions v3_req -extfile ${SERVER_CONFIG_FILE}
+${OQS_OPENSSL} req -new -newkey ${SIG_ALG} -keyout ${DIR}/server.key -out ${DIR}/server.csr -nodes -config ${SERVER_CONFIG_FILE} ${OQS_OPENSSL_REQ_ARGS} ${OQS_OPENSSL_FLAGS}
+${OQS_OPENSSL} x509 -req -in ${DIR}/server.csr -out ${DIR}/server.crt -CA ${CA_CRT} -CAkey ${CA_KEY} -CAcreateserial -days ${DAYS} -extensions v3_req -extfile ${SERVER_CONFIG_FILE} ${OQS_OPENSSL_FLAGS}
 
 rm ${DIR}/server.csr
 
