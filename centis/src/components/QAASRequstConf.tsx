@@ -29,7 +29,7 @@ export default function QAASRequstConf({config, setConfig}: { config: any, setCo
                 <div className="col-12 col-md-4">
                     <div className="form-floating">
                         <input type="password" placeholder="Password" defaultValue="1234568910"
-                               className="form-control mb-3" onChange={handlePasswordChange}/>
+                               className="form-control mb-3" onChange={handlePasswordChange} disabled/>
                         <label>Password</label>
                     </div>
                 </div>
