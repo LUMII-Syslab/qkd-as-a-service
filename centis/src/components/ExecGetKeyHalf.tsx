@@ -27,8 +27,8 @@ export default function ExecGetKeyHalf() {
                       responseDecoder={decodeGetKeyResponse} error={error}>
             <div className="col-12 col-lg-2 my-2"><SelectKdc kdc={kdc} setKDC={setKDC}/></div>
             <div className="col-12 col-lg-2 my-2"><InputKeyLength request={request} setRequest={setRequest}/></div>
-            <div className="col-12 col-lg-2 my-2"><InputCryptoNonce request={request} setRequest={setRequest}/></div>
             <div className="col-12 col-lg-6 my-2"><InputKeyId request={request} setRequest={setRequest}/></div>
+            <div className="col-12 col-lg-2 my-2"><InputCryptoNonce request={request} setRequest={setRequest}/></div>
         </ExecTemplate>
     )
 }
