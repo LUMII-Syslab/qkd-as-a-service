@@ -30,6 +30,27 @@ export default function ExecSetState() {
             <div className="col-12 col-lg-2 my-2"><SelectKdc kdc={kdc} setKDC={setKDC}/></div>
             <div className="col-12 col-lg-2 my-2"><SelectKdcState state={state} setKdcState={setState}/></div>
             <div className="col-12 col-lg-2 my-2"><InputCryptoNonce request={request} setRequest={setRequest}/></div>
+            <div className="col-12">
+                <div className="form-control">
+                    Requested state behaviour:
+                    <ul>
+                        <li>EMPTY - clears all keys. Once a key is received, state will change to RECEIVING</li>
+                        <li>RUNNING - enables key serving</li>
+                    </ul>
+                    <p>
+                    When state isn't RUNNING, keys are not served.
+                        </p>
+                    Response states:
+                    <ul>
+                        <li>EMPTY - there are no keys</li>
+                        <li>RECEIVING - there is at least one key but keys aren't being served</li>
+                        <li>RUNNING - keys are being served regardless of whether there are any</li>
+                    </ul>
+                    <p>
+                       Note that if the state is RUNNING but there aren't any reservable keys available, the server will respond when a key becomes available instead of sending an error.
+                    </p>
+                    </div>
+            </div>
         </ExecTemplate>
     )
 }
