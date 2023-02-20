@@ -70,10 +70,20 @@ export default function StatisticsChart() {
             reservableChart.data.labels.push(new Date().toLocaleString('sv'))
             reservableChart.data.datasets[0].data.push(aijaResponse.reservable)
             reservableChart.data.datasets[1].data.push(brencisResponse.reservable)
+            if(reservableChart.data.labels.length > 20) {
+                reservableChart.data.labels.shift()
+                reservableChart.data.datasets[0].data.shift()
+                reservableChart.data.datasets[1].data.shift()
+            }
 
             pressureChart.data.labels.push(new Date().toLocaleString('sv'))
             pressureChart.data.datasets[0].data.push(aijaResponse.keysAdded)
             pressureChart.data.datasets[1].data.push(brencisResponse.keysServed)
+            if(pressureChart.data.labels.length > 20) {
+                pressureChart.data.labels.shift()
+                pressureChart.data.datasets[0].data.shift()
+                pressureChart.data.datasets[1].data.shift()
+            }
 
             reservableChart.update()
             pressureChart.update()
