@@ -8,8 +8,7 @@ export default function KdcSynchronization() {
                 </p>
                 <p>
                     Synchronization performs <code>getState</code> request gathering the oldest keys of each KDC
-                    followed by
-                    <code>setState</code>. If a KDC has another KDC's oldest key then it must delete all keys that are
+                    followed by <code>setState</code> with the gathered keys. If a KDC has another KDC's oldest key then it must delete all keys that are
                     older than
                     it.
                 </p>
