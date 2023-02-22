@@ -27,12 +27,12 @@ func (c *Controller) handleSetStateRequest(conn *websocket.Conn, sequence DERSeq
 }
 
 func parseSetStateRequest(seq DERSequence) (request *models.SetStateRequest, cNonce int, err error) {
-	if len(seq) != 2 {
-		err = errors.New("sequence of length 2 was expected")
+	if len(seq) != 5 {
+		err = errors.New("sequence of length 5 was expected")
 		return
 	}
 	request = &models.SetStateRequest{}
-	_, request.KeyId0, request.KeyId1, cNonce = seq[0].AsInt(), seq[1].AsBytes(), seq[2].AsBytes(), seq[3].AsBytes()
+	_, request.State, request.KeyId0, request.KeyId1, cNonce = seq[0].AsInt(), seq[1].AsInt(), seq[2].AsBytes(), seq[3].AsBytes(), seq[4].AsInt()
 	return
 }
 
