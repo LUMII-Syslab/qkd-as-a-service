@@ -113,7 +113,7 @@ export default function StatisticsChart() {
     }, [config.aijaEndpoint, config.brencisEndpoint, updating])
 
     return (
-        <div className="my-4 d-flex flex-wrap h-25 form-control">
+        <div className="my-4 d-flex flex-wrap h-25 form-control rounded-0 shadow-sm p-3">
             <div className="col-12 col-lg-6 my-1">
                 <canvas ref={reservableChartRef}></canvas>
             </div>

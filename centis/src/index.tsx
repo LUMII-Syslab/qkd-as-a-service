@@ -16,6 +16,7 @@ import diagram from './images/diagram.png';
 import ExecGetState from "./components/ExecGetState";
 import ExecSetState from "./components/ExecSetState";
 import StatisticsChart from "./components/StatisticsChart";
+import KdcSynchronization from "./components/KdcSynchronization";
 
 const root = createRoot(document.getElementById('root'));
 
@@ -84,6 +85,7 @@ function App() {
                 <>
                     <ConfigContext.Provider value={config}>
                         <StatisticsChart/>
+                        <KdcSynchronization/>
                         <h2 className={"mt-5"}>Requests</h2>
                         <ExecReserveKey/>
                         <ExecGetKeyHalf/>
