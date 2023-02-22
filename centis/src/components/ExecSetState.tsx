@@ -5,6 +5,8 @@ import InputCryptoNonce from "./InputCryptoNonce";
 import {ConfigContext} from "../utils/config-context";
 import {decodeSetStateResponse, encodeSetStateRequest, SetStateRequest, validateSetStateRequest} from "../utils/set-state-req";
 import SelectKdcState from "./SelectKdcState";
+import InputKeyId0 from "./InputKeyId0";
+import InputKeyId1 from "./InputKeyId1";
 
 export default function ExecSetState() {
     const config = useContext(ConfigContext)
@@ -29,6 +31,8 @@ export default function ExecSetState() {
                       responseDecoder={decodeSetStateResponse} error={error}>
             <div className="col-12 col-lg-2 my-2"><SelectKdc kdc={kdc} setKDC={setKDC}/></div>
             <div className="col-12 col-lg-2 my-2"><SelectKdcState state={state} setKdcState={setState}/></div>
+            <div className="col-12 col-lg-2 my-2"><InputKeyId0 request={request} setRequest={setRequest}/></div>
+            <div className="col-12 col-lg-2 my-2"><InputKeyId1 request={request} setRequest={setRequest}/></div>
             <div className="col-12 col-lg-2 my-2"><InputCryptoNonce request={request} setRequest={setRequest}/></div>
             <div className="col-12">
                 <div className="form-control">

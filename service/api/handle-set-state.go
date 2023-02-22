@@ -32,7 +32,7 @@ func parseSetStateRequest(seq DERSequence) (request *models.SetStateRequest, cNo
 		return
 	}
 	request = &models.SetStateRequest{}
-	cNonce, request.KeyId0, request.KeyId1 = seq[1].AsInt(), seq[2].AsBytes(), seq[3].AsBytes()
+	_, request.KeyId0, request.KeyId1, cNonce = seq[0].AsInt(), seq[1].AsBytes(), seq[2].AsBytes(), seq[3].AsBytes()
 	return
 }
 
