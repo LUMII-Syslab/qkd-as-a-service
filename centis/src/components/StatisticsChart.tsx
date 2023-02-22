@@ -64,9 +64,6 @@ export default function StatisticsChart() {
             aijaWs.close()
             brencisWS.close()
 
-            console.log(aijaResponse)
-            console.log(brencisResponse)
-
             reservableChart.data.labels.push(new Date().toLocaleString('sv'))
             reservableChart.data.datasets[0].data.push(aijaResponse.reservable)
             reservableChart.data.datasets[1].data.push(brencisResponse.reservable)

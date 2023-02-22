@@ -23,7 +23,7 @@ func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, int) {
 
 func (k *KeyManager) getShake128Hash(data []byte) (hash []byte, errId int) {
 	h := sha3.NewShake128()
-	hash = make([]byte, 0)
+	hash = make([]byte, 128)
 	_, err := h.Write(data)
 	if err != nil {
 		errId = constants.ErrorInternal
@@ -34,7 +34,6 @@ func (k *KeyManager) getShake128Hash(data []byte) (hash []byte, errId int) {
 		errId = constants.ErrorInternal
 		return
 	}
-	hash = []byte{1, 2}
 	return
 }
 

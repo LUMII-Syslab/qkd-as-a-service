@@ -6,7 +6,6 @@ export default function SelectKdcState({state,setKdcState}) {
                         setKdcState(event.target.value)
                     }}>
                 <option value="EMPTY">EMPTY</option>
-                <option value="RECEIVING">RECEIVING</option>
                 <option value="RUNNING">RUNNING</option>
             </select>
             <label>State</label>
