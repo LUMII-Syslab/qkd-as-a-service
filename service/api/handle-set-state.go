@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"github.com/gorilla/websocket"
 	"qkdc-service/constants"
 	"qkdc-service/models"
@@ -26,13 +25,9 @@ func (c *Controller) handleSetStateRequest(conn *websocket.Conn, sequence DERSeq
 	}
 }
 
-func parseSetStateRequest(seq DERSequence) (request *models.SetStateRequest, cNonce int, err error) {
-	if len(seq) != 5 {
-		err = errors.New("sequence of length 5 was expected")
-		return
-	}
+func parseSetStateRequest(sequence DERSequence) (request *models.SetStateRequest, cNonce int, err error) {
 	request = &models.SetStateRequest{}
-	_, request.State, request.KeyId0, request.KeyId1, cNonce = seq[0].AsInt(), seq[1].AsInt(), seq[2].AsBytes(), seq[3].AsBytes(), seq[4].AsInt()
+	err = DecodeIntoVariables(sequence, nil, &request.State, &request.KeyId0, &request.KeyId1, &cNonce)
 	return
 }
 

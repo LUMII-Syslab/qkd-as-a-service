@@ -108,3 +108,20 @@ func DecodeDERSequence(arr []byte) (DERSequence, error) {
 	}
 	return res, nil
 }
+
+func DecodeIntoVariables(sequence DERSequence, vars ...interface{}) error {
+	if len(sequence) != len(vars) {
+		return fmt.Errorf("expected %v elements, received %v", len(vars), len(sequence))
+	}
+	for i, v := range vars {
+		switch v.(type) {
+		case *int:
+			*v.(*int) = sequence[i].AsInt()
+		case *[]byte:
+			*v.(*[]byte) = sequence[i].AsBytes()
+		default:
+			return fmt.Errorf("unsupported type")
+		}
+	}
+	return nil
+}
