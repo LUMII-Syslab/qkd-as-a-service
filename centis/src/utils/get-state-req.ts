@@ -1,4 +1,5 @@
 import { ASNDERToList } from "./formatting-bytes";
+import {encodeInteger, encodeSequence} from "./encode-element";
 
 export class GetStateRequest {
     cNonce: number
@@ -26,20 +27,11 @@ export function validateGetStateRequest(request: GetStateRequest): string {
 }
 
 export function encodeGetStateRequest(request: GetStateRequest): Uint8Array {
-    const result = new Uint8Array(9)
-    // sequence
-    result[0] = 0x30;
-    result[1] = 0x07    // a sequence of 7 bytes will follow
-    // reserveKeyAndGetKeyHalf request
-    result[2] = 0x02;
-    result[3] = 0x01    // an integer of 1 byte will follow
-    result[4] = 0x03
-    // crypto nonce
-    result[5] = 0x02;
-    result[6] = 0x02   // an integer of 2 bytes will follow
-    result[7] = request.cNonce >> 8;
-    result[8] = request.cNonce % 256
-    return result;
+    let getStateRequest = 0x03;
+    return encodeSequence([
+        encodeInteger(getStateRequest),
+        encodeInteger(request.cNonce)
+    ]);
 }
 
 
