@@ -27,8 +27,6 @@ export function bytesToSpacedHexOctets(data: Uint8Array): string {
     return res2
 }
 
-
-
 export function ASNDERToList(seq): (number | Uint8Array)[] {
     try {
         let it = 2;

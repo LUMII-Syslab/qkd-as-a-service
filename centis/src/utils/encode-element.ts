@@ -1,7 +1,6 @@
 let sequenceType = 0x30;
 let integerType = 0x02;
 let byteArrayType = 0x04;
-let objectType = 0x06;
 
 export function encodeSequence(elements: Uint8Array[]) {
     let length = 0;
@@ -9,7 +8,7 @@ export function encodeSequence(elements: Uint8Array[]) {
         length += elements[i].length;
     }
     const result = new Uint8Array(2 + length);
-    result[0] = 0x30;
+    result[0] = sequenceType;
     result[1] = length;
     let offset = 2;
     for (let i = 0; i < elements.length; i++) {
@@ -41,9 +40,16 @@ export function encodeByteArray(element: Uint8Array): Uint8Array {
 }
 
 export function encodeInteger(element: number): Uint8Array {
-    const result = new Uint8Array(2);
+    let bytes = 1;
+    while(element >= (1<< (8 * bytes))) {
+        bytes++;
+    }
+    const result = new Uint8Array(2+bytes);
     result[0] = integerType;
-    result[1] = 1;
-    result[2] = element;
+    result[1] = bytes;
+    let offset = 0;
+    for(let i=0;i<bytes;i++) {
+        result[2 + offset++] = (element >> (8 * (bytes - i - 1))) & 0xff;
+    }
     return result;
 }
