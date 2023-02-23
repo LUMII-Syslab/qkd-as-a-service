@@ -1,4 +1,5 @@
 import {ASNDERToList} from "./formatting-bytes";
+import {encodeInteger, encodeSequence} from "./encode-element";
 
 export class ReserveKeyRequest {
     keyLength: number
@@ -28,25 +29,12 @@ export function validateReserveKeyRequest(request: ReserveKeyRequest): string {
 }
 
 export function encodeReserveKeyRequest(request: ReserveKeyRequest): Uint8Array {
-    const result = new Uint8Array(13)
-    // sequence
-    result[0] = 0x30;
-    result[1] = 0x0B    // a sequence of 11 bytes will follow
-    // reserveKeyAndGetKeyHalf request
-    result[2] = 0x02;
-    result[3] = 0x01    // an integer of 1 byte will follow
-    result[4] = 0x01
-    // requested key length (256)
-    result[5] = 0x02;
-    result[6] = 0x02    // an integer of 2 bytes will follow
-    result[7] = 0x01;
-    result[8] = 0x00
-    // crypto nonce
-    result[9] = 0x02;
-    result[10] = 0x02   // an integer of 2 bytes will follow
-    result[11] = request.cNonce >> 8;
-    result[12] = request.cNonce % 256
-    return result;
+    let reserveKeyAndGetKeyHalf = 0x01;
+    return encodeSequence([
+        encodeInteger(reserveKeyAndGetKeyHalf),
+        encodeInteger(request.keyLength),
+        encodeInteger(request.cNonce)
+    ]);
 }
 
 
