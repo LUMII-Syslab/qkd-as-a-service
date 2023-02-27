@@ -5,12 +5,14 @@ import "strconv"
 func IntToBytes(x int64) []byte {
 	res := make([]byte, 0)
 	var mask int64 = (1 << 8) - 1
+	preceeded := false
 	for i := 7; i >= 0; i-- {
 		shiftedMask := mask << (8 * i)
 		maskedValue := x & shiftedMask
-		if maskedValue != 0 || shiftedMask < x {
+		if maskedValue != 0 || preceeded {
 			maskedValue >>= 8 * i
 			res = append(res, byte(maskedValue))
+			preceeded = true
 		}
 	}
 	if len(res) == 0 {
