@@ -6,7 +6,7 @@ import (
 )
 
 func TestIntToBytes(t *testing.T) {
-	param := 7
+	param := int64(7)
 	want := []byte{0b111}
 	result := IntToBytes(param)
 	if !reflect.DeepEqual(want, result) {
