@@ -119,6 +119,8 @@ func DecodeIntoVariables(sequence DERSequence, vars ...interface{}) error {
 			*v.(*int) = sequence[i].AsInt()
 		case *[]byte:
 			*v.(*[]byte) = sequence[i].AsBytes()
+		case nil:
+			continue
 		default:
 			return fmt.Errorf("unsupported type")
 		}

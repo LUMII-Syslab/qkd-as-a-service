@@ -20,5 +20,5 @@ const (
 	ErrorKeyNotFound = 1
 	ErrorNotRunning  = 2
 	ErrorInternal    = 3
-	ErrorInvalidReq  = 4
+	ErrorBadRequest  = 4
 )

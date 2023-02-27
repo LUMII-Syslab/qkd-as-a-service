@@ -28,7 +28,7 @@ type KeyManager struct {
 	sizeLimit  uint64         // maximum all size
 	aija       bool           // true <-> returns left of key and serves even ( otherwise returns right and serves odd)
 	mutex      sync.Mutex     // mutex for all, reservable, delayed, dictionary
-	running    bool           // running state ( keys can be reserved by the users)
+	serving    bool           // serving state ( keys can be reserved by the users)
 
 	keysAdded   uint64
 	keysServerd uint64
@@ -43,12 +43,12 @@ func newKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger) *KeyManage
 	return &KeyManager{
 		all:        deque.New[Key](),
 		reservable: deque.New[Key](),
-		notifier:   make(chan int, maxKeyCount*100),
+		notifier:   make(chan int, maxKeyCount*10),
 		delay:      500,
 		dictionary: make(map[string]Key),
 		sizeLimit:  maxKeyCount,
 		aija:       aija,
-		running:    true,
+		serving:    true,
 		logger:     logger,
 		HashAlgId:  []byte{0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x11},
 	}
@@ -75,14 +75,14 @@ func (k *KeyManager) getManagerState() KeyManagerState {
 		DictionarySize: uint64(len(k.dictionary)),
 		KeysAdded:      k.keysAdded,
 		KeysServed:     k.keysServerd,
-		Running:        k.running,
+		Running:        k.serving,
 		OldestOddKey:   k.getOldestKey(false),
 		OldestEvenKey:  k.getOldestKey(true),
 	}
 }
 
 func (k *KeyManager) getKey(id []byte) (key *Key, errId int) {
-	if !k.running {
+	if !k.serving {
 		errId = constants.ErrorNotRunning
 		return
 	}
@@ -133,7 +133,7 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 			time.Sleep(time.Duration(k.delay) * time.Millisecond)
 			k.keysDelayed -= 1
 			k.mutex.Lock()
-			if k.all.Front().Order > key.Order {
+			if k.all.Len() != 0 || k.all.Front().Order > key.Order {
 				k.mutex.Unlock()
 				return
 			}
@@ -148,7 +148,7 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 
 // extractKey extracts key and removes it from queue
 func (k *KeyManager) extractKey() (key *Key, errId int) {
-	if !k.running {
+	if !k.serving {
 		errId = constants.ErrorNotRunning
 		return
 	}
@@ -180,4 +180,20 @@ func (k *KeyManager) getOldestKey(even bool) *Key {
 		}
 	}
 	return nil
+}
+
+func (k *KeyManager) stopServingAndClear() {
+	k.mutex.Lock()
+	//k.serving = false
+	//k.all.Clear()
+	//k.reservable.Clear()
+	//k.dictionary = make(map[string]Key)
+	//k.notifier = make(chan int, k.sizeLimit*10)
+	k.mutex.Unlock()
+}
+
+func (k *KeyManager) startServing() {
+	k.mutex.Lock()
+	k.serving = true
+	k.mutex.Unlock()
 }

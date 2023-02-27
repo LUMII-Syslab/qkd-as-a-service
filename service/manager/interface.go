@@ -66,10 +66,16 @@ func (k *KeyManager) GetState(_ *models.GetStateRequest) (response *models.GetSt
 	return
 }
 
-func (k *KeyManager) SetState(_ *models.SetStateRequest) (response *models.SetStateResponse) {
-	response = new(models.SetStateResponse)
-	response.ErrId = constants.NoError
-	// TODO: implement
+func (k *KeyManager) SetState(request *models.SetStateRequest) (response *models.SetStateResponse) {
+	response = &models.SetStateResponse{}
+	switch request.State {
+	case constants.Empty:
+		k.stopServingAndClear()
+	case constants.Running:
+		k.startServing()
+	default:
+		response.ErrId = constants.ErrorBadRequest
+	}
 	return
 }
 
