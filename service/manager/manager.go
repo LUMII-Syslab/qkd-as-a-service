@@ -48,7 +48,7 @@ func newKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger) *KeyManage
 		dictionary: make(map[string]Key),
 		sizeLimit:  maxKeyCount,
 		aija:       aija,
-		serving:    true,
+		serving:    false,
 		logger:     logger,
 		HashAlgId:  []byte{0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x11},
 	}
@@ -62,7 +62,7 @@ type KeyManagerState struct {
 	KeysAdded      uint64
 	KeysServed     uint64
 	KeysDelayed    uint64
-	Running        bool
+	Serving        bool
 	OldestOddKey   *Key
 	OldestEvenKey  *Key
 }
@@ -75,7 +75,7 @@ func (k *KeyManager) getManagerState() KeyManagerState {
 		DictionarySize: uint64(len(k.dictionary)),
 		KeysAdded:      k.keysAdded,
 		KeysServed:     k.keysServerd,
-		Running:        k.serving,
+		Serving:        k.serving,
 		OldestOddKey:   k.getOldestKey(false),
 		OldestEvenKey:  k.getOldestKey(true),
 	}
@@ -83,7 +83,7 @@ func (k *KeyManager) getManagerState() KeyManagerState {
 
 func (k *KeyManager) getKey(id []byte) (key *Key, errId int) {
 	if !k.serving {
-		errId = constants.ErrorNotRunning
+		errId = constants.ErrorNotServing
 		return
 	}
 
@@ -133,7 +133,7 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 			time.Sleep(time.Duration(k.delay) * time.Millisecond)
 			k.keysDelayed -= 1
 			k.mutex.Lock()
-			if k.all.Len() != 0 || k.all.Front().Order > key.Order {
+			if k.all.Len() == 0 || k.all.Front().Order > key.Order {
 				k.mutex.Unlock()
 				return
 			}
@@ -149,7 +149,7 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 // extractKey extracts key and removes it from queue
 func (k *KeyManager) extractKey() (key *Key, errId int) {
 	if !k.serving {
-		errId = constants.ErrorNotRunning
+		errId = constants.ErrorNotServing
 		return
 	}
 	retrieved := false

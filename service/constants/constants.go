@@ -18,7 +18,7 @@ const (
 
 	NoError          = 0
 	ErrorKeyNotFound = 1
-	ErrorNotRunning  = 2
+	ErrorNotServing  = 2
 	ErrorInternal    = 3
 	ErrorBadRequest  = 4
 )

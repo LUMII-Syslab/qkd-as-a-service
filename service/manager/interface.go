@@ -52,7 +52,7 @@ func (k *KeyManager) GetState(_ *models.GetStateRequest) (response *models.GetSt
 	keyManagerState := k.getManagerState()
 	if keyManagerState.ReservableSize == 0 {
 		response.State = constants.Empty
-	} else if keyManagerState.Running == false {
+	} else if keyManagerState.Serving == false {
 		response.State = constants.Receiving
 	} else {
 		response.State = constants.Running
@@ -68,6 +68,7 @@ func (k *KeyManager) GetState(_ *models.GetStateRequest) (response *models.GetSt
 
 func (k *KeyManager) SetState(request *models.SetStateRequest) (response *models.SetStateResponse) {
 	response = &models.SetStateResponse{}
+
 	switch request.State {
 	case constants.Empty:
 		k.stopServingAndClear()
@@ -76,6 +77,7 @@ func (k *KeyManager) SetState(request *models.SetStateRequest) (response *models
 	default:
 		response.ErrId = constants.ErrorBadRequest
 	}
+
 	return
 }
 
