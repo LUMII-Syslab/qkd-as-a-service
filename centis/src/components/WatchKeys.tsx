@@ -73,7 +73,6 @@ export default function WatchKeys({ config }) {
       );
 
       result.ErrId = gkhResp.errorId;
-      console.log(result.ErrId)
       result.KeyId = rkaghResp.keyId;
       result.Left = rkaghResp.thisHalf;
       result.Right = gkhResp.thisHalf;
