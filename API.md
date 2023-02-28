@@ -1,102 +1,53 @@
-# QKD as a Service (QAAS)
+# QKD as a Service (QAAS) API
 
-Table of Contents:
+## Table of Contents:
 
 1. [QAAS client API](#qaas-client-api)
-  1. [0x01: `reserveKeyAndGetHalf` request](#0x01-reservekeyandgethalf-request)
-  2. [0xff: `reserveKeyAndGetHalf` response](#0xff-reservekeyandgethalf-response)
-  3. [0x02: `getKeyHalf` request](#0x02-getKeyHalf-request)
-  4. [0xfe: `getKeyHalf` response](#0xfe-getKeyHalf-response)
+   1. [0x01: `reserveKeyAndGetHalf` request](#0x01-reservekeyandgethalf-request)
+   2. [0xff: `reserveKeyAndGetHalf` response](#0xff-reservekeyandgethalf-response)
+   3. [0x02: `getKeyHalf` request](#0x02-getKeyHalf-request)
+   4. [0xfe: `getKeyHalf` response](#0xfe-getKeyHalf-response)
 2. [QAAS admin API](#qaas-admin-api)
-  1. [0x03: `getState` request](#0x03-getstate-request)
-  2. [0xfd: `getState` response](#0xfd-getstate-response)
-  3. [0x04: `setState` request](#0x04-setstate-request)
-  4. [0xfc: `setState` response](#0xfc-setstate-response)
+   1. [0x03: `getState` request](#0x03-getstate-request)
+   2. [0xfd: `getState` response](#0xfd-getstate-response)
+   3. [0x04: `setState` request](#0x04-setstate-request)
+   4. [0xfc: `setState` response](#0xfc-setstate-response)
 3. [API Error codes & Other constants](#error-codes--other-constants)
 4. [QAAS software structure & operation](#qaas-software-structure--operation)
-  1. [Key Gathering](#key-gathering)
-  2. [Handling `reserveKeyAndGetHalf` requests](#handling-reservekeyandgethalf-requests)
-  3. [Handling `getKeyHalf` requests](#handling-getkeyhalf-requests)
-  4. [KDC Synchronisation](#kdc-synchronisation)
+   1. [Key Gathering](#key-gathering)
+   2. [Handling `reserveKeyAndGetHalf` requests](#handling-reservekeyandgethalf-requests)
+   3. [Handling `getKeyHalf` requests](#handling-getkeyhalf-requests)
+   4. [KDC Synchronisation](#kdc-synchronisation)
 
-## Starting the service & Configuration
-
-Repository's layout:
-
-```
-.
-├── centis
-│   ├── node_modules
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── public
-│   ├── README.md
-│   ├── src
-│   ├── tsconfig.json
-│   └── yarn.lock
-├── README.md
-└── service
-    ├── api
-    ├── config.toml
-    ├── configure.go
-    ├── constants
-    ├── gatherers
-    ├── go.mod
-    ├── go.sum
-    ├── main.go
-    ├── manager
-    ├── models
-    ├── scripts
-    └── utils
-```
-
-The project consists of the QAAS itself (`service`) and the administration panel (`centis`).
-
-To run the `service` go language has to be installed. Afterwards:
-
-- cd into `service`
-
-- run `go run .`
-
-To run 'centis' npm has to be installed. Afterwards:
-
-- cd into `centis`
-
-- run `npm install`
-
-- run `npm start`
-  
 ## QAAS client API
+
+Every request is of sequence type (`0x30`) followed by the length of bytes following it and then the elements themselves.
 
 ### 0x01: `reserveKeyAndGetHalf` request
 
-parameters:
+Parameters:
 
-1. endpoint id = `0x01`
+1. endpoint id
+   
+   - type = integer (`0x02`)
+   - element length = `0x01` bytes
+   - value = `0x01`
 
 2. key length
+   
+   - type = integer (`0x02`)
+   - length = `0x02` bytes
+   - value = `0x100` ( currently only 256 byte key fetching is supported )
 
 3. crypto nonce
-
-encoded request example
-
-```
-30 0B 02 01 01 02 02 01 00 02 02 30 39
-```
-
-explanation:
-
-`30` `0b`: sequence type (`0x30`) with length `0x0b` = 11 bytes;
-
-`02` `01` `01`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x01` = 1; ( **endpoint id** )
-
-`02` `02` `01 00`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x0100` = 256; ( **key length** )
-
-`02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
+   
+   - type = integer (`0x02`)
+   - length <= `0x04` bytes
+   - value <= `0x111111`
 
 ### 0xff: `reserveKeyAndGetHalf` response
 
-returns:
+Returns:
 
 1. error code
 
@@ -115,26 +66,26 @@ returns:
 encoded return example:
 
 ```
-30 23 02 01 00 02 01 ff 02 02 a4 55 04 04 28 8b de 07 04 02 21 a1 04 02 01 02 06 09 60 86 48 01 65 03 04 02 11
+30 23 02 01 00 02 01 ff 02 02 30 3a 04 04 28 8b de 07 04 02 21 a1 04 0? ... 06 09 60 86 48 01 65 03 04 02 11
 ```
 
 explanation:
 
 `30` `23`: sequence type (`0x30`) with length `0x23` = 35 bytes;
 
-`02` `01` `00`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x00` = 0; ( **error code** )
+**error code** (`02` `01` `00`): integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x00` = 0;
 
-`02` `01` `ff`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0xff` = 255; ( **response id** )
+**response id** (`02` `01` `ff`): integer type (`0x02`) with length `0x01` = 1 bytes, value: `0xff` = 255;
 
-`02` `02` `a4 55`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0xa455` = 42069; ( **crypto nonce** )
+**crypto nonce** (`02` `02` `a4 55`): integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x303a` = 12346;
 
-`04` `04` `28 8b de 07`: byte array (`0x04`) with length `0x04` = 4 bytes; ( **key identifier** )
+**key identifier** (`04` `04` `28 8b de 07`): byte array (`0x04`) with length `0x04` = 4 bytes;
 
-`04` `02` `21 a1`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **half of key bytes** )
+**half of key bytes** (`04` `02` `21 a1`): byte array (`0x04`) with length `0x02` = 2 bytes;
 
-`04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **hash(the other half)** )
+**hash(the other half)** (`04` `0?` `...`): byte array (`0x04`) with length `0x0?` = ? bytes;
 
-`06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** )
+**hash algorithm id** (`06` `09` `60 86 48 01 65 03 04 02 11`): object identifier (`0x06`) with length `0x09` = 9 bytes;
 
 ### 0x02: `getKeyHalf` request
 
@@ -163,7 +114,6 @@ explanation:
 `04` `04` `40 af a0 1f`: byte array (`0x04`) with length `0x04` = 4 bytes; ( **key identifier** )
 
 `02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
-
 
 ### 0xfe: `getKeyHalf` response
 
@@ -242,15 +192,14 @@ returns:
 3. crypto nonce
 
 4. kdc state id
-	
-	- `EMPTY` = 0		( when there are no keys received from QKD device )
-	- `RECEIVING` = 1	( when at least one key has been received )
-	- `RUNNING` = 2		( when keys can be reserved by the users )
+   
+   - `EMPTY` = 0        ( when there are no keys received from QKD device )
+   - `RECEIVING` = 1    ( when at least one key has been received )
+   - `RUNNING` = 2        ( when keys can be reserved by the users )
 
 5. even key id
 
 6. odd key id
-
 
 TODO
 
@@ -265,6 +214,7 @@ TODO
 ## Error codes & Other constants
 
 error codes: 
+
 - NoError          = 0
 - ErrorKeyNotFound = 1
 - ErrorNotRunning  = 2
