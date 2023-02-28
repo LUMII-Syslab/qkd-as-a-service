@@ -30,7 +30,7 @@ func main() {
 
 	if config.AijaEnabled {
 		aijaDebugLogger := log.New(os.Stdout, "AIJA DEBUG\t", log.Ldate|log.Ltime|log.Lshortfile)
-		aijaKeyManager := manager.NewKeyManager(config.MaxKeyCount, true, aijaDebugLogger)
+		aijaKeyManager := manager.NewKeyManager(config.MaxKeyCount, true, aijaDebugLogger, config.DefaultServing)
 		gatherer.PublishTo(aijaKeyManager)
 
 		aijaInfoLogger := log.New(infoEndpoint, "AIJA INFO\t", log.Ldate|log.Ltime)
@@ -49,7 +49,7 @@ func main() {
 
 	if config.BrencisEnabled {
 		brencisDebugLogger := log.New(io.Discard, "BRENCIS DEBUG\t", log.Ldate|log.Ltime|log.Lshortfile)
-		brencisKeyManager := manager.NewKeyManager(config.MaxKeyCount, false, brencisDebugLogger)
+		brencisKeyManager := manager.NewKeyManager(config.MaxKeyCount, false, brencisDebugLogger, config.DefaultServing)
 		gatherer.PublishTo(brencisKeyManager)
 
 		brencisInfoLogger := log.New(infoEndpoint, "BRENCIS INFO\t", log.Ldate|log.Ltime)

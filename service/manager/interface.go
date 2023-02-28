@@ -6,8 +6,8 @@ import (
 	"qkdc-service/models"
 )
 
-func NewKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger) *KeyManager {
-	return newKeyManager(maxKeyCount, aija, logger)
+func NewKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger, serving bool) *KeyManager {
+	return newKeyManager(maxKeyCount, aija, logger, serving)
 }
 
 func (k *KeyManager) AddKey(keyId []byte, keyVal []byte) error {

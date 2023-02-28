@@ -20,6 +20,8 @@ type Configuration struct {
 	FSGathererDir string `mapstructure:"fs_gatherer_dir"`
 
 	LogRequests bool `mapstructure:"log_requests"`
+
+	DefaultServing bool `mapstructure:"default_serving"`
 }
 
 func loadConfig() Configuration {
@@ -88,6 +90,13 @@ func loadConfig() Configuration {
 	} else {
 		res.FSGathererDir = "/tmp/qkd-mock"
 		log.Printf("loaded FSGathererDir = %v from %v\n", res.FSGathererDir, "defaults")
+	}
+
+	if viper.IsSet("default_serving") {
+		log.Printf("loaded DefaultServing = %v from %v\n", res.DefaultServing, confFile)
+	} else {
+		res.DefaultServing = false
+		log.Printf("loaded DefaultServing = %v from %v\n", res.DefaultServing, "defaults")
 	}
 
 	return res

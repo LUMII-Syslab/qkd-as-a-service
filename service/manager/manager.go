@@ -38,7 +38,7 @@ type KeyManager struct {
 	HashAlgId []byte
 }
 
-func newKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger) *KeyManager {
+func newKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger, serving bool) *KeyManager {
 	return &KeyManager{
 		all:        deque.New[Key](),
 		reservable: deque.New[Key](),
@@ -47,7 +47,7 @@ func newKeyManager(maxKeyCount uint64, aija bool, logger *log.Logger) *KeyManage
 		dictionary: make(map[string]Key),
 		sizeLimit:  maxKeyCount,
 		aija:       aija,
-		serving:    false,
+		serving:    serving,
 		logger:     logger,
 		HashAlgId:  []byte{0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x11},
 	}
