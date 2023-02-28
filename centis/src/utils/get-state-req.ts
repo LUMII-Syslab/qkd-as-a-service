@@ -14,8 +14,8 @@ export class GetStateResponse {
     reservable: number
     keysServed: number
     keysAdded: number
-    evenKeyId: Uint8Array
-    oddKeyId: Uint8Array
+    oldestEvenKeyId: Uint8Array
+    oldestOddKeyId: Uint8Array
 }
 
 export function validateGetStateRequest(request: GetStateRequest): string {
@@ -39,6 +39,7 @@ export function decodeGetStateResponse(encodedResponse): GetStateResponse {
     let result = new GetStateResponse();
     if(!encodedResponse) return result;
     let data = ASNDERToList(encodedResponse);
+    console.log(data);
     result.errorId = data[0] as number;
     result.responseId = data[1] as number;
     result.cryptoNonce = data[2] as number;
@@ -47,7 +48,7 @@ export function decodeGetStateResponse(encodedResponse): GetStateResponse {
     result.reservable = data[5] as number;
     result.keysServed = data[6] as number;
     result.keysAdded = data[7] as number;
-    result.evenKeyId = data[4] as Uint8Array;
-    result.oddKeyId = data[5] as Uint8Array;
+    result.oldestEvenKeyId = data[8] as Uint8Array;
+    result.oldestOddKeyId = data[9] as Uint8Array;
     return result;
 }
