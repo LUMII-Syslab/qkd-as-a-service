@@ -22,9 +22,6 @@ export default function KdcSynchronization() {
         const brencisGetStateRes:GetStateResponse = decodeGetStateResponse(
             await wsSendRequest(brencisWs, encodeGetStateRequest({cNonce: 12345} as GetStateRequest))
         )
-        
-        console.log(aijaGetStateRes)
-        console.log(brencisGetStateRes)
 
         await wsSendRequest(aijaWs, encodeSetStateRequest({
             stateId: 2,
