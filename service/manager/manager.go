@@ -184,11 +184,14 @@ func (k *KeyManager) getOldestKey(even bool) *Key {
 
 func (k *KeyManager) stopServingAndClear() {
 	k.mutex.Lock()
-	//k.serving = false
-	//k.all.Clear()
-	//k.reservable.Clear()
-	//k.dictionary = make(map[string]Key)
-	//k.notifier = make(chan int, k.sizeLimit*10)
+	k.serving = false
+	k.all.Clear()
+	k.reservable.Clear()
+	k.dictionary = make(map[string]Key)
+	// clear notifier
+	for len(k.notifier) > 0 {
+		<-k.notifier
+	}
 	k.mutex.Unlock()
 }
 
