@@ -52,7 +52,7 @@ func (k *KeyManager) GetState(_ *models.GetStateRequest) (response *models.GetSt
 	keyManagerState := k.getManagerState()
 	if keyManagerState.ReservableSize == 0 {
 		response.State = constants.Empty
-	} else if keyManagerState.Serving == false {
+	} else if !keyManagerState.Serving {
 		response.State = constants.Receiving
 	} else {
 		response.State = constants.Running
@@ -73,6 +73,7 @@ func (k *KeyManager) SetState(request *models.SetStateRequest) (response *models
 	case constants.Empty:
 		k.stopServingAndClear()
 	case constants.Running:
+		k.clearKeysOlderThan(request.KeyId0, request.KeyId1)
 		k.startServing()
 	default:
 		response.ErrId = constants.ErrorBadRequest

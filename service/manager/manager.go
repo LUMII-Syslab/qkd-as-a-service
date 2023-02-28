@@ -1,7 +1,6 @@
 package manager
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"qkdc-service/constants"
@@ -107,7 +106,7 @@ func (k *KeyManager) addKey(id []byte, val []byte) error {
 	_, exists := k.dictionary[string(key.KeyId)]
 	if exists {
 		k.mutex.Unlock()
-		return errors.New(fmt.Sprintf("key %v already exists", utils.BytesToHexOctets(key.KeyId)))
+		return fmt.Errorf("key %v already exists", utils.BytesToHexOctets(key.KeyId))
 	}
 
 	k.keysAdded += 1
@@ -173,6 +172,7 @@ func (k *KeyManager) getOldestKey(even bool) *Key {
 	if k.all.Len() == 0 {
 		return nil
 	}
+	// provided that key parity is distributed evenly, this should be fast
 	for i := 0; i < k.all.Len(); i++ {
 		if (utils.ByteSum(k.all.At(i).KeyVal)%2 == 0) == even {
 			val := k.all.At(i)
@@ -199,4 +199,23 @@ func (k *KeyManager) startServing() {
 	k.mutex.Lock()
 	k.serving = true
 	k.mutex.Unlock()
+}
+
+func (k *KeyManager) clearKeysOlderThan(ids ...[]byte) {
+	k.mutex.Lock()
+	defer k.mutex.Unlock()
+	for _, id := range ids {
+		key, exists := k.dictionary[string(id)]
+		if !exists {
+			continue
+		}
+		for k.all.Len() > 0 && k.all.Front().Order < key.Order {
+			rem := k.all.PopFront()
+			delete(k.dictionary, string(rem.KeyId))
+		}
+		for k.reservable.Len() > 0 && k.reservable.Front().Order < key.Order {
+			<-k.notifier
+			k.reservable.PopFront()
+		}
+	}
 }
