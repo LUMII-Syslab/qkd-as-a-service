@@ -7,6 +7,7 @@ import {decodeSetStateResponse, encodeSetStateRequest, SetStateRequest, validate
 import SelectKdcState from "./SelectKdcState";
 import InputKeyId0 from "./InputKeyId0";
 import InputKeyId1 from "./InputKeyId1";
+import { inverseStateIds, stateIds } from "../utils/translate-ids";
 
 export default function ExecSetState() {
     const config = useContext(ConfigContext)
@@ -21,7 +22,9 @@ export default function ExecSetState() {
     let [kdc, setKDC] = useState("Aija")
     let endpoint = kdc === "Aija" ? config.aijaEndpoint : config.brencisEndpoint
 
-    let [state, setState] = useState("RUNNING")
+    let setKdcState = (state: string) => {
+        setRequest({...request, stateId: inverseStateIds[state.toLowerCase()]})
+    }
 
     let error = validateSetStateRequest(request)
     let encoded = (request && !error) ? encodeSetStateRequest(request) : null
@@ -30,7 +33,7 @@ export default function ExecSetState() {
         <ExecTemplate name="SetState" encodedRequest={encoded} endpoint={endpoint}
                       responseDecoder={decodeSetStateResponse} error={error}>
             <div className="col-12 col-lg-2 my-2"><SelectKdc kdc={kdc} setKDC={setKDC}/></div>
-            <div className="col-12 col-lg-2 my-2"><SelectKdcState state={state} setKdcState={setState}/></div>
+            <div className="col-12 col-lg-2 my-2"><SelectKdcState state={stateIds[request.stateId].toUpperCase()} setKdcState={setKdcState}/></div>
             <div className="col-12 col-lg-2 my-2"><InputKeyId0 request={request} setRequest={setRequest}/></div>
             <div className="col-12 col-lg-2 my-2"><InputKeyId1 request={request} setRequest={setRequest}/></div>
             <div className="col-12 col-lg-2 my-2"><InputCryptoNonce request={request} setRequest={setRequest}/></div>

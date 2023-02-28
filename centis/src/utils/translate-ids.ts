@@ -12,3 +12,9 @@ export var stateIds = {
     1: "receiving",
     2: "running"
 }
+
+export var inverseStateIds = {
+    "empty": 0,
+    "receiving": 1,
+    "running": 2
+}
