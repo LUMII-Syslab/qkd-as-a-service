@@ -66,12 +66,12 @@ public class InjectablePQC {
     /*
      * RFC 8446 reserved for private use (0xFE00..0xFFFF)
      */
-    // by SK: lookup here: c
     //public static final int oqs_sphincsshake256128frobust_signaturescheme_codepoint = 0xfe7a;
+    // ^^^ when compiling OQS openssl 1.1.1, go to openssl/oqs-template/generate.yml and enable this algorithm!
+    //     then invoke: python3 oqs-template/generate.py
     //public static final int oqs_sphincssha256256frobust_signaturescheme_codepoint = 0xfe72;
     public static final int oqs_sphincssha256128frobust_signaturescheme_codepoint = 0xfe5e;
-
-
+    
 
     private static String OQS_SIG_NAME =
             //"SPHINCS+-SHAKE256-128f-robust"
@@ -187,7 +187,7 @@ public class InjectablePQC {
                 (InjectedSigVerifiers.VerifySignatureFunction) (data, key, signature) -> {
                     int from = 26; // see der.md
                     int priorTo = key.length;
-                    //SPHINCSPlusSigner signer = new SPHINCSPlusSigner();
+                    //SPHINCSPlusSigner signer = new SPHINCSPlusSigner(); -- otherwise we need to modify SignatureSpi
                     InjectableSphincsPlusTlsSigner signer = new InjectableSphincsPlusTlsSigner();
 
                     byte[] pubKey = Arrays.copyOfRange(key, from, priorTo);

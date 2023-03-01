@@ -75,8 +75,12 @@ public class QkdTestClient {
                 //.proxy(ProxySelector.getDefault())
                 .build();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println("SMART RESPONSE: "+response.body());
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("SMART RESPONSE: " + response.body());
+        }catch (Exception e ){
+            e.printStackTrace();
+        }
 
     }
 
