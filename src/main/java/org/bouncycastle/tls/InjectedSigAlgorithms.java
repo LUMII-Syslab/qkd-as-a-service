@@ -8,6 +8,8 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricAlgorithmProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
+import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
+import org.bouncycastle.tls.injection.InjectedSignatureSpi;
 
 import java.io.IOException;
 import java.util.*;
@@ -29,7 +31,7 @@ public class InjectedSigAlgorithms
                             ASN1ObjectIdentifier oid, SignatureAndHashAlgorithm sigAndHash,
                             int signatureSchemeCodePoint, int cryptoHashAlgorithmIndex,
                             InjectedConverter converter,
-                            AsymmetricKeyInfoConverter infoToKeyConverter) {
+                            AsymmetricKeyInfoConverter infoToKeyConverter, InjectedSignatureSpi.Factory factory) {
 
         public ASN1ObjectIdentifier oid() {
             return this.oid;
@@ -48,9 +50,10 @@ public class InjectedSigAlgorithms
                                                  int signatureSchemeCodePoint, // e.g., oqs_sphincsshake256128frobust
                                                  int cryptoHashAlgorithmIndex,
                                                  InjectedConverter converter,
-                                                 AsymmetricKeyInfoConverter infoToKeyConverter) {
+                                                 AsymmetricKeyInfoConverter infoToKeyConverter,
+                                                 InjectedSignatureSpi.Factory factory) {
         SigAlgorithmInfo newAlg = new SigAlgorithmInfo(name, oid, sigAndHash, signatureSchemeCodePoint,
-                cryptoHashAlgorithmIndex, converter, infoToKeyConverter);
+                cryptoHashAlgorithmIndex, converter, infoToKeyConverter, factory);
         injected.add(newAlg);
         injectedSignatureSchemes.put(signatureSchemeCodePoint, newAlg);
         injectedOids.put(oid.toString(), newAlg);
@@ -137,6 +140,18 @@ public class InjectedSigAlgorithms
         public void configure(ConfigurableProvider provider) {
             provider.addAlgorithm("Alg.Alias.Signature."+info.oid, info.name);
             provider.addAlgorithm("Alg.Alias.Signature.OID."+info.oid, info.name);
+
+            // remove previous values in order to avoid the duplicate key exception
+            if (provider instanceof java.security.Provider) {
+                java.security.Provider p = (java.security.Provider)provider;
+                p.remove("Signature."+info.name);
+                p.remove("Alg.Alias.Signature." + info.oid);
+                p.remove("Alg.Alias.Signature.OID." + info.oid);
+            }
+            // = provider.addSignatureAlgorithm(provider, "SPHINCSPLUS", PREFIX + "SignatureSpi$Direct", BCObjectIdentifiers.sphincsPlus);
+            provider.addAlgorithm("Signature."+info.name, "org.bouncycastle.tls.injection.InjectedSignatureSpi");
+            provider.addAlgorithm("Alg.Alias.Signature." + info.oid, info.name);
+            provider.addAlgorithm("Alg.Alias.Signature.OID." + info.oid, info.name);
 
             registerOid(provider, info.oid, info.name, info.infoToKeyConverter);;
             registerOidAlgorithmParameters(provider, info.oid, info.name);

@@ -8,8 +8,10 @@ import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.digests.NullDigest;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.pqc.crypto.frodo.*;
+import org.bouncycastle.pqc.jcajce.provider.sphincsplus.SignatureSpi;
 import org.bouncycastle.tls.crypto.*;
 import org.bouncycastle.tls.crypto.impl.jcajce.JceTlsSecret;
 import org.bouncycastle.util.Pack;
@@ -57,27 +59,27 @@ public class InjectablePQC {
      * 1.3.9999.6.7.1 SPHINCS+ OID from open-quantum-safe;
      * ALL oqs SIG code points: https://github.com/open-quantum-safe/openssl/blob/OQS-OpenSSL_1_1_1-stable/oqs-template/oqs-sig-info.md
      */
-    public static final ASN1ObjectIdentifier oqs_sphincsshake256128frobust_oid = new ASN1ObjectIdentifier("1.3.9999.6.7").branch("1");
+    //public static final ASN1ObjectIdentifier oqs_sphincsshake256128frobust_oid = new ASN1ObjectIdentifier("1.3.9999.6.7").branch("1");
     //public static final ASN1ObjectIdentifier oqs_sphincssha256256frobust_oid = new ASN1ObjectIdentifier("1.3.9999.6.6").branch("1");
-    //public static final ASN1ObjectIdentifier oqs_sphincssha256128frobust_oid = new ASN1ObjectIdentifier("1.3.9999.6.4").branch("1");
+    public static final ASN1ObjectIdentifier oqs_sphincssha256128frobust_oid = new ASN1ObjectIdentifier("1.3.9999.6.4").branch("1");
 
     /*
      * RFC 8446 reserved for private use (0xFE00..0xFFFF)
      */
     // by SK: lookup here: c
-    public static final int oqs_sphincsshake256128frobust_signaturescheme_codepoint = 0xfe7a;
+    //public static final int oqs_sphincsshake256128frobust_signaturescheme_codepoint = 0xfe7a;
     //public static final int oqs_sphincssha256256frobust_signaturescheme_codepoint = 0xfe72;
-    //public static final int oqs_sphincssha256128frobust_signaturescheme_codepoint = 0xfe5e;
+    public static final int oqs_sphincssha256128frobust_signaturescheme_codepoint = 0xfe5e;
 
 
 
     private static String OQS_SIG_NAME =
-            "SPHINCS+-SHAKE256-128f-robust"
-            //"SPHINCS+-SHA256-128f-robust"
+            //"SPHINCS+-SHAKE256-128f-robust"
+            "SPHINCS+-SHA256-128f-robust"
             ;
     //private static SPHINCSPlusParameters sphincsPlusParameters = SPHINCSPlusParameters.shake256_128f;
-    private static SPHINCSPlusParameters sphincsPlusParameters = SPHINCSPlusParameters.shake_128f;
-    //private static SPHINCSPlusParameters sphincsPlusParameters = SPHINCSPlusParameters.sha2_128f;
+    //private static SPHINCSPlusParameters sphincsPlusParameters = SPHINCSPlusParameters.shake_128f;
+    private static SPHINCSPlusParameters sphincsPlusParameters = SPHINCSPlusParameters.sha2_128f;
     private static int sphincsPlusParametersAsInt = SPHINCSPlusParameters.getID(sphincsPlusParameters);
 
     public static void inject() {
@@ -86,15 +88,17 @@ public class InjectablePQC {
         //System.setProperty("jdk.tls.client.SignatureSchemes", "SPHINCS+"); // comma-separated
 
 
-        ASN1ObjectIdentifier sigOid = InjectablePQC.oqs_sphincsshake256128frobust_oid;
-        //ASN1ObjectIdentifier sigOid = InjectablePQC.oqs_sphincssha256128frobust_oid;
-        int sigCodePoint = InjectablePQC.oqs_sphincsshake256128frobust_signaturescheme_codepoint;
-        //int sigCodePoint = InjectablePQC.oqs_sphincssha256128frobust_signaturescheme_codepoint;
+        //ASN1ObjectIdentifier sigOid = InjectablePQC.oqs_sphincsshake256128frobust_oid;
+        ASN1ObjectIdentifier sigOid = InjectablePQC.oqs_sphincssha256128frobust_oid;
+        //int sigCodePoint = InjectablePQC.oqs_sphincsshake256128frobust_signaturescheme_codepoint;
+        int sigCodePoint = InjectablePQC.oqs_sphincssha256128frobust_signaturescheme_codepoint;
         short sigCodePointHi = (short)(sigCodePoint >> 8);
         short sigCodePointLo = (short)(sigCodePoint & 0xFF);
         int sphincsPlusPKLength = 32;
         int sphincsPlusSKLength = 64;
         // ^^^ see: https://github.com/sphincs/sphincsplus
+
+        InjectedKEMs.injectionOrder = InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT;
 
         InjectedSigAlgorithms.injectSigAndHashAlgorithm(
                 "SPHINCS+",//"SPHINCSPLUS",
@@ -159,7 +163,8 @@ public class InjectablePQC {
                         return new SubjectPublicKeyInfo(algorithmIdentifier, new DEROctetString(encoding));
                     }
                 },
-                new SPHINCSPlusKeyFactorySpi()
+                new SPHINCSPlusKeyFactorySpi(),
+                ()->new SphincsPlusSignatureSpi()
         );
         InjectedSigners.injectSigner("SPHINCS+", (JcaTlsCrypto crypto, PrivateKey privateKey) -> {
             assert (privateKey instanceof BCSPHINCSPlusPrivateKey);
@@ -182,7 +187,9 @@ public class InjectablePQC {
                 (InjectedSigVerifiers.VerifySignatureFunction) (data, key, signature) -> {
                     int from = 26; // see der.md
                     int priorTo = key.length;
-                    SPHINCSPlusSigner signer = new SPHINCSPlusSigner();
+                    //SPHINCSPlusSigner signer = new SPHINCSPlusSigner();
+                    InjectableSphincsPlusTlsSigner signer = new InjectableSphincsPlusTlsSigner();
+
                     byte[] pubKey = Arrays.copyOfRange(key, from, priorTo);
                     SPHINCSPlusPublicKeyParameters params = new SPHINCSPlusPublicKeyParameters(
                             sphincsPlusParameters, pubKey);
@@ -201,6 +208,11 @@ public class InjectablePQC {
         Security.insertProviderAt(bcProvider, 1);
     }
 
+    private static class SphincsPlusSignatureSpi extends SignatureSpi {
+        public SphincsPlusSignatureSpi() {
+            super(new NullDigest(), new InjectableSphincsPlusTlsSigner());
+        }
+    }
 
 
     public static class InjectableSphincsPlusTlsSigner extends SPHINCSPlusSigner implements TlsSigner {

@@ -68,18 +68,19 @@ public class QkdProperties {
 
     public QkdServerKey serverKey() {
         return new QkdServerKey(
-                fileNameProperty("key", "key.keystore"),
-                this.properties.value().getProperty("keyPassword", "key-pass"),
-                this.properties.value().getProperty("keyAlias", "qkd_user2")
+                fileNameProperty("serverKeyStore", "server.keystore"),
+                this.properties.value().getProperty("serverKeyStorePassword", "server-keystore-pass"),
+                this.properties.value().getProperty("serverKeyAlias", "server")
+                        //"qkd_user2")
         );
     }
 
     public KeyStore trustStore() throws Exception {
 
-        String fileName = fileNameProperty("ca", "ca.truststore");
+        String fileName = fileNameProperty("caTrustStore", "ca.truststore");
         File f = new File(fileName);
 
-        String password = properties.value().getProperty("caPassword", "ca-truststore-pass"); // ca-truststore-pass
+        String password = properties.value().getProperty("caTrustStorePassword", "ca-truststore-pass"); // ca-truststore-pass
 
         return KeyStore.getInstance(f, password.toCharArray());
     }
