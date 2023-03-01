@@ -1,10 +1,12 @@
 package lv.lumii.qkd;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 
-public class TlsServer implements Runnable {
+public class HttpServer implements Runnable, Server {
 
     private ServerSocket server = null;
     /**
@@ -12,10 +14,9 @@ public class TlsServer implements Runnable {
      * obtains a file's bytecodes using the method <b>getBytes</b>.
      *
      */
-    protected TlsServer(ServerSocket ss)
-    {
-        server = ss;
-        newListener();
+    protected HttpServer(SSLContext sslContext, int port) throws IOException {
+        SSLServerSocketFactory ssf = sslContext.getServerSocketFactory();
+        server = ssf.createServerSocket(port);
     }
 
     /**
@@ -51,7 +52,11 @@ public class TlsServer implements Runnable {
         }
 
         // create a new thread to accept the next connection
-        newListener();
+        try {
+            newListener();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         try {
             OutputStream rawOut = socket.getOutputStream();
@@ -105,14 +110,6 @@ public class TlsServer implements Runnable {
     }
 
     /**
-     * Create a new thread to listen.
-     */
-    private void newListener()
-    {
-        (new Thread(this)).start();
-    }
-
-    /**
      * Returns the path to the file obtained from
      * parsing the HTML header.
      */
@@ -142,5 +139,13 @@ public class TlsServer implements Runnable {
         } else {
             return "/";
         }
+    }
+
+    private void newListener() throws Exception {
+        (new Thread(this)).start();
+    }
+    @Override
+    public void start() throws Exception {
+        newListener();
     }
 }

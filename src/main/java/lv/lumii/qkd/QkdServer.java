@@ -10,13 +10,18 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
 import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;
 
+/**
+ * uses either HttpServer or WsServer inside to serve client requests
+ */
 public class QkdServer {
 
     public static Logger logger; // static initialization
@@ -55,15 +60,15 @@ public class QkdServer {
     private QkdProperties qkdProperties;
 
     private int port = 2222;
-    private Scalar<TlsServer> wsserver;
+    private Scalar<Server> server;
 
     public QkdServer() { // QkdProperties qkdProperties1) {
         System.out.println(" New QkdServer");
-        this.wsserver = new Synced<>(new Sticky<>(() -> newConnection() ));
+        this.server = new Synced<>(new Sticky<>(() -> newConnection() ));
         this.qkdProperties = new QkdProperties(mainDirectory);
     }
 
-    private TlsServer newConnection() throws Exception {
+    private Server newConnection() throws Exception {
 
         System.out.println(" New QKD User2 ");
 
@@ -72,37 +77,35 @@ public class QkdServer {
         System.out.println("SRV KEY "+srvKey.password());
 
 
-        SSLServerSocketFactory ssf = null;
         try {
             // set up key manager to do server authentication
-            SSLContext ctx;
 
             KeyManagerFactory kmf;
             KeyStore ks;
-
-            ctx = SSLContext.getInstance("TLS");
             kmf = KeyManagerFactory.getInstance("SunX509");
             ks = srvKey.keyStore();
-
             kmf.init(ks, srvKey.password());
-            ctx.init(kmf.getKeyManagers(), null, SecureRandom.getInstanceStrong());
 
-            ssf = ctx.getServerSocketFactory();
+            TrustManagerFactory tmf;
+            KeyStore ts;
+            tmf = TrustManagerFactory.getInstance("SunX509");
+            ts = qkdProperties.trustStore();
+            tmf.init(ts);
 
-            ServerSocket ss = ssf.createServerSocket(port);
-            return new TlsServer(ss);
+            SSLContext ctx;
+            ctx = SSLContext.getInstance("TLS");
+            ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), SecureRandom.getInstanceStrong());
+
+             return new HttpServer(ctx, qkdProperties.port());
+            //return new WsServer(ctx, qkdProperties.port());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
     }
 
-    public void start() {
-        try {
-            this.wsserver.value(); // init the value
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public void start() throws Exception {
+        this.server.value().start();
     }
 
 }

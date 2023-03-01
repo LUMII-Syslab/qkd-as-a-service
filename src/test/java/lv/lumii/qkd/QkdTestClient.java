@@ -1,7 +1,5 @@
-package lv.lumii.qrng;
+package lv.lumii.qkd;
 
-import lv.lumii.qkd.QkdProperties;
-import lv.lumii.qkd.QkdServer;
 import org.bouncycastle.pqc.InjectablePQC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +10,6 @@ import java.io.File;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;

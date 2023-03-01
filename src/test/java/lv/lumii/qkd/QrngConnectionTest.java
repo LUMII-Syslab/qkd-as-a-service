@@ -1,4 +1,4 @@
-package lv.lumii.qrng;
+package lv.lumii.qkd;
 
 import nl.altindag.ssl.SSLFactory;
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
@@ -96,7 +96,6 @@ public class QrngConnectionTest {
                 .withSecureRandom(SecureRandom.getInstanceStrong())
                 .withCiphers("TLS_AES_256_GCM_SHA384")
                 .build();
-
 
 
 

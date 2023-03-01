@@ -1,6 +1,4 @@
-package lv.lumii.qrng;
-
-import lv.lumii.qkd.QkdServer;
+package lv.lumii.qkd;
 
 
 public class QkdTestServer {
