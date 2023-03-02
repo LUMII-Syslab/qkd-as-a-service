@@ -26,9 +26,12 @@ export CLIENT_CONFIG_FILE=$3
 source $DIR/_vars.sh
 source $CA_VARS
 
+<<<<<<< HEAD
 export DER_TMP=`dirname $CLIENT_KEY`/${CLIENT_NAME}.der.tmp
 export PEM_TMP=`dirname $CLIENT_KEY`/${CLIENT_NAME}.pem.tmp
 
+=======
+>>>>>>> 10b8fc1c2ca6c1af93268374e85ac097deb4c368
 mkdir -p `dirname ${CLIENT_KEY}`
 mkdir -p `dirname ${CLIENT_CSR}`
 mkdir -p `dirname ${CLIENT_CRT}`
@@ -40,6 +43,7 @@ echo "Signing the client key pair for the user ${CLIENT_NAME}..."
 ${OQS_OPENSSL} x509 -req -in ${CLIENT_CSR} -out ${CLIENT_CRT} -CA ${CA_CRT} -CAkey ${CA_KEY} -CAcreateserial -days $CLIENT_DAYS ${OQS_OPENSSL_FLAGS}
 
 
+<<<<<<< HEAD
 cat ${CA_CRT} >${PEM_TMP}
 cat $CLIENT_CRT >>${PEM_TMP}
 cat $CLIENT_KEY >>${PEM_TMP}
@@ -51,6 +55,8 @@ keytool -v -printcert -file $DER_TMP
 echo yes | keytool -importcert -alias ${CLIENT_ALIAS} -keystore ${CLIENT_KEYSTORE} -storepass ${CLIENT_KEYSTORE_PASS} -file $DER_TMP
 echo "Validating..."
 keytool -keystore ${CLIENT_KEYSTORE} -storepass ${CLIENT_KEYSTORE_PASS} -v -list -storetype pkcs12 -alias ${CLIENT_ALIAS}
+=======
+>>>>>>> 10b8fc1c2ca6c1af93268374e85ac097deb4c368
 
 echo "Exporting to the PKCS#12 format..."
 # ${OQS_OPENSSL} pkcs12 -export -in ${PEM_TMP} \
@@ -61,11 +67,21 @@ echo "Exporting to the PKCS#12 format..."
 #               ${OQS_OPENSSL_FLAGS}
 
 # Creating a .pfx (PKCS#12) file (an alternative to .pem)...
+<<<<<<< HEAD
 ${OQS_OPENSSL} pkcs12 -export -out ${CLIENT_PFX} -inkey $CLIENT_KEY -in $CLIENT_CRT -certfile $CA_CRT
 rm ${PEM_TMP}
 rm ${DER_TMP}
+=======
+${OQS_OPENSSL} pkcs12 -export -out ${CLIENT_PFX} \
+		-password env:CLIENT_KEYSTORE_PASS \
+		-name ${CLIENT_ALIAS} -caname root -nodes -noiter -nomaciter \
+		-inkey $CLIENT_KEY -in $CLIENT_CRT -certfile $CA_CRT
+		# ^^^ use -noenc instead of -nodes in newer versions of openssl
+>>>>>>> 10b8fc1c2ca6c1af93268374e85ac097deb4c368
 
 
+cat $CLIENT_CRT >${CLIENT_PEM}
+cat $CLIENT_KEY >>${CLIENT_PEM}
 
 echo "We are done."
 echo "Deployable files:"

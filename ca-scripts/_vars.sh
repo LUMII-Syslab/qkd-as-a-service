@@ -33,6 +33,11 @@ export CLIENT_DAYS=365
 export CLIENT_KEY=${DIR}/${CLIENT_NAME}/client.key
 export CLIENT_CSR=${DIR}/${CLIENT_NAME}/client.csr
 export CLIENT_CRT=${DIR}/${CLIENT_NAME}/client.crt
+<<<<<<< HEAD
+=======
+export CLIENT_PEM=${DIR}/${CLIENT_NAME}/client.pem
+# ^^^ .pem will contain .crt + .key in the PEM (=Base64 DER) format
+>>>>>>> 10b8fc1c2ca6c1af93268374e85ac097deb4c368
 export CLIENT_PFX=${DIR}/${CLIENT_NAME}/client.pfx
 # ^^^ .pfx will contain ca.pem + .crt + .key in the PKCS#12 format
 export CLIENT_ALIAS=client
@@ -45,6 +50,12 @@ export SERVER_CSR=${DIR}/${SERVER_NAME}/server.csr
 export SERVER_CRT=${DIR}/${SERVER_NAME}/server.crt
 export SERVER_PEM=${DIR}/${SERVER_NAME}/server.pem
 # ^^^ .pem will contain .crt + .key in the PEM (=Base64 DER) format
+<<<<<<< HEAD
+=======
+export SERVER_PFX=${DIR}/${SERVER_NAME}/server.pfx
+# ^^^ .pfx will contain ca.pem + .crt + .key in the PKCS#12 format
+
+>>>>>>> 10b8fc1c2ca6c1af93268374e85ac097deb4c368
 export SERVER_ALIAS=server
 export SERVER_KEYSTORE=${DIR}/${SERVER_NAME}/server.keystore
 export SERVER_KEYSTORE_PASS=server-keystore-pass

@@ -30,10 +30,40 @@ mkdir -p `dirname $SERVER_CRT`
 mkdir -p `dirname $SERVER_PEM`
 
 ${OQS_OPENSSL} req -new -newkey ${SIG_ALG} -keyout ${SERVER_KEY} -out ${SERVER_CSR} -nodes -config ${SERVER_CONFIG_FILE} ${OQS_OPENSSL_SERVER_REQ_ARGS}
+<<<<<<< HEAD
 ${OQS_OPENSSL} x509 -req -in server.csr -out ${SERVER_CRT} -CA ${CA_CRT} -CAkey ${CA_KEY} -CAcreateserial -days ${SERVER_DAYS} -extensions v3_req -extfile ${SERVER_CONFIG_FILE}
 
 rm ${SERVER_CSR}
 
+=======
+${OQS_OPENSSL} x509 -req -in ${SERVER_CSR} -out ${SERVER_CRT} -CA ${CA_CRT} -CAkey ${CA_KEY} -CAcreateserial -days ${SERVER_DAYS} -extensions v3_req -extfile ${SERVER_CONFIG_FILE}
+
+rm ${SERVER_CSR}
+
+
+echo "Exporting to the PKCS#12 format..."
+# Creating a .pfx (PKCS#12) file (an alternative to .pem)...
+${OQS_OPENSSL} pkcs12 -export -out ${SERVER_PFX} \
+		-password env:SERVER_KEYSTORE_PASS \
+		-name ${SERVER_ALIAS} -caname root -nodes -noiter -nomaciter \
+		-inkey $SERVER_KEY -in $SERVER_CRT -certfile $CA_CRT
+		# ^^^ use -noenc instead of -nodes in newer versions of openssl
+
+echo "Importing the server key+cert+cacert to the DER format..."
+export DER_TMP=`dirname $SERVER_KEY`/${SERVER_NAME}.der.tmp
+export PEM_TMP=`dirname $SERVER_KEY`/${SERVER_NAME}.pem.tmp
+
+cat ${CA_CRT} >${PEM_TMP}
+cat $SERVER_CRT >>${PEM_TMP}
+cat $SERVER_KEY >>${PEM_TMP}
+
+${OQS_OPENSSL} x509 -in $PEM_TMP -inform pem -out $DER_TMP -outform der ${OQS_OPENSSL_FLAGS}
+
+rm ${PEM_TMP}
+rm ${DER_TMP}
+
+echo "Creating .pem = .crt + .key..."
+>>>>>>> 10b8fc1c2ca6c1af93268374e85ac097deb4c368
 cat ${SERVER_CRT} > ${SERVER_PEM}
 cat ${SERVER_KEY} >> ${SERVER_PEM}
 

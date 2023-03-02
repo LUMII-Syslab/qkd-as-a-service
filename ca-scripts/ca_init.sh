@@ -90,10 +90,18 @@ mkdir -p `dirname $CA_CRT`
 mkdir -p `dirname $CA_VARS`
 mkdir -p `dirname $ALL_CA_TRUSTSTORE`
 
+# Copying the CA config file (thus, the CA directory will contain all necessary info)
+cp $CA_CONFIG_FILE `dirname $CA_KEY`/ca.cnf
+export CA_CONFIG_FILE=`dirname $CA_KEY`/ca.cnf
+
 # Remembering the signature algorithm (in order to use it for signing client and server certificates)...
 echo "#!/bin/bash" > $CA_VARS
 echo "" >> $CA_VARS
 echo "export SIG_ALG=${SIG_ALG}" >> $CA_VARS
+<<<<<<< HEAD
+=======
+echo "export CA_CONFIG_FILE=\`dirname \$CA_KEY\`/ca.cnf" >> $CA_VARS
+>>>>>>> 10b8fc1c2ca6c1af93268374e85ac097deb4c368
 echo "export OQS_OPENSSL_CA_REQ_ARGS=${OQS_OPENSSL_CA_REQ_ARGS}" >> $CA_VARS
 echo "export OQS_OPENSSL_CLIENT_REQ_ARGS=${OQS_OPENSSL_CLIENT_REQ_ARGS}" >> $CA_VARS
 echo "export OQS_OPENSSL_SERVER_REQ_ARGS=${OQS_OPENSSL_SERVER_REQ_ARGS}" >> $CA_VARS
