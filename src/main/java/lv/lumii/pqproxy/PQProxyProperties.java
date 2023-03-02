@@ -14,14 +14,13 @@ import java.net.URI;
 import java.security.KeyStore;
 import java.util.Properties;
 
-public class ProxyProperties {
+public class PQProxyProperties {
 
-    Logger logger = LoggerFactory.getLogger(ProxyProperties.class);
+    Logger logger = LoggerFactory.getLogger(PQProxyProperties.class);
     private String mainDirectory;
     private Unchecked<Properties> properties;
 
-    public ProxyProperties(String mainDirectory) {
-        System.out.println("MAIN "+mainDirectory);
+    public PQProxyProperties(String mainDirectory) {
         this.mainDirectory = mainDirectory;
         this.properties = new Unchecked<>(new Sticky<>(
                 () -> loadPropertiesFile(mainDirectory + File.separator + "pqproxy.properties")));
@@ -47,15 +46,16 @@ public class ProxyProperties {
         return f.getAbsolutePath();
     }
 
-    public URI remoteUri() throws Exception {
-        String host = properties.value().getProperty("host", "localhost");
-        host = "https://"+host+":"+port();
+    public URI targetUri() throws Exception {
+        String host = properties.value().getProperty("targetUri");
+        if (host==null)
+            throw new Exception("The target URI has not been specified in pqproxy.properties.");
         return new URI(host);
     }
 
-    public int port() throws Exception {
+    public int sourcePort() throws Exception {
         int defaultPort = 443;
-        String s = properties.value().getProperty("port", defaultPort+"");
+        String s = properties.value().getProperty("sourcePort", defaultPort+"");
         try {
             int result = Integer.parseInt(s);
             if (result<=0)
@@ -76,15 +76,32 @@ public class ProxyProperties {
         );
     }
 
-    public KeyStore trustStore() throws Exception {
+    public KeyStore sourceCaTrustStore() throws Exception {
 
-        String fileName = fileNameProperty("caTrustStore", "ca.truststore");
+        String fileName = fileNameProperty("sourceCaTrustStore", "source-ca.truststore");
         File f = new File(fileName);
 
-        String password = properties.value().getProperty("caTrustStorePassword", "ca-truststore-pass"); // ca-truststore-pass
+        String password = properties.value().getProperty("sourceCaTrustStorePassword", "ca-truststore-pass"); // ca-truststore-pass
 
         return KeyStore.getInstance(f, password.toCharArray());
     }
 
+    public KeyStore targetCaTrustStore() throws Exception {
+
+        String fileName = fileNameProperty("targetCaTrustStore", "target-ca.truststore");
+        File f = new File(fileName);
+
+        String password = properties.value().getProperty("targetCaTrustStorePassword", "ca-truststore-pass"); // ca-truststore-pass
+
+        return KeyStore.getInstance(f, password.toCharArray());
+    }
+
+    public TargetClientKey targetClientKey() {
+        return new TargetClientKey(
+                fileNameProperty("targetClientKeyStore", "target-client.keystore"),
+                this.properties.value().getProperty("targetClientKeyStorePassword", "client-keystore-pass"),
+                this.properties.value().getProperty("targetClientKeyAlias", "client")
+        );
+    }
 
 }

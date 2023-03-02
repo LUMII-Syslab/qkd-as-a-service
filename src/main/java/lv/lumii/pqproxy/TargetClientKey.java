@@ -9,13 +9,13 @@ import java.io.FileInputStream;
 import java.security.Key;
 import java.security.KeyStore;
 
-public class ClientKey {
+public class TargetClientKey {
 
     private char[] password;
     private String alias;
     private Unchecked<KeyStore> keyStore;
 
-    public ClientKey(String fileName, String password, String alias) {
+    public TargetClientKey(String fileName, String password, String alias) {
         this.password = password.toCharArray();
         this.alias = alias;
         this.keyStore = new Unchecked<>(new Sticky<>(()->loadKeyStore(fileName)));

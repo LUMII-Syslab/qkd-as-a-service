@@ -11,43 +11,71 @@ import org.java_websocket.server.WebSocketServer;
 
 import javax.net.ssl.SSLContext;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class WsServer {
+public class SourceWsServer {
+
+    public interface ClientSourceMessageSinkFactory {
+        WsSink createSourceMessageSink(WebSocket client) throws Exception;
+    }
 
     private Scalar<WebSocketServer> wsserver;
+    private ClientSourceMessageSinkFactory sinkFactory;
 
-    public WsServer(SSLContext sslContext, int port) {
+    private Map<WebSocket, WsSink> sourceMessageSinks;
+
+    public SourceWsServer(SSLContext sslContext, int port, ClientSourceMessageSinkFactory sinkFactory) {
         System.out.println("New WsServer");
         this.wsserver = new Synced<>(new Sticky<>(() -> newConnection(sslContext, port) ));
+        this.sinkFactory = sinkFactory;
+        this.sourceMessageSinks = new ConcurrentHashMap<>();
     }
 
     private WebSocketServer newConnection(SSLContext sslContext, int port) throws Exception {
 
-        System.out.println("QKD User2 is starting...");
+        System.out.println("PQProxy server (listener) is starting...");
 
         WebSocketServer wssrv = new WebSocketServer(new InetSocketAddress(port)) {
 
             @Override
-            public void onOpen(WebSocket conn, ClientHandshake handshake) {
-                System.out.println("Handshake :" + handshake.toString());
+            public void onOpen(WebSocket ws, ClientHandshake handshake) {
+                WsSink sink = null;
+                try {
+                    sink = sinkFactory.createSourceMessageSink(ws);
+                } catch (Exception e) {
+                    ws.close();
+                }
+                sourceMessageSinks.put(ws, sink);
+                System.out.println("Proxy Handshake :" + handshake.toString());
+                sink.open();
             }
 
             @Override
-            public void onMessage(WebSocket arg0, String arg1) {
-                System.out.println("Server receives:  " + arg1 + " " + arg0.getRemoteSocketAddress());
+            public void onMessage(WebSocket ws, String msg) {
+                System.out.println("Proxy received:  " + msg + " " + ws.getRemoteSocketAddress());
+                sourceMessageSinks.get(ws).consumeMessage(msg);
+            }
 
-                    //SERVER SEND THE CLIENT ID AND REGISTER A NEW CONNECTION
-                    //clientSockets.add(new Connection(arg0, clientId));
 
-                    //clientId++;
-                    //nClients++;
-
+            @Override
+            public void onMessage(WebSocket ws, ByteBuffer msg) {
+                System.out.println("Proxy received:  " + msg.capacity() + " bytes " + ws.getRemoteSocketAddress());
+                sourceMessageSinks.get(ws).consumeMessage(msg);
+            }
+            @Override
+            public void onClose(WebSocket ws, int code, String details, boolean byRemoteHost) {
+                sourceMessageSinks.get(ws).closeGracefully(details);
+                sourceMessageSinks.remove(ws);
             }
 
             @Override
-            public void onError(WebSocket arg0, Exception arg1) {
+            public void onError(WebSocket ws, Exception e) {
                 // TODO Auto-generated method stub
-                System.out.println("Server Error " + arg1);
+                System.out.println("Prxoy receive error " + e);
+                sourceMessageSinks.get(ws).closeWithException(e);
+                sourceMessageSinks.remove(ws);
             }
 
             @Override
@@ -55,9 +83,6 @@ public class WsServer {
 
             }
 
-            @Override
-            public void onClose(WebSocket arg0, int arg1, String arg2, boolean arg3) {
-            }
         };
 
         WebSocketServerFactory wsf = new DefaultSSLWebSocketServerFactory(sslContext);
@@ -76,5 +101,10 @@ public class WsServer {
     public void start() throws Exception {
         this.wsserver.value(); // init the value, starts the server automatically
     }
+
+    public WebSocketServer wsServer() throws Exception {
+        return this.wsserver.value();
+    }
+
 
 }

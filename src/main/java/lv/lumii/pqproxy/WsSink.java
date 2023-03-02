@@ -1,2 +1,15 @@
-package lv.lumii.pqproxy;public class WsSink {
+package lv.lumii.pqproxy;
+
+import org.java_websocket.handshake.ServerHandshake;
+
+import java.nio.ByteBuffer;
+
+public interface WsSink {
+
+    void open();
+    void consumeMessage(String s);
+    void consumeMessage(ByteBuffer blob);
+
+    void closeGracefully(String details);
+    void closeWithException(Exception e);
 }
