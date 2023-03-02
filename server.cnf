@@ -8,7 +8,7 @@ prompt = no
 countryName            = LV
 localityName           = Riga
 organizationName       = IMCS,UL
-commonName             = IMCS,UL QKD as a service
+commonName             = IMCS,UL server
 [req_ext]
 subjectAltName = @alt_names
 [v3_req]
