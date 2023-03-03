@@ -1,4 +1,6 @@
 #!/bin/bash
+
+set -Eeuxo pipefail
 #
 # Generates a new CA key pair to be used for signing server and client certificates.
 # If the CA key pair already exists, does nothing.
@@ -17,12 +19,12 @@
 
 export PATH=/usr/bin:$PATH
 export DIR=$(dirname $0)
-export CA_NAME=$1
-export SIG_ALG=$2
-export CA_CONFIG_FILE=$3
-export OQS_OPENSSL_CA_REQ_ARGS=$4
-export OQS_OPENSSL_CLIENT_REQ_ARGS=$5
-export OQS_OPENSSL_SERVER_REQ_ARGS=$6
+export CA_NAME=${1:-}
+export SIG_ALG=${2:-}
+export CA_CONFIG_FILE=${3:-}
+export OQS_OPENSSL_CA_REQ_ARGS=${4:-}
+export OQS_OPENSSL_CLIENT_REQ_ARGS=${5:-}
+export OQS_OPENSSL_SERVER_REQ_ARGS=${6:-}
 
 if [ -z $CA_NAME ]; then
     echo -n "Please, specify the name of your CA [ca]: "
