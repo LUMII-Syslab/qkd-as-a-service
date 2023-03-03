@@ -13,6 +13,7 @@ import javax.net.ssl.SSLContext;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SourceWsServer {
@@ -26,14 +27,14 @@ public class SourceWsServer {
 
     private Map<WebSocket, WsSink> sourceMessageSinks;
 
-    public SourceWsServer(SSLContext sslContext, int port, ClientSourceMessageSinkFactory sinkFactory) {
+    public SourceWsServer(Optional<SSLContext> sslContext, int port, ClientSourceMessageSinkFactory sinkFactory) {
         System.out.println("New WsServer");
         this.wsserver = new Synced<>(new Sticky<>(() -> newConnection(sslContext, port) ));
         this.sinkFactory = sinkFactory;
         this.sourceMessageSinks = new ConcurrentHashMap<>();
     }
 
-    private WebSocketServer newConnection(SSLContext sslContext, int port) throws Exception {
+    private WebSocketServer newConnection(Optional<SSLContext> sslContext, int port) throws Exception {
 
         System.out.println("PQProxy server (listener) is starting...");
 
@@ -85,12 +86,13 @@ public class SourceWsServer {
 
         };
 
-        WebSocketServerFactory wsf = new DefaultSSLWebSocketServerFactory(sslContext);
-        for (String s: sslContext.getSocketFactory().getDefaultCipherSuites()) {
-            System.out.println("CIPHER "+s);
+        if (sslContext.isPresent()) {
+            WebSocketServerFactory wsf = new DefaultSSLWebSocketServerFactory(sslContext.get());
+            for (String s : sslContext.get().getSocketFactory().getDefaultCipherSuites()) {
+                System.out.println("CIPHER " + s);
+            }
+            wssrv.setWebSocketFactory(wsf); // adding TLS
         }
-
-        //wssrv.setWebSocketFactory(wsf); // adding TLS
         wssrv.setConnectionLostTimeout(20);
         wssrv.start();
         System.out.println("Ws server started and ready.");

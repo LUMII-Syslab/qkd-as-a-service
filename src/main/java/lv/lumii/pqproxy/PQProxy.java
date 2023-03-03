@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;
+import java.util.Optional;
 
 public class PQProxy {
 
@@ -89,10 +90,16 @@ public class PQProxy {
                 .withCiphers("TLS_AES_256_GCM_SHA384")
                 .build();
 
-        SSLContext ctx = SSLContext.getInstance("TLS");
-        ctx.init(loadKeyManager(props), loadAllTrustManagers(props), SecureRandom.getInstanceStrong());
+        Optional<SSLContext> octx = Optional.empty(); // non-TLS proxy
 
-        SourceWsServer sourceWsServer = new SourceWsServer(ctx, props.sourcePort(), (WebSocket sourceClientWs)->{
+        boolean tlsServer = !true;
+        if (tlsServer) {
+            SSLContext ctx = SSLContext.getInstance("TLS");
+            ctx.init(loadKeyManager(props), loadAllTrustManagers(props), SecureRandom.getInstanceStrong());
+            octx = Optional.of(ctx);
+        }
+
+        SourceWsServer sourceWsServer = new SourceWsServer(octx, props.sourcePort(), (WebSocket sourceClientWs)->{
             class WrappedTargetWsClient {
                 TargetWsClient value = null;
             }
