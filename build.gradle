@@ -172,10 +172,12 @@ nativeCompile {
 task(pqproxy, dependsOn: 'classes', type: JavaExec) {
    main = 'lv.lumii.pqproxy.PQProxy'
    classpath = sourceSets.main.runtimeClasspath
+   jvmArgs = ["-cp", "/home/sergejs/quantum.gits/qkd-user-lib/.jars/*", "-Djava.library.path=/usr/local/lib:/Users/sergejs/quantum.gits/qkd-user-lib/.libs" ]
 }
 
-task(qkdserver, dependsOn: 'classes', type: JavaExec) {
+task(pqtestserver, dependsOn: 'classes', type: JavaExec) {
    main = 'lv.lumii.qkd.QkdTestServer'
 //   classpath = sourceSets.main.runtimeClasspath + ':' + sourceSets.test.runtimeClasspath
    classpath = sourceSets.test.runtimeClasspath
+   jvmArgs = ["-cp", "/home/sergejs/quantum.gits/qkd-user-lib/.jars/*", "-Djava.library.path=/usr/local/lib:/Users/sergejs/quantum.gits/qkd-user-lib/.libs" ]
 }
