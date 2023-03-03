@@ -1,5 +1,6 @@
 package lv.lumii.qkd;
 
+import lv.lumii.keys.ServerKey;
 import org.cactoos.scalar.Sticky;
 import org.cactoos.scalar.Unchecked;
 import org.slf4j.Logger;
@@ -66,8 +67,8 @@ public class QkdProperties {
         }
     }
 
-    public QkdServerKey serverKey() {
-        return new QkdServerKey(
+    public ServerKey serverKey() {
+        return new ServerKey(
                 fileNameProperty("serverKeyStore", "server.keystore"),
                 this.properties.value().getProperty("serverKeyStorePassword", "server-keystore-pass"),
                 this.properties.value().getProperty("serverKeyAlias", "server")

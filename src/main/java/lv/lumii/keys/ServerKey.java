@@ -1,6 +1,5 @@
-package lv.lumii.pqproxy;
+package lv.lumii.keys;
 
-import java.security.cert.Certificate;
 import org.cactoos.scalar.Sticky;
 import org.cactoos.scalar.Unchecked;
 
@@ -9,13 +8,13 @@ import java.io.FileInputStream;
 import java.security.Key;
 import java.security.KeyStore;
 
-public class TargetClientKey {
+public class ServerKey {
 
     private char[] password;
     private String alias;
     private Unchecked<KeyStore> keyStore;
 
-    public TargetClientKey(String fileName, String password, String alias) {
+    public ServerKey(String fileName, String password, String alias) {
         this.password = password.toCharArray();
         this.alias = alias;
         this.keyStore = new Unchecked<>(new Sticky<>(()->loadKeyStore(fileName)));
@@ -24,6 +23,8 @@ public class TargetClientKey {
     private KeyStore loadKeyStore(String fileName) throws Exception {
         KeyStore clientKeyStore  = KeyStore.getInstance("PKCS12");
         // ^^^ If "Algorithm HmacPBESHA256 not available" error => need jdk16+ (new pkx format hash)
+
+        //variant:        KeyStore clientKeyStore = KeyStore.getInstance(f, password.toCharArray());
 
         File f = new File(fileName);
         FileInputStream instream = new FileInputStream(f);
@@ -44,8 +45,12 @@ public class TargetClientKey {
         return this.password;
     }
 
-    public Certificate[] certificateChain() throws Exception {
+    public KeyStore keyStore() {
+        return this.keyStore.value();
+    }
+
+    /*public Certificate[] certificateChain() throws Exception {
         Certificate[] arr = this.keyStore.value().getCertificateChain(this.alias);
         return arr;
-    }
+    }*/
 }

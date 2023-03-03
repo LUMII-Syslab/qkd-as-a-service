@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'org.graalvm.buildtools.native' version '0.9.19'
+    id 'java'
 }
 
 repositories {
@@ -167,3 +168,14 @@ nativeCompile {
     }
 }
 
+// see [https://stackoverflow.com/questions/43937169/gradle-application-plugin-with-multiple-main-classes]
+task(pqproxy, dependsOn: 'classes', type: JavaExec) {
+   main = 'lv.lumii.pqproxy.PQProxy'
+   classpath = sourceSets.main.runtimeClasspath
+}
+
+task(qkdserver, dependsOn: 'classes', type: JavaExec) {
+   main = 'lv.lumii.qkd.QkdTestServer'
+//   classpath = sourceSets.main.runtimeClasspath + ':' + sourceSets.test.runtimeClasspath
+   classpath = sourceSets.test.runtimeClasspath
+}

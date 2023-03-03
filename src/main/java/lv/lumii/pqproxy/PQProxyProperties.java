@@ -1,6 +1,7 @@
 package lv.lumii.pqproxy;
 
-import lv.lumii.qkd.QkdServerKey;
+import lv.lumii.keys.ServerKey;
+import lv.lumii.keys.ClientKey;
 import org.cactoos.scalar.Sticky;
 import org.cactoos.scalar.Unchecked;
 import org.slf4j.Logger;
@@ -67,12 +68,11 @@ public class PQProxyProperties {
         }
     }
 
-    public QkdServerKey serverKey() {
-        return new QkdServerKey(
-                fileNameProperty("serverKeyStore", "server.keystore"),
-                this.properties.value().getProperty("serverKeyStorePassword", "server-keystore-pass"),
-                this.properties.value().getProperty("serverKeyAlias", "server")
-                        //"qkd_user2")
+    public ServerKey sourceServerKey() {
+        return new ServerKey(
+                fileNameProperty("sourceServerKeyStore", "source-server.keystore"),
+                this.properties.value().getProperty("sourceServerKeyStorePassword", "server-keystore-pass"),
+                this.properties.value().getProperty("sourceServerKeyAlias", "server")
         );
     }
 
@@ -96,8 +96,8 @@ public class PQProxyProperties {
         return KeyStore.getInstance(f, password.toCharArray());
     }
 
-    public TargetClientKey targetClientKey() {
-        return new TargetClientKey(
+    public ClientKey targetClientKey() {
+        return new ClientKey(
                 fileNameProperty("targetClientKeyStore", "target-client.keystore"),
                 this.properties.value().getProperty("targetClientKeyStorePassword", "client-keystore-pass"),
                 this.properties.value().getProperty("targetClientKeyAlias", "client")

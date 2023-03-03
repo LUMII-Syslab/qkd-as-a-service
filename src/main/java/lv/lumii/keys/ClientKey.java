@@ -1,5 +1,6 @@
-package lv.lumii.qkd;
+package lv.lumii.keys;
 
+import java.security.cert.Certificate;
 import org.cactoos.scalar.Sticky;
 import org.cactoos.scalar.Unchecked;
 
@@ -7,15 +8,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.Key;
 import java.security.KeyStore;
-import java.security.cert.Certificate;
 
-public class QkdServerKey {
+public class ClientKey {
 
     private char[] password;
     private String alias;
     private Unchecked<KeyStore> keyStore;
 
-    public QkdServerKey(String fileName, String password, String alias) {
+    public ClientKey(String fileName, String password, String alias) {
         this.password = password.toCharArray();
         this.alias = alias;
         this.keyStore = new Unchecked<>(new Sticky<>(()->loadKeyStore(fileName)));
@@ -24,8 +24,6 @@ public class QkdServerKey {
     private KeyStore loadKeyStore(String fileName) throws Exception {
         KeyStore clientKeyStore  = KeyStore.getInstance("PKCS12");
         // ^^^ If "Algorithm HmacPBESHA256 not available" error => need jdk16+ (new pkx format hash)
-
-        //variant:        KeyStore clientKeyStore = KeyStore.getInstance(f, password.toCharArray());
 
         File f = new File(fileName);
         FileInputStream instream = new FileInputStream(f);
@@ -46,12 +44,8 @@ public class QkdServerKey {
         return this.password;
     }
 
-    public KeyStore keyStore() {
-        return this.keyStore.value();
-    }
-
-    /*public Certificate[] certificateChain() throws Exception {
+    public Certificate[] certificateChain() throws Exception {
         Certificate[] arr = this.keyStore.value().getCertificateChain(this.alias);
         return arr;
-    }*/
+    }
 }

@@ -1,5 +1,7 @@
 package lv.lumii.pqproxy;
 
+import lv.lumii.keys.ClientKey;
+import lv.lumii.keys.ServerKey;
 import lv.lumii.qkd.QkdServer;
 import nl.altindag.ssl.SSLFactory;
 import org.bouncycastle.pqc.InjectablePQC;
@@ -7,12 +9,8 @@ import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.*;
 import java.io.File;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
-import javax.net.ssl.TrustManager;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
@@ -54,6 +52,13 @@ public class PQProxy {
 
     }
 
+    private static KeyManager[] loadKeyManager(PQProxyProperties props) throws Exception {
+        KeyManagerFactory kmfSourceServer = KeyManagerFactory.getInstance("SunX509");
+        ServerKey k = props.sourceServerKey();
+        kmfSourceServer.init(k.keyStore(), k.password());
+        return kmfSourceServer.getKeyManagers();
+    }
+
     private static TrustManager[] loadAllTrustManagers(PQProxyProperties props) throws Exception {
         TrustManagerFactory tmfServer, tmfClient;
         tmfServer = TrustManagerFactory.getInstance("SunX509");
@@ -74,7 +79,7 @@ public class PQProxy {
     public static void main(String[] args) throws Exception {
         PQProxyProperties props = new PQProxyProperties(mainDirectory);
 
-        TargetClientKey myKey = props.targetClientKey();
+        ClientKey myKey = props.targetClientKey();
 
         SSLFactory targetSslFactory = SSLFactory.builder()
                 .withIdentityMaterial(myKey.key(), myKey.password(), myKey.certificateChain())
@@ -85,7 +90,7 @@ public class PQProxy {
                 .build();
 
         SSLContext ctx = SSLContext.getInstance("TLS");
-        ctx.init(null, loadAllTrustManagers(props), SecureRandom.getInstanceStrong());
+        ctx.init(loadKeyManager(props), loadAllTrustManagers(props), SecureRandom.getInstanceStrong());
 
         SourceWsServer sourceWsServer = new SourceWsServer(ctx, props.sourcePort(), (WebSocket sourceClientWs)->{
             class WrappedTargetWsClient {

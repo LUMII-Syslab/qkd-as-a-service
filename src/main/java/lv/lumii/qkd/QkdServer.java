@@ -1,5 +1,6 @@
 package lv.lumii.qkd;
 
+import lv.lumii.keys.ServerKey;
 import org.bouncycastle.pqc.InjectablePQC;
 import org.cactoos.Scalar;
 import org.cactoos.scalar.Sticky;
@@ -9,11 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
-import java.net.ServerSocket;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
@@ -72,7 +70,7 @@ public class QkdServer {
 
         System.out.println(" New QKD User2 ");
 
-        QkdServerKey srvKey = qkdProperties.serverKey();
+        ServerKey srvKey = qkdProperties.serverKey();
 
         System.out.println("SRV KEY "+srvKey.password());
 
