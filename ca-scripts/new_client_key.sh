@@ -1,4 +1,6 @@
 #!/bin/bash
+
+set -Eeuxo pipefail
 #
 # Generates a new client key (aka token) for client authentication.
 # The token is intended to be validated by, e.g., HAProxy by checking that the token
