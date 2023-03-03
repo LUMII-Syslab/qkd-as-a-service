@@ -1,4 +1,6 @@
 #!/bin/bash
+
+set -Eeuxo pipefail
 #
 # Generates a new server key (to be used within, e.g., HAProxy, Apache, or nginx).
 # Script arguments: ca-name server-name openssl-server-config-file
