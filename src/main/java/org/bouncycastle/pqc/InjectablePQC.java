@@ -11,6 +11,7 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.digests.NullDigest;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.pqc.crypto.frodo.*;
+import org.bouncycastle.pqc.jcajce.provider.sphincsplus.BCSPHINCSPlusPublicKey;
 import org.bouncycastle.pqc.jcajce.provider.sphincsplus.SignatureSpi;
 import org.bouncycastle.tls.crypto.*;
 import org.bouncycastle.tls.crypto.impl.jcajce.JceTlsSecret;
@@ -32,6 +33,7 @@ import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Arrays;
@@ -164,7 +166,12 @@ public class InjectablePQC {
                     }
                 },
                 new SPHINCSPlusKeyFactorySpi(),
-                ()->new SphincsPlusSignatureSpi()
+                (PublicKey pk)->{
+                    if (pk instanceof BCSPHINCSPlusPublicKey)
+                        return new SphincsPlusSignatureSpi();
+                    else
+                        throw new RuntimeException("Only SPHINCS+ is supported in this implementation of InjectedSignatureSpi.Factory");
+                }
         );
         InjectedSigners.injectSigner("SPHINCS+", (JcaTlsCrypto crypto, PrivateKey privateKey) -> {
             assert (privateKey instanceof BCSPHINCSPlusPrivateKey);
@@ -208,7 +215,7 @@ public class InjectablePQC {
         Security.insertProviderAt(bcProvider, 1);
     }
 
-    private static class SphincsPlusSignatureSpi extends SignatureSpi {
+    public static class SphincsPlusSignatureSpi extends SignatureSpi { // non-private, otherwise, Java reflection doesn't see it
         public SphincsPlusSignatureSpi() {
             super(new NullDigest(), new InjectableSphincsPlusTlsSigner());
         }
@@ -428,6 +435,7 @@ public class InjectablePQC {
                 Pair<byte[], byte[]> pair = kem.encap_secret(partnerPublicKey);
                 byte[] ciphertext = pair.getLeft();
                 byte[] semiSecret = pair.getRight();
+                System.out.println("SERVER SHARED SECRET: "+byteArrayToString(semiSecret));
                 return new Pair<>(semiSecret, ciphertext);
             }
             else { // client

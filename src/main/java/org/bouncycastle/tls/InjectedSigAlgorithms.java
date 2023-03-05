@@ -31,7 +31,7 @@ public class InjectedSigAlgorithms
                             ASN1ObjectIdentifier oid, SignatureAndHashAlgorithm sigAndHash,
                             int signatureSchemeCodePoint, int cryptoHashAlgorithmIndex,
                             InjectedConverter converter,
-                            AsymmetricKeyInfoConverter infoToKeyConverter, InjectedSignatureSpi.Factory factory) {
+                            AsymmetricKeyInfoConverter infoToKeyConverter, InjectedSignatureSpi.Factory sig2spiFactory) {
 
         public ASN1ObjectIdentifier oid() {
             return this.oid;
@@ -51,12 +51,13 @@ public class InjectedSigAlgorithms
                                                  int cryptoHashAlgorithmIndex,
                                                  InjectedConverter converter,
                                                  AsymmetricKeyInfoConverter infoToKeyConverter,
-                                                 InjectedSignatureSpi.Factory factory) {
+                                                 InjectedSignatureSpi.Factory sig2spi) {
         SigAlgorithmInfo newAlg = new SigAlgorithmInfo(name, oid, sigAndHash, signatureSchemeCodePoint,
-                cryptoHashAlgorithmIndex, converter, infoToKeyConverter, factory);
+                cryptoHashAlgorithmIndex, converter, infoToKeyConverter, sig2spi);
         injected.add(newAlg);
         injectedSignatureSchemes.put(signatureSchemeCodePoint, newAlg);
         injectedOids.put(oid.toString(), newAlg);
+        InjectedSignatureSpi.addFactory(sig2spi);
     }
 
     public static Collection<? extends SignatureAndHashAlgorithm> getInjectedSigAndHashAlgorithms() {
