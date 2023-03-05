@@ -49,24 +49,25 @@ public class SourceWsServer {
                     ws.close();
                 }
                 sourceMessageSinks.put(ws, sink);
-                System.out.println("Proxy Handshake :" + handshake.toString());
+                System.out.println("Proxy server handshake :" + handshake.toString());
                 sink.open();
             }
 
             @Override
             public void onMessage(WebSocket ws, String msg) {
-                System.out.println("Proxy received:  " + msg + " " + ws.getRemoteSocketAddress());
+                System.out.println("Proxy server received:  " + msg + " " + ws.getRemoteSocketAddress());
                 sourceMessageSinks.get(ws).consumeMessage(msg);
             }
 
 
             @Override
             public void onMessage(WebSocket ws, ByteBuffer msg) {
-                System.out.println("Proxy received:  " + msg.capacity() + " bytes " + ws.getRemoteSocketAddress());
+                System.out.println("Proxy server received:  " + msg.capacity() + " bytes " + ws.getRemoteSocketAddress());
                 sourceMessageSinks.get(ws).consumeMessage(msg);
             }
             @Override
             public void onClose(WebSocket ws, int code, String details, boolean byRemoteHost) {
+                System.out.println("Proxy server close code=" + code+ " details:"+details);
                 sourceMessageSinks.get(ws).closeGracefully(details);
                 sourceMessageSinks.remove(ws);
             }
@@ -74,7 +75,7 @@ public class SourceWsServer {
             @Override
             public void onError(WebSocket ws, Exception e) {
                 // TODO Auto-generated method stub
-                System.out.println("Prxoy receive error " + e);
+                System.out.println("Proxy server receive error " + e);
                 sourceMessageSinks.get(ws).closeWithException(e);
                 sourceMessageSinks.remove(ws);
             }

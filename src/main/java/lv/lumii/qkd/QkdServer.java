@@ -94,8 +94,8 @@ public class QkdServer {
             ctx = SSLContext.getInstance("TLS");
             ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), SecureRandom.getInstanceStrong());
 
-             return new HttpServer(ctx, qkdProperties.port());
-            //return new WsServer(ctx, qkdProperties.port());
+             //return new HttpServer(ctx, qkdProperties.port());
+            return new WsServer(ctx, qkdProperties.port());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

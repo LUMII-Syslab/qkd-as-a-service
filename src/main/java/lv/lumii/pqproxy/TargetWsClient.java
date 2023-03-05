@@ -41,31 +41,31 @@ public class TargetWsClient {
 
             @Override
             public void onOpen(ServerHandshake serverHandshake) {
-                System.out.println("OPENED WS");
+                System.out.println("Proxy client ws: OPENED");
                 replySink.open();
             }
 
             @Override
             public void onMessage(String s) {
-                System.out.println("TXT MSG WS: ["+s+"]");
+                System.out.println("Proxy client ws: TXT MSG received ["+s+"]");
                 replySink.consumeMessage(s);
             }
 
             @Override
             public void onMessage(ByteBuffer blob) {
-                System.out.println("BYTE MSG WS: ["+blob.array().length+" bytes]");
+                System.out.println("Proxy client ws: BYTE MSG received ["+blob.array().length+" bytes]");
                 replySink.consumeMessage(blob);
             }
 
             @Override
             public void onClose(int i, String s, boolean b) {
-                System.out.println("CLOSED WS ["+s+"]");
+                System.out.println("Proxy client ws: CLOSED WS ["+s+"]");
                 replySink.closeGracefully(s);
             }
 
             @Override
             public void onError(Exception e) {
-                System.out.println("Error "+e.getMessage());
+                System.out.println("Proxy client ws: Error "+e.getMessage());
                 replySink.closeWithException(e);
             }
 
@@ -83,7 +83,7 @@ public class TargetWsClient {
             if (ok) {
                 new Thread(()-> {
                     try {
-                        wsClient.value().run();
+                       // wsClient.value().run();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

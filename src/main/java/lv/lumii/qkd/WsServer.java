@@ -17,6 +17,7 @@ import java.io.File;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
+import java.sql.Connection;
 
 public class WsServer implements Server {
 
@@ -36,11 +37,20 @@ public class WsServer implements Server {
             @Override
             public void onOpen(WebSocket conn, ClientHandshake handshake) {
                 System.out.println("Handshake :" + handshake.toString());
+                conn.send("My name is Aija");
             }
 
             @Override
-            public void onMessage(WebSocket arg0, String arg1) {
-                System.out.println("Server receives:  " + arg1 + " " + arg0.getRemoteSocketAddress());
+            public void onMessage(WebSocket conn, String msg) {
+                System.out.println("Server receives:  " + msg + " from " + conn.getRemoteSocketAddress());
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        conn.send("My name is Aija2");
+                    }
+                }).start();
+//                conn.close();
 
                     //SERVER SEND THE CLIENT ID AND REGISTER A NEW CONNECTION
                     //clientSockets.add(new Connection(arg0, clientId));
@@ -72,7 +82,7 @@ public class WsServer implements Server {
         }
 
         wssrv.setWebSocketFactory(wsf);
-        wssrv.setConnectionLostTimeout(20);
+        //wssrv.setConnectionLostTimeout(20);
         wssrv.start();
         System.out.println("Server started and ready.");
 
