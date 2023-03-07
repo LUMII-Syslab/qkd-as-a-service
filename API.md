@@ -4,6 +4,7 @@
 
 - [QKD as a Service (QAAS) API](#qkd-as-a-service-qaas-api)
   - [Table of Contents:](#table-of-contents)
+  - [Introduction](#introduction)
   - [QAAS client API](#qaas-client-api)
     - [0x01: `reserveKeyAndGetHalf` request](#0x01-reservekeyandgethalf-request)
     - [0xff: `reserveKeyAndGetHalf` response](#0xff-reservekeyandgethalf-response)
@@ -21,9 +22,9 @@
     - [Handling `getKeyHalf` requests](#handling-getkeyhalf-requests)
     - [KDC Synchronisation](#kdc-synchronisation)
 
-## QAAS client API
+## Introduction
 
-Every request is an ASN.1 DER encoded sequence of elements.
+Every request and response is an ASN.1 DER encoded sequence of elements.
 Each element of the sequence consists of its `type`, `length` and `value`.
 The types and their respective encodings used in QAAS requests are:
 
@@ -36,6 +37,11 @@ The types and their respective encodings used in QAAS requests are:
 | OBJECT IDENTIFIER | 0X06 |
 
 
+## QAAS client API
+
+- `reserveKeyAndGetHalf` is used to reserve a key.
+
+- `getKeyHalf` is used to fetch a reserved key from the other KDC.
 
 ### 0x01: `reserveKeyAndGetHalf` request
 
@@ -61,6 +67,10 @@ The types and their respective encodings used in QAAS requests are:
 |                  5                  | half of key bytes      | octet array |                                                |
 |                  6                  | hash of the other half | octet array |                                                |
 |                  7                  | hash algorithm id      | object id   |                                                |
+
+<details>
+   <summary>encoded response example</summary>
+</details>
 
 ### 0x02: `getKeyHalf` request
 
@@ -159,24 +169,6 @@ explanation:
 
 ### 0xfd: `getState` response
 
-returns:
-
-1. error code
-
-2. response id = `0xfd`
-
-3. crypto nonce
-
-4. kdc state id
-   
-   - `EMPTY` = 0        ( when there are no keys received from QKD device )
-   - `RECEIVING` = 1    ( when at least one key has been received )
-   - `RUNNING` = 2        ( when keys can be reserved by the users )
-
-5. even key id
-
-6. odd key id
-
 | ordinal | value                | type        | description & notes                |
 |:-------:|----------------------|-------------|------------------------------------|
 |    1    | error code           | integer     |                                    |
@@ -186,7 +178,10 @@ returns:
 |    5    | oldest even key id   | octet array |                                    |
 |    6    | oldest odd key id    | octet array |                                    |
 
+<details>
+<summary>encoded response example</summary>
 TODO
+</details>
 
 ### 0x04: `setState` request
 
