@@ -28,7 +28,7 @@ Each element of the sequence consists of its `type`, `length` and `value`.
 The types and their respective encodings used in QAAS requests are:
 
 
-| type              | tag  |
+| type              | encoding  |
 |-------------------|------|
 | SEQUENCE OF       | 0X30 |
 | INTEGER           | 0X02 |
@@ -39,53 +39,24 @@ The types and their respective encodings used in QAAS requests are:
 
 ### 0x01: `reserveKeyAndGetHalf` request
 
-| ordinal | parameter    | type    | description & notes                            |
-|---------|--------------|---------|------------------------------------------------|
-| 1       | **endpoint id**  | integer | specifies the `reserveKeyAndGetHalf` request   |
-| 2       | **key length**   | integer | currently only 256 byte key fetching supported |
-| 3       | **crypto nonce** | integer | should be between 0 and 2^63-1                 |
+| ordinal |       parameter      |   type  |               description & notes               |
+|:-------:|:--------------------:|:-------:|:-----------------------------------------------:|
+|    1    | endpoint id = `0x01` | integer | Specifies the `reserveKeyAndGetHalf` request.   |
+|    2    | key length = `256`   | integer | Currently only 256 byte key fetching supported. |
+|    3    | crypto nonce         | integer | Value should be between 0 and 2^63-1.           |
 
 ### 0xff: `reserveKeyAndGetHalf` response
 
-Returns:
-
-1. error code
-
-2. response id = `0xff`
-
-3. crypto nonce
-
-4. key identifier
-
-5. half of key bytes
-
-6. hash(the other half)
-
-7. hash algorithm id = `0x608648016503040211`
-
-encoded return example:
-
-```
-30 23 02 01 00 02 01 ff 02 02 30 3a 04 04 28 8b de 07 04 02 21 a1 04 0? ... 06 09 60 86 48 01 65 03 04 02 11
-```
-
-explanation:
-
-`30` `23`: sequence type (`0x30`) with length `0x23` = 35 bytes;
-
-**error code** (`02` `01` `00`): integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x00` = 0;
-
-**response id** (`02` `01` `ff`): integer type (`0x02`) with length `0x01` = 1 bytes, value: `0xff` = 255;
-
-**crypto nonce** (`02` `02` `a4 55`): integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x303a` = 12346;
-
-**key identifier** (`04` `04` `28 8b de 07`): byte array (`0x04`) with length `0x04` = 4 bytes;
-
-**half of key bytes** (`04` `02` `21 a1`): byte array (`0x04`) with length `0x02` = 2 bytes;
-
-**hash(the other half)** (`04` `0?` `...`): byte array (`0x04`) with length `0x0?` = ? bytes;
-
-**hash algorithm id** (`06` `09` `60 86 48 01 65 03 04 02 11`): object identifier (`0x06`) with length `0x09` = 9 bytes;
+| 0xff: reserveKeyAndGetHalf response |                        |             |                                                |
+|-------------------------------------|------------------------|-------------|------------------------------------------------|
+|               ordinal               |          value         |     type    |               description & notes              |
+|                  1                  | error code             | integer     |                                                |
+|                  2                  | response id = `0xff`   | integer     | Specifies the `reserveKeyAndGetHalf` response. |
+|                  3                  | crypto nonce           | integer     |                                                |
+|                  4                  | key identifier         | octet array |                                                |
+|                  5                  | half of key bytes      | octet array |                                                |
+|                  6                  | hash of the other half | octet array |                                                |
+|                  7                  | hash algorithm id      | object id   |                                                |
 
 ### 0x02: `getKeyHalf` request
 
