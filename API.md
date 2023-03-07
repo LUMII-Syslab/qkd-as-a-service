@@ -39,17 +39,11 @@ The types and their respective encodings used in QAAS requests are:
 
 ### 0x01: `reserveKeyAndGetHalf` request
 
-Parameters:
-
-1. integer `endpoint id`
-
-   - value = `0x01` ( to )
-
-2. integer `key length`
-   
-   - value = `0x100` ( currently only 256 byte key fetching is supported )
-
-3. integer `crypto nonce`
+| ordinal | parameter    | type    | description & notes                            |
+|---------|--------------|---------|------------------------------------------------|
+| 1       | endpoint id  | integer | specifies the `reserveKeyAndGetHalf` request   |
+| 2       | key length   | integer | currently only 256 byte key fetching supported |
+| 3       | crypto nonce | integer | should be between 0 and 2^63-1                 |
 
 ### 0xff: `reserveKeyAndGetHalf` response
 
