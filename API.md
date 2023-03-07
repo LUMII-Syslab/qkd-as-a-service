@@ -46,7 +46,7 @@ The types and their respective encodings used in QAAS requests are:
 |    3    | crypto nonce         | integer | Value should be between 0 and 2^63-1.           |
 
 <details>
-  <summary>0x01: `reserveKeyAndGetHalf` request encoded example</summary>
+  <summary>encoded request example</summary>
   TODO
 </details>
 
@@ -66,13 +66,12 @@ The types and their respective encodings used in QAAS requests are:
 
 | ordinal | parameter            | type        | description & notes                             |
 |:-------:|----------------------|-------------|-------------------------------------------------|
-|    1    | endpoint id = `0x01` | integer     | Specifies the `reserveKeyAndGetHalf` request.   |
+|    1    | endpoint id = `0x02` | integer     | Specifies the `getKeyHalf` request.   |
 |    2    | key length = `256`   | integer     | Currently only 256 byte key fetching supported. |
 |    3    | key identifier       | octet array |                                                 |
 |    4    | crypto nonce         | integer     | Value should be between 0 and 2^63-1.           |
 
 <details>
-
 <summary>encoded request example</summary>
 
 ```
@@ -95,21 +94,17 @@ explanation:
 
 ### 0xfe: `getKeyHalf` response
 
-returns:
+| ordinal | value                  | type        | description & notes                            |
+|:-------:|------------------------|-------------|------------------------------------------------|
+|    1    | error code             | integer     |                                                |
+|    2    | response id = `0xfe`   | integer     | Specifies the `reserveKeyAndGetHalf` response. |
+|    3    | crypto nonce           | integer     |                                                |
+|    4    | half of key bytes      | octet array |                                                |
+|    5    | hash of the other half | octet array |                                                |
+|    6    | hash algorithm id      | object id   |                                                |
 
-1. error code
-
-2. response id = `0xff`
-
-3. crypto nonce
-
-4. half of key bytes
-
-5. hash(the other half)
-
-6. hash algorithm id = `0x608648016503040211`
-
-encoded response example:
+<details>
+<summary>encoded response example:</summary>
 
 ```
 30 1d 02 01 00 02 01 fe 02 02 30 3a 04 02 e1 5c 04 02 01 02 06 09 60 86 48 01 65 03 04 02 11
@@ -130,6 +125,7 @@ explanation:
 `04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **hash(the other half)** )
 
 `06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** )
+</details>
 
 ## QAAS admin API
 
