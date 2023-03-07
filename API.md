@@ -40,15 +40,20 @@ The types and their respective encodings used in QAAS requests are:
 ### 0x01: `reserveKeyAndGetHalf` request
 
 | ordinal |       parameter      |   type  |               description & notes               |
-|:-------:|----------------------|:-------:|-------------------------------------------------|
+|:-------:|----------------------|---------|-------------------------------------------------|
 |    1    | endpoint id = `0x01` | integer | Specifies the `reserveKeyAndGetHalf` request.   |
 |    2    | key length = `256`   | integer | Currently only 256 byte key fetching supported. |
 |    3    | crypto nonce         | integer | Value should be between 0 and 2^63-1.           |
 
+<details>
+  <summary>0x01: `reserveKeyAndGetHalf` request encoded example</summary>
+  TODO
+</details>
+
 ### 0xff: `reserveKeyAndGetHalf` response
 
 |               ordinal               |          value         |     type    |               description & notes              |
-|:-----------------------------------:|------------------------|:-----------:|------------------------------------------------|
+|:-----------------------------------:|------------------------|-------------|------------------------------------------------|
 |                  1                  | error code             | integer     |                                                |
 |                  2                  | response id = `0xff`   | integer     | Specifies the `reserveKeyAndGetHalf` response. |
 |                  3                  | crypto nonce           | integer     |                                                |
@@ -59,13 +64,12 @@ The types and their respective encodings used in QAAS requests are:
 
 ### 0x02: `getKeyHalf` request
 
-1. endpoint id = `0x01`
-
-2. key length
-
-3. key identifier
-
-4. crypto nonce
+| ordinal | parameter            | type        | description & notes                             |
+|:-------:|----------------------|-------------|-------------------------------------------------|
+|    1    | endpoint id = `0x01` | integer     | Specifies the `reserveKeyAndGetHalf` request.   |
+|    2    | key length = `256`   | integer     | Currently only 256 byte key fetching supported. |
+|    3    | key identifier       | octet array |                                                 |
+|    4    | crypto nonce         | integer     | Value should be between 0 and 2^63-1.           |
 
 encoded request example
 
