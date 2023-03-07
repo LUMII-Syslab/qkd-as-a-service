@@ -135,7 +135,7 @@ explanation:
 
 ### 0x03: `getState` request
 
-| ordinal | value               | type    | description & notes                   |
+| ordinal | parameter           | type    | description & notes                   |
 |:-------:|---------------------|---------|---------------------------------------|
 |    1    | endoint id = `0x03` | integer |                                       |
 |    2    | crypto nonce        | integer | Value should be between 0 and 2^63-1. |
@@ -176,6 +176,15 @@ returns:
 5. even key id
 
 6. odd key id
+
+| ordinal | value                | type        | description & notes                |
+|:-------:|----------------------|-------------|------------------------------------|
+|    1    | error code           | integer     |                                    |
+|    2    | response id = `0xfd` | integer     | Specifies the `getState` response. |
+|    3    | crypto nonce         | integer     |                                    |
+|    4    | KDC state id         | integer     |                                    |
+|    5    | oldest even key id   | octet array |                                    |
+|    6    | oldest odd key id    | octet array |                                    |
 
 TODO
 
