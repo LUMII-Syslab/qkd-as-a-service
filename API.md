@@ -47,9 +47,8 @@ The types and their respective encodings used in QAAS requests are:
 
 ### 0xff: `reserveKeyAndGetHalf` response
 
-| 0xff: reserveKeyAndGetHalf response |                        |             |                                                |
-|-------------------------------------|------------------------|-------------|------------------------------------------------|
 |               ordinal               |          value         |     type    |               description & notes              |
+|-------------------------------------|------------------------|-------------|------------------------------------------------|
 |                  1                  | error code             | integer     |                                                |
 |                  2                  | response id = `0xff`   | integer     | Specifies the `reserveKeyAndGetHalf` response. |
 |                  3                  | crypto nonce           | integer     |                                                |
