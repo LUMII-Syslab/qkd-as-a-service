@@ -2,48 +2,54 @@
 
 ## Table of Contents:
 
-1. [QAAS client API](#qaas-client-api)
-   1. [0x01: `reserveKeyAndGetHalf` request](#0x01-reservekeyandgethalf-request)
-   2. [0xff: `reserveKeyAndGetHalf` response](#0xff-reservekeyandgethalf-response)
-   3. [0x02: `getKeyHalf` request](#0x02-getKeyHalf-request)
-   4. [0xfe: `getKeyHalf` response](#0xfe-getKeyHalf-response)
-2. [QAAS admin API](#qaas-admin-api)
-   1. [0x03: `getState` request](#0x03-getstate-request)
-   2. [0xfd: `getState` response](#0xfd-getstate-response)
-   3. [0x04: `setState` request](#0x04-setstate-request)
-   4. [0xfc: `setState` response](#0xfc-setstate-response)
-3. [API Error codes & Other constants](#error-codes--other-constants)
-4. [QAAS software structure & operation](#qaas-software-structure--operation)
-   1. [Key Gathering](#key-gathering)
-   2. [Handling `reserveKeyAndGetHalf` requests](#handling-reservekeyandgethalf-requests)
-   3. [Handling `getKeyHalf` requests](#handling-getkeyhalf-requests)
-   4. [KDC Synchronisation](#kdc-synchronisation)
+- [QKD as a Service (QAAS) API](#qkd-as-a-service-qaas-api)
+  - [Table of Contents:](#table-of-contents)
+  - [QAAS client API](#qaas-client-api)
+    - [0x01: `reserveKeyAndGetHalf` request](#0x01-reservekeyandgethalf-request)
+    - [0xff: `reserveKeyAndGetHalf` response](#0xff-reservekeyandgethalf-response)
+    - [0x02: `getKeyHalf` request](#0x02-getkeyhalf-request)
+    - [0xfe: `getKeyHalf` response](#0xfe-getkeyhalf-response)
+  - [QAAS admin API](#qaas-admin-api)
+    - [0x03: `getState` request](#0x03-getstate-request)
+    - [0xfd: `getState` response](#0xfd-getstate-response)
+    - [0x04: `setState` request](#0x04-setstate-request)
+    - [0x05:`getStatistics` request](#0x05getstatistics-request)
+  - [Error codes \& Other constants](#error-codes--other-constants)
+  - [QAAS software structure \& operation](#qaas-software-structure--operation)
+    - [Key Gathering](#key-gathering)
+    - [Handling `reserveKeyAndGetHalf` requests](#handling-reservekeyandgethalf-requests)
+    - [Handling `getKeyHalf` requests](#handling-getkeyhalf-requests)
+    - [KDC Synchronisation](#kdc-synchronisation)
 
 ## QAAS client API
 
-Every request is of sequence type (`0x30`) followed by the length of bytes following it and then the elements themselves.
+Every request is an ASN.1 DER encoded sequence of elements.
+Each element of the sequence consists of its `type`, `length` and `value`.
+The types and their respective encodings used in QAAS requests are:
+
+
+| type              | tag  |
+|-------------------|------|
+| SEQUENCE OF       | 0X30 |
+| INTEGER           | 0X02 |
+| OCTET ARRAY       | 0X04 |
+| OBJECT IDENTIFIER | 0X06 |
+
+
 
 ### 0x01: `reserveKeyAndGetHalf` request
 
 Parameters:
 
-1. endpoint id
-   
-   - type = integer (`0x02`)
-   - element length = `0x01` bytes
-   - value = `0x01`
+1. integer `endpoint id`
 
-2. key length
+   - value = `0x01` ( to )
+
+2. integer `key length`
    
-   - type = integer (`0x02`)
-   - length = `0x02` bytes
    - value = `0x100` ( currently only 256 byte key fetching is supported )
 
-3. crypto nonce
-   
-   - type = integer (`0x02`)
-   - length <= `0x04` bytes
-   - value <= `0x111111`
+3. integer `crypto nonce`
 
 ### 0xff: `reserveKeyAndGetHalf` response
 
