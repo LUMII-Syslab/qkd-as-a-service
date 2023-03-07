@@ -71,7 +71,9 @@ The types and their respective encodings used in QAAS requests are:
 |    3    | key identifier       | octet array |                                                 |
 |    4    | crypto nonce         | integer     | Value should be between 0 and 2^63-1.           |
 
-encoded request example
+<details>
+
+<summary>encoded request example</summary>
 
 ```
 30 11 02 01 02 02 02 01 00 04 04 40 af a0 1f 02 02 30 39
@@ -88,6 +90,8 @@ explanation:
 `04` `04` `40 af a0 1f`: byte array (`0x04`) with length `0x04` = 4 bytes; ( **key identifier** )
 
 `02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
+
+</details>
 
 ### 0xfe: `getKeyHalf` response
 
