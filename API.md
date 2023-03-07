@@ -97,7 +97,7 @@ explanation:
 | ordinal | value                  | type        | description & notes                            |
 |:-------:|------------------------|-------------|------------------------------------------------|
 |    1    | error code             | integer     |                                                |
-|    2    | response id = `0xfe`   | integer     | Specifies the `reserveKeyAndGetHalf` response. |
+|    2    | response id = `0xfe`   | integer     | Specifies the `getKeyHalf` response. |
 |    3    | crypto nonce           | integer     |                                                |
 |    4    | half of key bytes      | octet array |                                                |
 |    5    | hash of the other half | octet array |                                                |
@@ -135,13 +135,13 @@ explanation:
 
 ### 0x03: `getState` request
 
-parameters:
+| ordinal | value               | type    | description & notes                   |
+|:-------:|---------------------|---------|---------------------------------------|
+|    1    | endoint id = `0x03` | integer |                                       |
+|    2    | crypto nonce        | integer | Value should be between 0 and 2^63-1. |
 
-1. endpoint id = `0x03`
-
-2. crypto nonce
-
-encoded request example:
+<details>
+<summary>encoded request example:</summary>
 
 ```
 30 07 02 01 03 02 02 30 39
@@ -154,6 +154,8 @@ explanation:
 `02` `01` `03`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x03` = 3; ( **endpoint id** )
 
 `02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
+
+</details>
 
 ### 0xfd: `getState` response
 
