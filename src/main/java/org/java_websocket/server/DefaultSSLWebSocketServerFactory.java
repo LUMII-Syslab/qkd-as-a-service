@@ -69,6 +69,12 @@ public class DefaultSSLWebSocketServerFactory implements WebSocketServerFactory 
      * E.g. firefox requests this cipher and this causes some dcs/instable connections
      */
     List<String> ciphers = new ArrayList<>(Arrays.asList(e.getEnabledCipherSuites()));
+
+    // by SK:
+    ciphers.add(0, "TLS_AES_256_GCM_SHA384");
+//    e.setNeedClientAuth(true);
+//    e.setWantClientAuth(true);
+
     ciphers.remove("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
     e.setEnabledCipherSuites(ciphers.toArray(new String[ciphers.size()]));
     e.setUseClientMode(false);

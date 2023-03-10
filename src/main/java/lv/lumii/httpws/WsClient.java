@@ -1,4 +1,4 @@
-package lv.lumii.pqproxy;
+package lv.lumii.httpws;
 
 import nl.altindag.ssl.SSLFactory;
 import org.cactoos.Scalar;
@@ -14,24 +14,26 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
-public class TargetWsClient {
+public class WsClient {
 
     private Scalar<WebSocketClient> wsClient;
     private WsSink replySink;
-    public TargetWsClient(SSLFactory sslFactory, URI targetUri, WsSink replySink) {
+    public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, WsSink replySink) {
+        System.out.println("New WsClient ssl="+sslFactory.isPresent());
         this.wsClient = new Synced<>(new Sticky<>(() -> newConnection(sslFactory, targetUri) ));
         this.replySink = replySink;
     }
 
-    private WebSocketClient newConnection(SSLFactory sslFactory, URI targetUri) throws Exception {
+    private WebSocketClient newConnection(Optional<SSLFactory> sslFactory, URI targetUri) throws Exception {
         WebSocketClient cln = new WebSocketClient(targetUri) {
 
             @Override
             protected void onSetSSLParameters(SSLParameters sslParameters) {
                 super.onSetSSLParameters(sslParameters);
                 List<SNIServerName> list = new LinkedList<>();
-                System.out.println("setting host name (SNI) to "+targetUri.getHost());
+                System.out.println("WS CLIENT: setting host name (SNI) to "+targetUri.getHost());
                 list.add(new SNIHostName(targetUri.getHost()));
                 sslParameters.setServerNames(list);
                 sslParameters.setWantClientAuth(true);
@@ -41,38 +43,40 @@ public class TargetWsClient {
 
             @Override
             public void onOpen(ServerHandshake serverHandshake) {
-                System.out.println("Proxy client ws: OPENED");
+                System.out.println("WS CLIENT: OPENED");
                 replySink.open();
             }
 
             @Override
             public void onMessage(String s) {
-                System.out.println("Proxy client ws: TXT MSG received ["+s+"]");
+                System.out.println("WS CLIENT: TXT MSG received ["+s+"]");
                 replySink.consumeMessage(s);
             }
 
             @Override
             public void onMessage(ByteBuffer blob) {
-                System.out.println("Proxy client ws: BYTE MSG received ["+blob.array().length+" bytes]");
+                System.out.println("WS CLIENT: BYTE MSG received ["+blob.array().length+" bytes]");
                 replySink.consumeMessage(blob);
             }
 
             @Override
             public void onClose(int i, String s, boolean b) {
-                System.out.println("Proxy client ws: CLOSED WS ["+s+"]");
+                System.out.println("WS CLIENT: CLOSED WS ["+s+"]");
                 replySink.closeGracefully(s);
             }
 
             @Override
             public void onError(Exception e) {
-                System.out.println("Proxy client ws: Error "+e.getMessage());
+                System.out.println("WS CLIENT: Error "+e.getMessage());
                 replySink.closeWithException(e);
             }
 
         };
 
         cln.setConnectionLostTimeout(20);
-        cln.setSocketFactory(sslFactory.getSslSocketFactory());
+
+        if (sslFactory.isPresent())
+            cln.setSocketFactory(sslFactory.get().getSslSocketFactory());
 
         return cln;
     }

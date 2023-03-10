@@ -1,5 +1,6 @@
-package lv.lumii.qkd;
+package lv.lumii.test;
 
+import lv.lumii.qkd.QkdProperties;
 import org.bouncycastle.pqc.InjectablePQC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ public class QkdTestClient {
 
         InjectablePQC.inject(); // makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
 
-        File f = new File(QkdServer.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        File f = new File(QkdTestClient.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();
         mainDirectory = f.getParent();
 
@@ -38,7 +39,7 @@ public class QkdTestClient {
 
         String logFileName = mainDirectory+ File.separator+"qkd.log";
         System.setProperty("org.slf4j.simpleLogger.logFile", logFileName);
-        logger = LoggerFactory.getLogger(QkdServer.class);
+        logger = LoggerFactory.getLogger(QkdTestClient.class);
 
         Provider tlsProvider = null;
         try {
@@ -46,7 +47,7 @@ public class QkdTestClient {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        logger.info("QkdServer is using TLS provider: "+tlsProvider.getName()); // BCJSSE
+        logger.info("QkdTestClient is using TLS provider: "+tlsProvider.getName()); // BCJSSE
 
     }
 

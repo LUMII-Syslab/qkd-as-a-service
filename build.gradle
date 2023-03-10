@@ -175,8 +175,22 @@ task(pqproxy, dependsOn: 'classes', type: JavaExec) {
    jvmArgs = ["-cp", "/home/sergejs/quantum.gits/qkd-user-lib/.jars/*", "-Djava.library.path=/usr/local/lib:/Users/sergejs/quantum.gits/qkd-user-lib/.libs" ]
 }
 
-task(pqtestserver, dependsOn: 'classes', type: JavaExec) {
-   main = 'lv.lumii.qkd.QkdTestServer'
+task(pqproxy1, dependsOn: 'classes', type: JavaExec) {
+   main = 'lv.lumii.pqproxy.PQProxy'
+   classpath = sourceSets.main.runtimeClasspath
+   args = ["-f", "pqproxy1.properties" ]
+   jvmArgs = ["-cp", "/home/sergejs/quantum.gits/qkd-user-lib/.jars/*", "-Djava.library.path=/usr/local/lib:/Users/sergejs/quantum.gits/qkd-user-lib/.libs" ]
+}
+
+task(pqproxy2, dependsOn: 'classes', type: JavaExec) {
+   main = 'lv.lumii.pqproxy.PQProxy'
+   classpath = sourceSets.main.runtimeClasspath
+   args = ["-f", "pqproxy2.properties" ]
+   jvmArgs = ["-cp", "/home/sergejs/quantum.gits/qkd-user-lib/.jars/*", "-Djava.library.path=/usr/local/lib:/Users/sergejs/quantum.gits/qkd-user-lib/.libs" ]
+}
+
+task(pqproxywstestserver, dependsOn: 'classes', type: JavaExec) {
+   main = 'lv.lumii.test.PQProxyWsTestServer'
 //   classpath = sourceSets.main.runtimeClasspath + ':' + sourceSets.test.runtimeClasspath
    classpath = sourceSets.test.runtimeClasspath
    jvmArgs = ["-cp", "/home/sergejs/quantum.gits/qkd-user-lib/.jars/*", "-Djava.library.path=/usr/local/lib:/Users/sergejs/quantum.gits/qkd-user-lib/.libs" ]

@@ -1,4 +1,4 @@
-package lv.lumii.pqproxy;
+package lv.lumii.httpws;
 
 import org.java_websocket.handshake.ServerHandshake;
 
