@@ -22,6 +22,7 @@ socket.onopen = function(e) {
   console.log("[open] Connection established");
   console.log("Sending to server");
   socket.send("My name is Centis");
+  setTimeout(()=>socket.send("My name is Centis, still!"), 0);
 };
 
 socket.onmessage = function(event) {

@@ -6,12 +6,17 @@ import org.cactoos.scalar.Unchecked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Properties;
 
 public class QkdProperties {
@@ -86,5 +91,25 @@ public class QkdProperties {
         return KeyStore.getInstance(f, password.toCharArray());
     }
 
+    public SSLContext serverSslContext() throws Exception {
+        ServerKey srvKey = this.serverKey();
+
+        KeyManagerFactory kmf;
+        KeyStore ks;
+        kmf = KeyManagerFactory.getInstance("SunX509");
+        ks = srvKey.keyStore();
+        kmf.init(ks, srvKey.password());
+
+        TrustManagerFactory tmf;
+        KeyStore ts;
+        tmf = TrustManagerFactory.getInstance("SunX509");
+        ts = this.trustStore();
+        tmf.init(ts);
+
+        SSLContext ctx;
+        ctx = SSLContext.getInstance("TLS");
+        ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), SecureRandom.getInstanceStrong());
+        return ctx;
+    }
 
 }
