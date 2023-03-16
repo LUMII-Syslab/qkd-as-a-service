@@ -39,10 +39,11 @@ if [ -f $CA_VARS ]; then
   source $CA_VARS
 fi
 if [ -z $SIG_ALG ]; then
-    $OQS_OPENSSL list -signature-algorithms $OQS_OPENSSL_FLAGS
+    $OQS_OPENSSL list -public-key-algorithms $OQS_OPENSSL_FLAGS
     echo -n "Please, specify the signature algorithm [RSA]: "
     read INP
     export SIG_ALG=$INP
+    echo "Now you can enter additional signature algorithm parameters, e.g., '-pkeyopt ec_paramgen_curve:P-256' for the EC algorithm."
     echo -n "Enter additional openssl req args for the CA []: "
     read INP
     export OQS_OPENSSL_CA_REQ_ARGS=$INP
@@ -63,6 +64,9 @@ if [ -z $CA_CONFIG_FILE ]; then
     export CA_CONFIG_FILE=$INP
 fi
 
+if [ -z $CA_CONFIG_FILE ]; then
+   export CA_CONFIG_FILE=ca.cnf
+fi
 
 if [ -f $CA_KEY ] && [ -f $CA_TRUSTSTORE ]; then
   echo "Your CA has already been initialized."
@@ -101,9 +105,9 @@ echo "#!/bin/bash" > $CA_VARS
 echo "" >> $CA_VARS
 echo "export SIG_ALG=${SIG_ALG}" >> $CA_VARS
 echo "export CA_CONFIG_FILE=\`dirname \$CA_KEY\`/ca.cnf" >> $CA_VARS
-echo "export OQS_OPENSSL_CA_REQ_ARGS=${OQS_OPENSSL_CA_REQ_ARGS}" >> $CA_VARS
-echo "export OQS_OPENSSL_CLIENT_REQ_ARGS=${OQS_OPENSSL_CLIENT_REQ_ARGS}" >> $CA_VARS
-echo "export OQS_OPENSSL_SERVER_REQ_ARGS=${OQS_OPENSSL_SERVER_REQ_ARGS}" >> $CA_VARS
+echo "export OQS_OPENSSL_CA_REQ_ARGS=\"${OQS_OPENSSL_CA_REQ_ARGS}\"" >> $CA_VARS
+echo "export OQS_OPENSSL_CLIENT_REQ_ARGS=\"${OQS_OPENSSL_CLIENT_REQ_ARGS}\"" >> $CA_VARS
+echo "export OQS_OPENSSL_SERVER_REQ_ARGS=\"${OQS_OPENSSL_SERVER_REQ_ARGS}\"" >> $CA_VARS
 chmod +x $CA_VARS
 
 echo "Generating CA key pair..."
