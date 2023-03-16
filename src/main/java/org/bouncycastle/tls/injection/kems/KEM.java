@@ -22,17 +22,17 @@ public interface KEM {
     Pair<byte[], byte[]> keyGen();
 
     /**
-     * Generates a secret and encapsulates it to be sent to the partner.
+     * Generates a secret (=symmetric key K) and encapsulates it to be sent to the partner.
      * @param partnerPublicKey partner's public key received during the TLS handshake
-     * @return a generated symmetric key K and a ciphertext ct (=K encrypted with partner's public Key
+     * @return a generated symmetric key K and a ciphertext ct (=K encrypted with partner's public Key)
      */
     Pair<byte[], byte[]> encapsulate(byte[] partnerPublicKey);
 
     /**
-     * Decapsulates the ciphertext (=secret encrypted with our public key) received from the partner.
+     * Decapsulates the ciphertext (=secret K encrypted with our public key) received from the partner.
      * @param secretKey our secret key to use to decrypt the ciphertext
      * @param ciphertext the ciphertext
-     * @return the shared secret
+     * @return the shared secret K
      */
     byte[] decapsulate(byte[] secretKey, byte[] ciphertext);
 }

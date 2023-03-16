@@ -8,8 +8,10 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricAlgorithmProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
-import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
-import org.bouncycastle.tls.injection.InjectedSignatureSpi;
+import org.bouncycastle.tls.injection.keys.BC_ASN1_Converter;
+import org.bouncycastle.tls.injection.signaturespi.DirectSignatureSpi;
+import org.bouncycastle.tls.injection.signaturespi.InjectedSignatureSpiFactories;
+import org.bouncycastle.tls.injection.signaturespi.SignatureSpiFromPublicKeyFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -30,8 +32,8 @@ public class InjectedSigAlgorithms
     public record SigAlgorithmInfo(String name,
                             ASN1ObjectIdentifier oid, SignatureAndHashAlgorithm sigAndHash,
                             int signatureSchemeCodePoint, int cryptoHashAlgorithmIndex,
-                            InjectedConverter converter,
-                            AsymmetricKeyInfoConverter infoToKeyConverter, InjectedSignatureSpi.Factory sig2spiFactory) {
+                            BC_ASN1_Converter converter,
+                            AsymmetricKeyInfoConverter infoToKeyConverter, SignatureSpiFromPublicKeyFactory sig2spiFactory) {
 
         public ASN1ObjectIdentifier oid() {
             return this.oid;
@@ -49,15 +51,15 @@ public class InjectedSigAlgorithms
                                                  ASN1ObjectIdentifier oid, SignatureAndHashAlgorithm sigAndHash,
                                                  int signatureSchemeCodePoint, // e.g., oqs_sphincsshake256128frobust
                                                  int cryptoHashAlgorithmIndex,
-                                                 InjectedConverter converter,
+                                                 BC_ASN1_Converter converter,
                                                  AsymmetricKeyInfoConverter infoToKeyConverter,
-                                                 InjectedSignatureSpi.Factory sig2spi) {
+                                                 SignatureSpiFromPublicKeyFactory sig2spi) {
         SigAlgorithmInfo newAlg = new SigAlgorithmInfo(name, oid, sigAndHash, signatureSchemeCodePoint,
                 cryptoHashAlgorithmIndex, converter, infoToKeyConverter, sig2spi);
         injected.add(newAlg);
         injectedSignatureSchemes.put(signatureSchemeCodePoint, newAlg);
         injectedOids.put(oid.toString(), newAlg);
-        InjectedSignatureSpi.addFactory(sig2spi);
+        InjectedSignatureSpiFactories.registerFactory(sig2spi);
     }
 
     public static Collection<? extends SignatureAndHashAlgorithm> getInjectedSigAndHashAlgorithms() {
@@ -150,7 +152,7 @@ public class InjectedSigAlgorithms
                 p.remove("Alg.Alias.Signature.OID." + info.oid);
             }
             // = provider.addSignatureAlgorithm(provider, "SPHINCSPLUS", PREFIX + "SignatureSpi$Direct", BCObjectIdentifiers.sphincsPlus);
-            provider.addAlgorithm("Signature."+info.name, "org.bouncycastle.tls.injection.InjectedSignatureSpi");
+            provider.addAlgorithm("Signature."+info.name, "org.bouncycastle.tls.injection.signaturespi.DirectSignatureSpi");
             provider.addAlgorithm("Alg.Alias.Signature." + info.oid, info.name);
             provider.addAlgorithm("Alg.Alias.Signature.OID." + info.oid, info.name);
 

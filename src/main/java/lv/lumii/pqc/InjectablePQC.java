@@ -14,7 +14,12 @@ import org.bouncycastle.pqc.crypto.frodo.*;
 import org.bouncycastle.pqc.jcajce.provider.sphincsplus.BCSPHINCSPlusPublicKey;
 import org.bouncycastle.pqc.jcajce.provider.sphincsplus.SignatureSpi;
 import org.bouncycastle.tls.crypto.*;
-import org.bouncycastle.tls.crypto.impl.jcajce.JceTlsSecret;
+import org.bouncycastle.tls.injection.kems.InjectedKEMs;
+import org.bouncycastle.tls.injection.kems.KEMAgreementBase;
+import org.bouncycastle.tls.injection.keys.BC_ASN1_Converter;
+import org.bouncycastle.tls.injection.sigalgs.InjectedSigAlgorithms;
+import org.bouncycastle.tls.injection.sigalgs.InjectedSigVerifiers;
+import org.bouncycastle.tls.injection.sigalgs.InjectedSigners;
 import org.bouncycastle.util.Pack;
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusParameters;
@@ -37,7 +42,6 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Arrays;
-import java.util.BitSet;
 
 /**
  * The class for injecting PQC algorithms used for our experiments (~post-quantum agility)
@@ -105,10 +109,8 @@ public class InjectablePQC {
         InjectedSigAlgorithms.injectSigAndHashAlgorithm(
                 "SPHINCS+",//"SPHINCSPLUS",
                 sigOid,
-                new SignatureAndHashAlgorithm(sigCodePointHi,sigCodePointLo), // todo: compute from sigCodePoint
                 sigCodePoint,
-                sigCodePointHi,//8,//CryptoHashAlgorithm.sha256, //sigCodePointHi, // TODO: remove this param?
-                new InjectedConverter() {
+                new BC_ASN1_Converter() {
                     @Override
                     public boolean isSupportedParameter(AsymmetricKeyParameter someKey) {
                         return someKey instanceof SPHINCSPlusPublicKeyParameters ||

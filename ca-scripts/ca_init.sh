@@ -39,7 +39,7 @@ if [ -f $CA_VARS ]; then
   source $CA_VARS
 fi
 if [ -z $SIG_ALG ]; then
-    $OQS_OPENSSL list -signature-algorithms $OQS_OPENSSL_FLAGS
+    $OQS_OPENSSL list -public-key-algorithms $OQS_OPENSSL_FLAGS
     echo -n "Please, specify the signature algorithm [RSA]: "
     read INP
     export SIG_ALG=$INP

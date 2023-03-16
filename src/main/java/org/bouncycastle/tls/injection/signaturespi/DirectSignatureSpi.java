@@ -1,4 +1,4 @@
-package org.bouncycastle.tls.injection;
+package org.bouncycastle.tls.injection.signaturespi;
 
 
 import java.lang.reflect.Array;
@@ -9,6 +9,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+/**
+ *
+ * #pqc-tls #injection
+ *
+ * @author Sergejs Kozlovics
+ */
 public class InjectedSignatureSpi extends java.security.SignatureSpi
 {
     public interface Factory {
