@@ -1,24 +1,23 @@
 package lv.lumii.test;
 
 
-import lv.lumii.httpws.Server;
 import lv.lumii.httpws.WsServer;
 import lv.lumii.httpws.WsSink;
-import lv.lumii.keys.ServerKey;
-import lv.lumii.pqproxy.PQProxyProperties;
 import lv.lumii.qkd.QkdProperties;
-import org.bouncycastle.pqc.InjectablePQC;
+import lv.lumii.pqc.InjectablePQC;
+import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
+import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
+import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
+import java.security.Security;
 import java.util.Optional;
 
 public class PQProxyWsTestServer {
@@ -30,7 +29,13 @@ public class PQProxyWsTestServer {
 
     static {
 
-        InjectablePQC.inject(); // makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
+        InjectablePQC.inject(InjectedKEMs.InjectionOrder.AFTER_DEFAULT);//.INSTEAD_DEFAULT); // makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
+
+        /*BouncyCastleJsseProvider jsseProvider = new BouncyCastleJsseProvider();
+        Security.insertProviderAt(jsseProvider, 1);
+
+        BouncyCastlePQCProvider bcProvider = new BouncyCastlePQCProvider(); // BCPQC
+        Security.insertProviderAt(bcProvider, 1);*/
 
         File f = new File(PQProxyWsTestServer.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();

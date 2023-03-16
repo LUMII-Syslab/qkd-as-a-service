@@ -5,49 +5,40 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
 
 /**
+ * The DirectSignatureSpi class acts as a proxy for all injected SignatureSpi-s.
+ * DirectSignatureSpi can be registered in JCA/JCE providers, since it has the no-arg constructor.
+ * See, for example, the InjectedSigAlgorithms class, which registers the full class name
+ * "org.bouncycastle.tls.injection.signaturespi.DirectSignatureSpi" when configuring a provider.
+ *
+ * Internally, DirectSignatureSpi tries all injected SignatureSpi factories until
+ * some factory returns a valid SignatureSpi. Then this SignatureSpi is used as a delegate
+ * to which SignatureSpi method invocations are forwarded (via Java reflection).
  *
  * #pqc-tls #injection
  *
  * @author Sergejs Kozlovics
  */
-public class InjectedSignatureSpi extends java.security.SignatureSpi
+public class DirectSignatureSpi extends java.security.SignatureSpi
 {
-    public interface Factory {
-        java.security.SignatureSpi newInstance(PublicKey publicKey);
-    }
-    //private static Map<Class, Factory> algFactories
-      //  = new HashMap<>(); // the same map for all instances
-    private static Vector<Factory> factories = new Vector<>();
 
-    public static void addFactory(Factory factory) {
-        factories.add(factory);
-        //algFactories.put(publicKeyClass, factory);
-    }
 
     private java.security.SignatureSpi delegate = null; // will be initialized in engineInitVerify
 
-    public InjectedSignatureSpi()
+    public DirectSignatureSpi()
     {
     }
 
     private Method findDirectOrInheritedMethod(Class c, String methodName, Class... args) {
         Method m = null;
         while (c!=null) {
-            System.out.println(" ===> " + c.getName());
             for (Method mm : c.getDeclaredMethods()) {
+                // this is an optimization: we don't check all arg types, just their number
+                // (for SignatureSpi-s that's sufficient)
                 if (mm.getName().equals(methodName) && (args.length == mm.getParameterTypes().length))
                     m = mm;
             }
-/*            try {
-                m = c.getMethod(methodName, args);
-            } catch (Exception ee) {
-                ee.printStackTrace();
-            }*/
             if (m!=null)
                 break;
             c = c.getSuperclass();
@@ -60,21 +51,7 @@ public class InjectedSignatureSpi extends java.security.SignatureSpi
             throws InvalidKeyException
     {
 
-        delegate = null; // not found yet
-        for (Factory f : factories) {
-            try {
-                delegate = f.newInstance(publicKey);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                // SignatureSpi could not been created with this factory, continue with the next one
-            }
-            if (delegate != null)
-                break;
-        }
-        if (delegate == null) {
-            throw new InvalidKeyException("No known SignatureSpi for the passed public key of type "+publicKey.getClass().getName());
-        }
+        delegate = InjectedSignatureSpiFactories.createSignatureSpi(publicKey);
 
         Class c = delegate.getClass(); // searching for the method in the class or in base classes
         Method m = findDirectOrInheritedMethod(c, "engineInitVerify", PublicKey.class);

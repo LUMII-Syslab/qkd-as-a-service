@@ -1,4 +1,4 @@
-package org.bouncycastle.tls;
+package org.bouncycastle.tls.injection.sigalgs;
 
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -8,6 +8,7 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricAlgorithmProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
+import org.bouncycastle.tls.SignatureAndHashAlgorithm;
 import org.bouncycastle.tls.injection.keys.BC_ASN1_Converter;
 import org.bouncycastle.tls.injection.signaturespi.DirectSignatureSpi;
 import org.bouncycastle.tls.injection.signaturespi.InjectedSignatureSpiFactories;
@@ -23,39 +24,63 @@ import java.util.*;
  */
 public class InjectedSigAlgorithms
 {
-    /**
-     * @param cryptoHashAlgorithmIndex corresponds to org.bouncycastle.tls.crypto.impl.CryptoHashAlgorithm
-     *                                 (e.g., CryptoHashAlgorithm.sha256 for rainbowIclassic);
-     *                                 use 8 (HashAlgorithm.Intrinsic), if the hash algorithm is
-     *                                 built-in into the signature scheme (e.g., for sphincsshake256128frobust)
-     */
-    public record SigAlgorithmInfo(String name,
-                            ASN1ObjectIdentifier oid, SignatureAndHashAlgorithm sigAndHash,
-                            int signatureSchemeCodePoint, int cryptoHashAlgorithmIndex,
+    public static class SigAlgorithmInfo {
+        private String name;
+        private ASN1ObjectIdentifier oid;
+        private int signatureSchemeCodePoint;
+        private SignatureAndHashAlgorithm signatureAndHashAlgorithm;
+            // ^^^ Just splits the code point (a 2-byte integer) into two separate bytes:
+            //     HighestByte(signatureSchemeCodePoint), LowestByte(signatureSchemeCodePoint).
+            //     Actually, the highest (the second) byte does not necessarily correspond to the hash algorithm,
+            //     but we still use the BC SignatureAndHashAlgorithm class since it is needed internally
+            //     in many places within BC code.
+        private BC_ASN1_Converter converter;
+        private AsymmetricKeyInfoConverter infoToKeyConverter;
+        private SignatureSpiFromPublicKeyFactory sig2spiFactory;
+        public SigAlgorithmInfo(String name,
+
+                            ASN1ObjectIdentifier oid, // SignatureAndHashAlgorithm sigAndHash,
+                            int signatureSchemeCodePoint, // int cryptoHashAlgorithmIndex,
                             BC_ASN1_Converter converter,
                             AsymmetricKeyInfoConverter infoToKeyConverter, SignatureSpiFromPublicKeyFactory sig2spiFactory) {
+            this.name = name;
+            this.oid = oid;
+            this.signatureSchemeCodePoint = signatureSchemeCodePoint;
+            this.signatureAndHashAlgorithm = new SignatureAndHashAlgorithm((short) (signatureSchemeCodePoint >> 8), (short) (signatureSchemeCodePoint & 0xFF));
+            this.converter = converter;
+            this.infoToKeyConverter = infoToKeyConverter;
+            this.sig2spiFactory = sig2spiFactory;
+        }
+
+        public String name() {
+            return this.name;
+        }
 
         public ASN1ObjectIdentifier oid() {
             return this.oid;
         }
 
-        public SignatureAndHashAlgorithm signatureAndHashAlgorithm() {
-            return this.sigAndHash;
+        public int signatureSchemeCodePoint() {
+            return this.signatureSchemeCodePoint;
         }
+
+        public SignatureAndHashAlgorithm signatureAndHashAlgorithm() {
+            return this.signatureAndHashAlgorithm;
+        }
+
     }
     private static final Vector<SigAlgorithmInfo> injected = new Vector<>();
     private static final Map<Integer, SigAlgorithmInfo> injectedSignatureSchemes = new HashMap<>();
     private static final Map<String, SigAlgorithmInfo> injectedOids = new HashMap<>();
 
     public static void injectSigAndHashAlgorithm(String name,
-                                                 ASN1ObjectIdentifier oid, SignatureAndHashAlgorithm sigAndHash,
+                                                 ASN1ObjectIdentifier oid,
                                                  int signatureSchemeCodePoint, // e.g., oqs_sphincsshake256128frobust
-                                                 int cryptoHashAlgorithmIndex,
                                                  BC_ASN1_Converter converter,
                                                  AsymmetricKeyInfoConverter infoToKeyConverter,
                                                  SignatureSpiFromPublicKeyFactory sig2spi) {
-        SigAlgorithmInfo newAlg = new SigAlgorithmInfo(name, oid, sigAndHash, signatureSchemeCodePoint,
-                cryptoHashAlgorithmIndex, converter, infoToKeyConverter, sig2spi);
+        SigAlgorithmInfo newAlg = new SigAlgorithmInfo(name, oid, signatureSchemeCodePoint,
+                converter, infoToKeyConverter, sig2spi);
         injected.add(newAlg);
         injectedSignatureSchemes.put(signatureSchemeCodePoint, newAlg);
         injectedOids.put(oid.toString(), newAlg);
@@ -79,12 +104,14 @@ public class InjectedSigAlgorithms
     }
 
     public static boolean isSigAndHashAlgorithmSupported(SignatureAndHashAlgorithm sigAndHashAlgorithm) {
-        return injected.contains(sigAndHashAlgorithm);
+        int codePoint = (sigAndHashAlgorithm.getHash() << 8) | sigAndHashAlgorithm.getSignature();
+        return isSigSchemeSupported(codePoint);
     }
 
+    /*
     public static int getCryptoHashAlgorithmIndex(int sigSchemeCodePoint) {
         return injectedSignatureSchemes.get(sigSchemeCodePoint).cryptoHashAlgorithmIndex;
-    }
+    }*/
 
     public static boolean isParameterSupported(AsymmetricKeyParameter param) {
         for (SigAlgorithmInfo sig : injectedSignatureSchemes.values()) {

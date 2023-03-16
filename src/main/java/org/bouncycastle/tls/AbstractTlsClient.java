@@ -1,11 +1,11 @@
 package org.bouncycastle.tls;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import org.bouncycastle.tls.crypto.TlsCrypto;
+import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.bouncycastle.util.Integers;
 
 /**

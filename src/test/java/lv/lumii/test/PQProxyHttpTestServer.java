@@ -5,11 +5,10 @@ import lv.lumii.httpws.HttpServer;
 
 import java.net.URI;
 import java.net.http.HttpClient;
-import lv.lumii.httpws.WsServer;
-import lv.lumii.httpws.WsSink;
+
 import lv.lumii.qkd.QkdProperties;
-import org.bouncycastle.pqc.InjectablePQC;
-import org.java_websocket.WebSocket;
+import lv.lumii.pqc.InjectablePQC;
+import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +19,6 @@ import java.net.Socket;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.util.*;
@@ -35,7 +32,7 @@ public class PQProxyHttpTestServer {
 
     static {
 
-        InjectablePQC.inject(); // makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
+        InjectablePQC.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT); // makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
 
         File f = new File(PQProxyHttpTestServer.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();

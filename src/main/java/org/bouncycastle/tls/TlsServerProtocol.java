@@ -14,8 +14,9 @@ import org.bouncycastle.tls.crypto.TlsDHConfig;
 import org.bouncycastle.tls.crypto.TlsECConfig;
 import org.bouncycastle.tls.crypto.TlsSecret;
 import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsCrypto;
+import org.bouncycastle.tls.injection.kems.InjectedKEMs;
+import org.bouncycastle.tls.injection.kems.KEMAgreementBase;
 import org.bouncycastle.util.Arrays;
-import org.openquantumsafe.Pair;
 
 public class TlsServerProtocol
     extends TlsProtocol

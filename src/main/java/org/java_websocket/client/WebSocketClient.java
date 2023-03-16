@@ -511,7 +511,7 @@ public abstract class WebSocketClient extends AbstractWebSocket implements Runna
     // wwt by SK
     WebsocketWriteThread wwt = new WebsocketWriteThread(this);
     writeThread = new Thread(wwt);
-    writeThread.start();
+    //writeThread.start();
 
     // by SK: start writeThread only after handshake has been completed
     // by SK: -- writeThread.start();
@@ -522,7 +522,7 @@ public abstract class WebSocketClient extends AbstractWebSocket implements Runna
       sslSocket.addHandshakeCompletedListener((ev) -> {
         System.err.println("HANDSHAKE DONE" +ev);
         wwt.onHandshakeDone();
-//        writeThread.start();
+        writeThread.start();
       });
 
     }

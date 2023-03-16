@@ -165,6 +165,7 @@ public class PQProxyProperties {
             tmf.init(ts);
 
             SSLContext ctx;
+            //ctx = SSLContext.getInstance("TLSv1.2");
             ctx = SSLContext.getInstance("TLS");
             ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), SecureRandom.getInstanceStrong());
             return Optional.of(ctx);

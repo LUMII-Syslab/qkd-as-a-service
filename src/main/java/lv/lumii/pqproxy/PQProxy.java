@@ -1,11 +1,8 @@
 package lv.lumii.pqproxy;
 
 import lv.lumii.httpws.*;
-import lv.lumii.keys.ClientKey;
-import lv.lumii.keys.ServerKey;
-import nl.altindag.ssl.SSLFactory;
-import org.bouncycastle.pqc.InjectablePQC;
-import org.bouncycastle.util.Arrays;
+import lv.lumii.pqc.InjectablePQC;
+import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,16 +11,11 @@ import javax.net.ssl.*;
 import java.io.File;
 import java.io.InputStream;
 import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.nio.channels.spi.SelectorProvider;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -37,7 +29,8 @@ public class PQProxy {
 
     static {
 
-        InjectablePQC.inject(); // makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
+        InjectablePQC.inject(InjectedKEMs.InjectionOrder.AFTER_DEFAULT);
+            // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
 
         File f = new File(WsServer.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();
@@ -133,7 +126,7 @@ public class PQProxy {
 
         Optional<SSLContext> ctx = props.sourceServerSslContext();
 
-        if (false && props.isTargetWebSocket()) {
+        if (props.isTargetWebSocket()) {
             WsServer wsServer = new WsServer(ctx, props.sourcePort(), (WebSocket sourceClientWs) -> {
                 class WrappedTargetWsClient {
                     WsClient value = null;
@@ -201,7 +194,7 @@ public class PQProxy {
                 WsSink replySink = new WsSink() {
                     @Override
                     public void open() {
-
+                        System.out.println("REPLY SINK OPEN OK");
                     }
 
                     @Override

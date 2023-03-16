@@ -11,7 +11,7 @@ import java.util.Vector;
 import org.bouncycastle.tls.crypto.TlsAgreement;
 import org.bouncycastle.tls.crypto.TlsSecret;
 import org.bouncycastle.tls.crypto.TlsStreamSigner;
-import org.bouncycastle.tls.crypto.impl.jcajce.JceTlsSecret;
+import org.bouncycastle.tls.injection.kems.KEMAgreementBase;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Integers;
 

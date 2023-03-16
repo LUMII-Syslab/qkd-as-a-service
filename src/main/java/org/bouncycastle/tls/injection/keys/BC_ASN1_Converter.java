@@ -1,4 +1,4 @@
-package org.bouncycastle.tls.injection;
+package org.bouncycastle.tls.injection.keys;
 
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;

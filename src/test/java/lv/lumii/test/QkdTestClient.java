@@ -1,7 +1,8 @@
 package lv.lumii.test;
 
 import lv.lumii.qkd.QkdProperties;
-import org.bouncycastle.pqc.InjectablePQC;
+import lv.lumii.pqc.InjectablePQC;
+import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ public class QkdTestClient {
 
     static {
 
-        InjectablePQC.inject(); // makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
+        InjectablePQC.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT); // makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
 
         File f = new File(QkdTestClient.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();

@@ -1,17 +1,8 @@
-package org.bouncycastle.tls;
+package org.bouncycastle.tls.injection.kems;
 
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.tls.crypto.TlsAgreement;
-import org.bouncycastle.tls.crypto.TlsSigner;
 import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsCrypto;
 
-import java.io.IOException;
-import java.security.PrivateKey;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -34,7 +25,7 @@ public class InjectedKEMs
         INSTEAD_DEFAULT,
         AFTER_DEFAULT
     }
-    public static InjectionOrder injectionOrder = InjectionOrder.INSTEAD_DEFAULT;
+    public static InjectionOrder injectionOrder = InjectionOrder.AFTER_DEFAULT;
 
     public interface TlsAgreementFunction {
         TlsAgreement invoke(JcaTlsCrypto crypto, int kemCodePoint, boolean isServer);

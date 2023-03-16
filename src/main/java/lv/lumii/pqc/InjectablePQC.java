@@ -1,4 +1,4 @@
-package org.bouncycastle.pqc;
+package lv.lumii.pqc;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -88,7 +88,7 @@ public class InjectablePQC {
     private static SPHINCSPlusParameters sphincsPlusParameters = SPHINCSPlusParameters.sha2_128f;
     private static int sphincsPlusParametersAsInt = SPHINCSPlusParameters.getID(sphincsPlusParameters);
 
-    public static void inject() {
+    public static void inject(InjectedKEMs.InjectionOrder injectionOrder) {
         // PQC signatures are huge; increasing the max handshake size:
         System.setProperty("jdk.tls.maxHandshakeMessageSize", String.valueOf(32768 * 32));
         //System.setProperty("jdk.tls.client.SignatureSchemes", "SPHINCS+"); // comma-separated
@@ -96,15 +96,12 @@ public class InjectablePQC {
 
         //ASN1ObjectIdentifier sigOid = InjectablePQC.oqs_sphincsshake256128frobust_oid;
         ASN1ObjectIdentifier sigOid = InjectablePQC.oqs_sphincssha256128frobust_oid;
-        //int sigCodePoint = InjectablePQC.oqs_sphincsshake256128frobust_signaturescheme_codepoint;
         int sigCodePoint = InjectablePQC.oqs_sphincssha256128frobust_signaturescheme_codepoint;
-        short sigCodePointHi = (short)(sigCodePoint >> 8);
-        short sigCodePointLo = (short)(sigCodePoint & 0xFF);
         int sphincsPlusPKLength = 32;
         int sphincsPlusSKLength = 64;
         // ^^^ see: https://github.com/sphincs/sphincsplus
 
-        InjectedKEMs.injectionOrder = InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT;
+        InjectedKEMs.injectionOrder = injectionOrder;
 
         InjectedSigAlgorithms.injectSigAndHashAlgorithm(
                 "SPHINCS+",//"SPHINCSPLUS",

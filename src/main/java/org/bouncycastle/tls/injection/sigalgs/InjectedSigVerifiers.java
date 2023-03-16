@@ -1,5 +1,6 @@
-package org.bouncycastle.tls;
+package org.bouncycastle.tls.injection.sigalgs;
 
+import org.bouncycastle.tls.DigitallySigned;
 import org.bouncycastle.tls.crypto.TlsStreamVerifier;
 import org.bouncycastle.tls.crypto.TlsVerifier;
 import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsCrypto;

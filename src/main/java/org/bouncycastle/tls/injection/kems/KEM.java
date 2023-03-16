@@ -1,4 +1,4 @@
-package org.bouncycastle.tls;
+package org.bouncycastle.tls.injection.kems;
 
 import org.openquantumsafe.Pair;
 
