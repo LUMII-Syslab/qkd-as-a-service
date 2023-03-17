@@ -138,7 +138,7 @@ public class PQProxy {
                     boolean isOpen = false;
 
                     @Override
-                    public void open() {
+                    public void open(WebSocket ws) {
                         try {
                             wrappedTargetWsClient.value.connectBlockingAndRunAsync();
                             this.isOpen = true;
@@ -193,7 +193,7 @@ public class PQProxy {
                 };
                 WsSink replySink = new WsSink() {
                     @Override
-                    public void open() {
+                    public void open(WebSocket ws) {
                         System.out.println("REPLY SINK OPEN OK");
                     }
 

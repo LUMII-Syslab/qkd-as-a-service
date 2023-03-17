@@ -4,12 +4,14 @@ import nl.altindag.ssl.SSLFactory;
 import org.cactoos.Scalar;
 import org.cactoos.scalar.Sticky;
 import org.cactoos.scalar.Synced;
+import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import javax.net.ssl.SNIHostName;
 import javax.net.ssl.SNIServerName;
 import javax.net.ssl.SSLParameters;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
@@ -18,13 +20,80 @@ import java.util.Optional;
 
 public class WsClient {
 
+    public interface RequestDataFactory {
+        byte[] data() throws IOException;
+    }
+
+    public interface ResponseTarget {
+        void consume(byte[] data);
+    }
+
+    public interface ErrorTarget {
+        void consumeError(Exception e);
+    }
     private Scalar<WebSocketClient> wsClient;
     private WsSink replySink;
+
+    /**
+     *
+     * @param sslFactory the optional SSLFactory to use when a TLS web socket is needed
+     * @param targetUri the target URI
+     * @param fRequest the function that creates binary data to be sent as a request
+     * @param fResponse the function that handles the response data; exactly one of fResponse and fError will be called
+     * @param fError the function that handle the error; exactly one of fResponse and fError will be called
+     */
+    public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, RequestDataFactory fRequest, ResponseTarget fResponse, ErrorTarget fError) {
+        this(sslFactory, targetUri, new WsSink() {
+            private boolean hasBeenSent = false;
+            private boolean hasBeenConsumed = false;
+            private WebSocket ws = null;
+            @Override
+            public void open(WebSocket ws) {
+                this.ws = ws;
+                try {
+                    ws.send(fRequest.data());
+                    hasBeenSent = true;
+                } catch (IOException e) {
+                    throw new RuntimeException("Could not send data", e); // should close the web socket
+                }
+            }
+
+            @Override
+            public void consumeMessage(String s) {
+
+            }
+
+            @Override
+            public void consumeMessage(ByteBuffer blob) {
+                fResponse.consume(blob.array());
+                hasBeenConsumed = true;
+                assert ws != null; // this.ws must have been initialized on open
+                ws.close();
+            }
+
+            @Override
+            public void closeGracefully(String details) {
+                if (!hasBeenSent)
+                    fError.consumeError(new Exception("No data had been sent before the connection closed."));
+                else if (!hasBeenConsumed)
+                    fError.consumeError(new Exception("No data received before the connection closed."));
+            }
+
+            @Override
+            public void closeWithException(Exception e) {
+                if (!hasBeenConsumed)
+                    fError.consumeError(e);
+                // do not send error, since the response data have been already consumed; assume that everything was OK
+            }
+        });
+    }
+
     public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, WsSink replySink) {
         System.out.println("New WsClient ssl="+sslFactory.isPresent());
         this.wsClient = new Synced<>(new Sticky<>(() -> newConnection(sslFactory, targetUri) ));
         this.replySink = replySink;
     }
+
 
     private WebSocketClient newConnection(Optional<SSLFactory> sslFactory, URI targetUri) throws Exception {
         WebSocketClient cln = new WebSocketClient(targetUri) {
@@ -44,7 +113,7 @@ public class WsClient {
             @Override
             public void onOpen(ServerHandshake serverHandshake) {
                 System.out.println("WS CLIENT: OPENED");
-                replySink.open();
+                replySink.open(this);
             }
 
             @Override
