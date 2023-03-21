@@ -2,6 +2,8 @@ package org.bouncycastle.tls.injection.kems;
 
 import org.openquantumsafe.Pair;
 
+import java.util.concurrent.ExecutionException;
+
 
 /**
  * A KEM (key encapsulation mechanism) is a set of functions that can be used to obtain
@@ -19,14 +21,14 @@ public interface KEM {
      * Generates a new key pair (pk, sk).
      * @return a public key pk and its corresponding private key (=secret key) sk
      */
-    Pair<byte[], byte[]> keyGen();
+    Pair<byte[], byte[]> keyGen() throws Exception;
 
     /**
      * Generates a secret (=symmetric key K) and encapsulates it to be sent to the partner.
      * @param partnerPublicKey partner's public key received during the TLS handshake
      * @return a generated symmetric key K and a ciphertext ct (=K encrypted with partner's public Key)
      */
-    Pair<byte[], byte[]> encapsulate(byte[] partnerPublicKey);
+    Pair<byte[], byte[]> encapsulate(byte[] partnerPublicKey) throws Exception;
 
     /**
      * Decapsulates the ciphertext (=secret K encrypted with our public key) received from the partner.
@@ -34,5 +36,5 @@ public interface KEM {
      * @param ciphertext the ciphertext
      * @return the shared secret K
      */
-    byte[] decapsulate(byte[] secretKey, byte[] ciphertext);
+    byte[] decapsulate(byte[] secretKey, byte[] ciphertext) throws Exception;
 }

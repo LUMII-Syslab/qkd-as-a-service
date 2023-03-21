@@ -17,15 +17,17 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 public class WsClient {
 
     public interface RequestDataFactory {
-        byte[] data() throws IOException;
+        byte[] data() throws Exception;
     }
 
     public interface ResponseTarget {
-        void consume(byte[] data);
+        void consume(byte[] data) throws Exception;
     }
 
     public interface ErrorTarget {
@@ -39,8 +41,12 @@ public class WsClient {
      * @param sslFactory the optional SSLFactory to use when a TLS web socket is needed
      * @param targetUri the target URI
      * @param fRequest the function that creates binary data to be sent as a request
-     * @param fResponse the function that handles the response data; exactly one of fResponse and fError will be called
-     * @param fError the function that handle the error; exactly one of fResponse and fError will be called
+     * @param fResponse the function that handles the response data;
+     *                  after the request, exactly one of fResponse and fError will be called;
+     *                  however, if an exception occurs during fResponse, fError is also called
+     * @param fError the function that handle the error;
+     *               after the request, exactly one of fResponse and fError will be called;
+     *               however, if an exception occurs during fResponse, fError is also called
      */
     public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, RequestDataFactory fRequest, ResponseTarget fResponse, ErrorTarget fError) {
         this(sslFactory, targetUri, new WsSink() {
@@ -53,7 +59,7 @@ public class WsClient {
                 try {
                     ws.send(fRequest.data());
                     hasBeenSent = true;
-                } catch (IOException e) {
+                } catch (Exception e) {
                     throw new RuntimeException("Could not send data", e); // should close the web socket
                 }
             }
@@ -65,7 +71,12 @@ public class WsClient {
 
             @Override
             public void consumeMessage(ByteBuffer blob) {
-                fResponse.consume(blob.array());
+                try {
+                    fResponse.consume(blob.array());
+                }
+                catch (Exception e) {
+                    fError.consumeError(e);
+                }
                 hasBeenConsumed = true;
                 assert ws != null; // this.ws must have been initialized on open
                 ws.close();
@@ -107,6 +118,7 @@ public class WsClient {
                 sslParameters.setServerNames(list);
                 sslParameters.setWantClientAuth(true);
                 sslParameters.setNeedClientAuth(true);
+
                 sslParameters.setCipherSuites(new String[] {"TLS_AES_256_GCM_SHA384"});
             }
 

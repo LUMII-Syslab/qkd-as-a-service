@@ -7,6 +7,7 @@ import org.bouncycastle.tls.crypto.impl.jcajce.JceTlsSecret;
 import org.openquantumsafe.Pair;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -36,7 +37,11 @@ public abstract class KEMAgreementBase implements TlsAgreement, KEM {
     public byte[] publicKey() {
         Pair<byte[],byte[]> p;
 
-        p = this.keyGen(); // factory method call
+        try {
+            p = this.keyGen(); // factory method call
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         byte[] pk = p.getLeft();
         byte[] sk = p.getRight();
 
@@ -47,13 +52,21 @@ public abstract class KEMAgreementBase implements TlsAgreement, KEM {
     public byte[] encapsulatedSecret(byte[] partnerPublicKey) {
         Pair<byte[],byte[]> p;
 
-        p = this.encapsulate(partnerPublicKey); // factory method call
+        try {
+            p = this.encapsulate(partnerPublicKey); // factory method call
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         this.mySecret = p.getLeft();
         return p.getRight();
     }
 
     public void decapsulateSecret(byte[] ciphertext) {
-        this.receivedSecret = this.decapsulate(this.mySecretKey, ciphertext); // factory method call
+        try {
+            this.receivedSecret = this.decapsulate(this.mySecretKey, ciphertext); // factory method call
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public TlsSecret ownSecret() {
@@ -80,7 +93,7 @@ public abstract class KEMAgreementBase implements TlsAgreement, KEM {
 
     // included KEM functions (factory methods):
 
-    public abstract Pair<byte[], byte[]> keyGen();
-    public abstract Pair<byte[], byte[]> encapsulate(byte[] partnerPublicKey);
-    public abstract byte[] decapsulate(byte[] secretKey, byte[] ciphertext);
+    public abstract Pair<byte[], byte[]> keyGen() throws Exception;
+    public abstract Pair<byte[], byte[]> encapsulate(byte[] partnerPublicKey) throws Exception;
+    public abstract byte[] decapsulate(byte[] secretKey, byte[] ciphertext) throws Exception;
 }

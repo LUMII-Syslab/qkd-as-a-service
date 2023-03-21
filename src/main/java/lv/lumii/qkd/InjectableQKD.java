@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.digests.NullDigest;
+import org.bouncycastle.crypto.digests.SHAKEDigest;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.bouncycastle.pqc.crypto.frodo.FrodoKeyGenerationParameters;
@@ -45,6 +46,10 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * The class for injecting PQC algorithms used for our experiments (~post-quantum agility)
@@ -469,45 +474,218 @@ public class InjectableQKD {
         }
     }
 
+
+    public static ExecutorService qaasExecutor = Executors.newSingleThreadExecutor();
+    public static Nonce nonce = new Nonce();
     public static class InjectableQaaSKEM extends KEMAgreementBase {
+
+        private static int KEY_BITS = 256;
         public InjectableQaaSKEM(JcaTlsCrypto crypto, boolean isServer) {
             super(crypto, isServer);
         }
 
         @Override
-        public Pair<byte[], byte[]> keyGen() {
+        public Pair<byte[], byte[]> keyGen() throws Exception {
             if (this.isServer()) {
                 return new Pair<>(new byte[]{}, new byte[]{}); // not needed by the server
             }
             else {
+                CompletableFuture<Pair<byte[], byte[]>> result = new CompletableFuture<>();
+                long aijaNonce = nonce.nextValue();
                 // message formats: https://github.com/LUMII-Syslab/qkd-as-a-service/blob/master/API.md
                 WsClient aija = new WsClient(Optional.empty(), URI.create("aija.qkd.lumii.lv"),
                         () -> {
+                            // Step 1> reserveKeyAndGetHalf to Aija
                             ASN1EncodableVector v = new ASN1EncodableVector();
                             v.add(new ASN1Integer(1)); // endpoint (function) id
-                            v.add(new ASN1Integer(256)); // key length
-                            v.add(new ASN1Integer(12345)); // nonce
+                            v.add(new ASN1Integer(KEY_BITS)); // key length
+                            v.add(new ASN1Integer(aijaNonce)); // nonce
 
-                            DERSequence seq = new DERSequence(v);
-                            return seq.getEncoded();
+                            return new DERSequence(v).getEncoded();
                         },
-                        (aliseResponse) -> {
-                            // parse the ASN.1 response
+                        (aijaResponse) -> {
+                            // Step 1< parse reserveKeyAndGetHalf response (ASN.1)
+                            ASN1Primitive respObj1 = new ASN1InputStream(aijaResponse).readObject();
+                            ASN1Sequence respSeq1 = ASN1Sequence.getInstance(respObj1);
+                            if (respSeq1.size() != 7)
+                                throw new Exception("Invalid sequence length in reserveKeyAndGetHalf response.");
+                            if (ASN1Integer.getInstance(respSeq1.getObjectAt(0)).intValueExact() != 0)
+                                throw new Exception("reserveKeyAndGetHalf response returned an error");
+                            if (ASN1Integer.getInstance(respSeq1.getObjectAt(1)).intValueExact() != 0xFF)
+                                throw new Exception("Invalid reserveKeyAndGetHalf response code");
+                            if (ASN1Integer.getInstance(respSeq1.getObjectAt(2)).longValueExact() != aijaNonce)
+                                throw new Exception("reserveKeyAndGetHalf response returned an invalid nonce");
+                            ASN1OctetString keyId = ASN1OctetString.getInstance(respSeq1.getObjectAt(3));
+                            ASN1OctetString keyLeft = ASN1OctetString.getInstance(respSeq1.getObjectAt(4));
+                            ASN1OctetString hashRight = ASN1OctetString.getInstance(respSeq1.getObjectAt(5));
+                            ASN1ObjectIdentifier hashAlgRight = ASN1ObjectIdentifier.getInstance(respSeq1.getObjectAt(6));
 
-                            // continue the protocol here...
+
+                            // Step 3> send getKeyHalf to Brencis
+                            long brencisNonce = nonce.nextValue();
+                            WsClient brencis = new WsClient(Optional.empty(), URI.create("brencis.qkd.lumii.lv"),
+                                    () -> {
+                                        ASN1EncodableVector v = new ASN1EncodableVector();
+                                        v.add(new ASN1Integer(2)); // endpoint (function) id
+                                        v.add(new ASN1Integer(KEY_BITS)); // key length
+                                        v.add(keyId); // key ID
+                                        v.add(new ASN1Integer(brencisNonce));
+
+                                        return new DERSequence(v).getEncoded();
+                                    },
+                                    (brencisResponse) -> {
+                                        // Step 3< parse reserveKeyAndGetHalf response (ASN.1)
+                                        ASN1Primitive respObj2 = new ASN1InputStream(brencisResponse).readObject();
+                                        ASN1Sequence respSeq2 = ASN1Sequence.getInstance(respObj2);
+                                        if (respSeq2.size() != 6)
+                                            throw new Exception("Invalid sequence length in getKeyHalf response.");
+                                        if (ASN1Integer.getInstance(respSeq2.getObjectAt(0)).intValueExact() != 0)
+                                            throw new Exception("getKeyHalf response returned an error");
+                                        if (ASN1Integer.getInstance(respSeq2.getObjectAt(1)).intValueExact() != 0xFE)
+                                            throw new Exception("Invalid getKeyHalf response code");
+                                        if (ASN1Integer.getInstance(respSeq2.getObjectAt(2)).longValueExact() != brencisNonce)
+                                            throw new Exception("getKeyHalf response returned an invalid nonce");
+                                        ASN1OctetString keyRight = ASN1OctetString.getInstance(respSeq2.getObjectAt(3));
+                                        ASN1OctetString hashLeft = ASN1OctetString.getInstance(respSeq2.getObjectAt(4));
+                                        ASN1ObjectIdentifier hashAlgLeft = ASN1ObjectIdentifier.getInstance(respSeq2.getObjectAt(5));
+
+                                        // comparing the hashes against each other...
+                                        assert new Hash(hashAlgLeft, keyLeft).equals(hashLeft);
+                                        assert new Hash(hashAlgRight, keyRight).equals(hashRight);
+
+                                        byte[] fullKey = Arrays.copyOf(keyLeft.getOctets(), Math.ceilDiv(KEY_BITS, 8));
+                                        System.arraycopy(keyRight.getOctets(), 0, fullKey, fullKey.length/2, fullKey.length/2);
+
+
+                                        ASN1EncodableVector pk = new ASN1EncodableVector();
+                                        pk.add(keyId);
+                                        pk.add(hashLeft);
+                                        pk.add(hashRight);
+
+                                        result.complete(new Pair<>(new DERSequence(pk).getEncoded(),fullKey));
+
+                                    },
+                                    (ex) -> {
+                                        result.completeExceptionally(ex);
+                                    }
+                            );
+                            brencis.connectBlockingAndRunAsync();
                         },
                         (ex) -> {
-
+                            result.completeExceptionally(ex);
                         });
-                return null;
+                aija.connectBlockingAndRunAsync();
+                return result.get();
             }
         }
 
         @Override
-        public Pair<byte[], byte[]> encapsulate(byte[] partnerPublicKey) {
+        public Pair<byte[], byte[]> encapsulate(byte[] partnerPublicKey) throws Exception {
             if (this.isServer()) {
-                return null;
-                //return new Pair<>(semiSecret, ciphertext);
+                ASN1Primitive o = new ASN1InputStream(partnerPublicKey).readObject();
+                ASN1Sequence seq = ASN1Sequence.getInstance(o);
+                if (seq.size() != 3)
+                    throw new Exception("Invalid partner's sequence received for Encapsulate.");
+                ASN1OctetString keyId = ASN1OctetString.getInstance(seq.getObjectAt(0));
+                ASN1OctetString hashLeft = ASN1OctetString.getInstance(seq.getObjectAt(1));
+                ASN1OctetString hashRight = ASN1OctetString.getInstance(seq.getObjectAt(2));
+
+                CompletableFuture<Pair<byte[], byte[]>> result = new CompletableFuture<>();
+                long aijaNonce = nonce.nextValue();
+                // message formats: https://github.com/LUMII-Syslab/qkd-as-a-service/blob/master/API.md
+                WsClient aija = new WsClient(Optional.empty(), URI.create("aija.qkd.lumii.lv"),
+                        () -> {
+                            // Step 4> getKeyHalf to Aija
+                            ASN1EncodableVector v = new ASN1EncodableVector();
+                            v.add(new ASN1Integer(2)); // endpoint (function) id
+                            v.add(new ASN1Integer(KEY_BITS)); // key length
+                            v.add(keyId); // key ID
+                            v.add(new ASN1Integer(aijaNonce));
+
+                            return new DERSequence(v).getEncoded();
+                        },
+                        (aijaResponse) -> {
+                            // Step 4< parse getKeyHalf response (ASN.1)
+                            ASN1Primitive respObj1 = new ASN1InputStream(aijaResponse).readObject();
+                            ASN1Sequence respSeq1 = ASN1Sequence.getInstance(respObj1);
+                            if (respSeq1.size() != 6)
+                                throw new Exception("Invalid sequence length in getKeyHalf response.");
+                            if (ASN1Integer.getInstance(respSeq1.getObjectAt(0)).intValueExact() != 0)
+                                throw new Exception("getKeyHalf response returned an error");
+                            if (ASN1Integer.getInstance(respSeq1.getObjectAt(1)).intValueExact() != 0xFE)
+                                throw new Exception("Invalid getKeyHalf response code");
+                            if (ASN1Integer.getInstance(respSeq1.getObjectAt(2)).longValueExact() != aijaNonce)
+                                throw new Exception("getKeyHalf response returned an invalid nonce");
+                            ASN1OctetString keyLeft = ASN1OctetString.getInstance(respSeq1.getObjectAt(3));
+                            ASN1OctetString hashRight1 = ASN1OctetString.getInstance(respSeq1.getObjectAt(4));
+                            ASN1ObjectIdentifier hashAlgRight1 = ASN1ObjectIdentifier.getInstance(respSeq1.getObjectAt(5));
+
+                            // comparing expected hashRight and returned hashRight1:
+                            assert new Hash(hashRight).equals(hashRight1);
+
+
+                            // Step 5> send getKeyHalf to Brencis
+                            long brencisNonce = nonce.nextValue();
+                            WsClient brencis = new WsClient(Optional.empty(), URI.create("brencis.qkd.lumii.lv"),
+                                    () -> {
+                                        ASN1EncodableVector v = new ASN1EncodableVector();
+                                        v.add(new ASN1Integer(2)); // endpoint (function) id
+                                        v.add(new ASN1Integer(KEY_BITS)); // key length
+                                        v.add(keyId); // key ID
+                                        v.add(new ASN1Integer(brencisNonce));
+
+                                        return new DERSequence(v).getEncoded();
+                                    },
+                                    (brencisResponse) -> {
+                                        // Step 5< parse getKeyHalf response (ASN.1)
+
+                                        ASN1Primitive respObj2 = new ASN1InputStream(brencisResponse).readObject();
+                                        ASN1Sequence respSeq2 = ASN1Sequence.getInstance(respObj2);
+                                        if (respSeq2.size() != 6)
+                                            throw new Exception("Invalid sequence length in getKeyHalf response.");
+                                        if (ASN1Integer.getInstance(respSeq2.getObjectAt(0)).intValueExact() != 0)
+                                            throw new Exception("getKeyHalf response returned an error");
+                                        if (ASN1Integer.getInstance(respSeq2.getObjectAt(1)).intValueExact() != 0xFE)
+                                            throw new Exception("Invalid getKeyHalf response code");
+                                        if (ASN1Integer.getInstance(respSeq2.getObjectAt(2)).longValueExact() != brencisNonce)
+                                            throw new Exception("getKeyHalf response returned an invalid nonce");
+                                        ASN1OctetString keyRight = ASN1OctetString.getInstance(respSeq2.getObjectAt(3));
+                                        ASN1OctetString hashLeft2 = ASN1OctetString.getInstance(respSeq2.getObjectAt(4));
+                                        ASN1ObjectIdentifier hashAlgLeft2 = ASN1ObjectIdentifier.getInstance(respSeq2.getObjectAt(5));
+
+                                        // comparing expected hashLeft and returned hashLeft1:
+                                        assert new Hash(hashLeft).equals(hashLeft2);
+
+                                        // comparing the hashes against each other...
+                                        assert new Hash(hashAlgLeft2, keyLeft).equals(hashLeft);
+                                        assert new Hash(hashAlgRight1, keyRight).equals(hashRight);
+
+                                        byte[] fullKey = Arrays.copyOf(keyLeft.getOctets(), Math.ceilDiv(KEY_BITS, 8));
+                                        System.arraycopy(keyRight.getOctets(), 0, fullKey, fullKey.length/2, fullKey.length/2);
+
+                                        byte[] fullHash = new Hash(hashAlgLeft2, fullKey).value(); // just choose the same hash algorithm used for the left half
+
+                                        ASN1EncodableVector ct = new ASN1EncodableVector();
+                                        ct.add(new DEROctetString(fullHash));
+                                        ct.add(hashAlgLeft2);
+                                        byte[] ctEncoded = new DERSequence(ct).getEncoded();
+
+                                        System.out.println("QaaS SHARED SECRET at server: "+byteArrayToString(fullKey));
+
+                                        result.complete(new Pair<>(fullKey, ctEncoded));
+
+                                    },
+                                    (ex) -> {
+                                        result.completeExceptionally(ex);
+                                    }
+                            );
+                            brencis.connectBlockingAndRunAsync();
+                        },
+                        (ex) -> {
+                            result.completeExceptionally(ex);
+                        });
+
+                return result.get();
             }
             else { // client
                 return new Pair<>(new byte[]{}, new byte[]{});
@@ -515,16 +693,26 @@ public class InjectableQKD {
         }
 
         @Override
-        public byte[] decapsulate(byte[] secretKey, byte[] ciphertext) {
+        public byte[] decapsulate(byte[] secretKey, byte[] ciphertext) throws Exception {
 
             byte[] sharedSecret = new byte[] {};
             if (this.isServer()) {
-                //sharedSecret = this.mySecret;
+                return new byte[] {};
             }
             else {
-                //sharedSecret = kem.decap_secret(ciphertext);
+                ASN1Primitive o = new ASN1InputStream(ciphertext).readObject();
+                ASN1Sequence seq = ASN1Sequence.getInstance(o);
+                if (seq.size() != 2)
+                    throw new Exception("Invalid partner's sequence received for Decapsulate.");
+                ASN1OctetString fullHash = ASN1OctetString.getInstance(seq.getObjectAt(0));
+                ASN1ObjectIdentifier hashAlgOid = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(1));
+
+                // comparing the received and expected hash
+                assert new Hash(hashAlgOid, secretKey).equals(fullHash);
+
+                System.out.println("QaaS SECRET KEY at client: "+byteArrayToString(secretKey));
+                System.out.println("QaaS SHARED SECRET at client: "+byteArrayToString(sharedSecret));
             }
-            System.out.println("QaaS SHARED SECRET: "+byteArrayToString(sharedSecret));
 
             return sharedSecret;
         }

@@ -95,7 +95,7 @@ public class WsServer {
                 }
                 sourceMessageSinks.put(ws, sink);
                 System.out.println("WsServer handshake :" + handshake.toString());
-                sink.open();
+                sink.open(ws);
             }
 
             @Override

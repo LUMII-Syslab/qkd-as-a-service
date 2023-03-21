@@ -77,7 +77,7 @@ public class PQProxyWsTestServer {
                 (WebSocket client) -> new WsSink() {
 
                     @Override
-                    public void open() {
+                    public void open(WebSocket ws) {
                         System.out.println("WS test server: connection opened");
                         client.send("Connected: I am WS test server!");
                         new Thread(()->{
