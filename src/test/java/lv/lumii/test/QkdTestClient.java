@@ -66,7 +66,7 @@ public class QkdTestClient {
         ctx.init(null, tmf.getTrustManagers(), SecureRandom.getInstanceStrong());
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(props.serverUri())
+                .uri(props.user2Uri())
                 //.version(HttpClient.Version.HTTP_2)
                 .GET()
                 .build();

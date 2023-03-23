@@ -73,7 +73,7 @@ public class QkdTestUser1 {
             }
         };
 
-        WsClient wsClient = new WsClient(props.targetSslFactory(), props.serverUri(), replySink);
+        WsClient wsClient = new WsClient(props.user1SslFactory(), props.user2Uri(), replySink);
         wsClient.connectBlockingAndRunAsync();
 
     }

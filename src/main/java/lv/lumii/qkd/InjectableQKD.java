@@ -96,7 +96,7 @@ public class InjectableQKD {
     private static SPHINCSPlusParameters sphincsPlusParameters = SPHINCSPlusParameters.sha2_128f;
     private static int sphincsPlusParametersAsInt = SPHINCSPlusParameters.getID(sphincsPlusParameters);
 
-    public static void inject(InjectedKEMs.InjectionOrder injectionOrder) {
+    public static void inject(InjectedKEMs.InjectionOrder injectionOrder, QkdProperties qkdProperties) {
         // PQC signatures are huge; increasing the max handshake size:
         System.setProperty("jdk.tls.maxHandshakeMessageSize", String.valueOf(32768 * 32));
         //System.setProperty("jdk.tls.client.SignatureSchemes", "SPHINCS+"); // comma-separated
@@ -216,7 +216,7 @@ public class InjectableQKD {
         InjectedKEMs.injectKEM(
                 0xFEFF, // from our paper; from the reserved-for-private-use range, i.e., 0xFE00..0xFEFF for KEMs
                 "QKD-as-a-Service",
-                (crypto, kemCodePoint, isServer) -> new InjectableQaaSKEM(crypto, isServer));
+                (crypto, kemCodePoint, isServer) -> new InjectableQaaSKEM(crypto, isServer, qkdProperties));
 
         InjectedKEMs.injectKEM(oqs_frodo640shake_codepoint, "FrodoKEM-640-SHAKE",
                 (crypto, kemCodePoint, isServer) -> new InjectableFrodoKEMAgreement(crypto, "FrodoKEM-640-SHAKE", isServer));
@@ -482,8 +482,10 @@ public class InjectableQKD {
     public static class InjectableQaaSKEM extends KEMAgreementBase {
 
         private static int KEY_BITS = 256;
-        public InjectableQaaSKEM(JcaTlsCrypto crypto, boolean isServer) {
+        private QkdProperties qkdProperties;
+        public InjectableQaaSKEM(JcaTlsCrypto crypto, boolean isServer, QkdProperties qkdProperties) {
             super(crypto, isServer);
+            this.qkdProperties = qkdProperties;
         }
 
         @Override
@@ -495,7 +497,7 @@ public class InjectableQKD {
                 CompletableFuture<Pair<byte[], byte[]>> result = new CompletableFuture<>();
                 long aijaNonce = nonce.nextValue();
                 // message formats: https://github.com/LUMII-Syslab/qkd-as-a-service/blob/master/API.md
-                WsClient aija = new WsClient(Optional.empty(), URI.create("aija.qkd.lumii.lv"),
+                WsClient aija = new WsClient(qkdProperties.qaasClientSslFactory(1), qkdProperties.aijaUri(),
                         () -> {
                             // Step 1> reserveKeyAndGetHalf to Aija
                             ASN1EncodableVector v = new ASN1EncodableVector();
@@ -525,7 +527,7 @@ public class InjectableQKD {
 
                             // Step 3> send getKeyHalf to Brencis
                             long brencisNonce = nonce.nextValue();
-                            WsClient brencis = new WsClient(Optional.empty(), URI.create("brencis.qkd.lumii.lv"),
+                            WsClient brencis = new WsClient(qkdProperties.qaasClientSslFactory(1), qkdProperties.brencisUri(),
                                     () -> {
                                         ASN1EncodableVector v = new ASN1EncodableVector();
                                         v.add(new ASN1Integer(2)); // endpoint (function) id
@@ -595,7 +597,7 @@ public class InjectableQKD {
                 CompletableFuture<Pair<byte[], byte[]>> result = new CompletableFuture<>();
                 long aijaNonce = nonce.nextValue();
                 // message formats: https://github.com/LUMII-Syslab/qkd-as-a-service/blob/master/API.md
-                WsClient aija = new WsClient(Optional.empty(), URI.create("aija.qkd.lumii.lv"),
+                WsClient aija = new WsClient(qkdProperties.qaasClientSslFactory(2), qkdProperties.aijaUri(),
                         () -> {
                             // Step 4> getKeyHalf to Aija
                             ASN1EncodableVector v = new ASN1EncodableVector();
@@ -628,7 +630,7 @@ public class InjectableQKD {
 
                             // Step 5> send getKeyHalf to Brencis
                             long brencisNonce = nonce.nextValue();
-                            WsClient brencis = new WsClient(Optional.empty(), URI.create("brencis.qkd.lumii.lv"),
+                            WsClient brencis = new WsClient(qkdProperties.qaasClientSslFactory(2), qkdProperties.brencisUri(),
                                     () -> {
                                         ASN1EncodableVector v = new ASN1EncodableVector();
                                         v.add(new ASN1Integer(2)); // endpoint (function) id
@@ -686,6 +688,7 @@ public class InjectableQKD {
                         (ex) -> {
                             result.completeExceptionally(ex);
                         });
+                aija.connectBlockingAndRunAsync();
 
                 return result.get();
             }

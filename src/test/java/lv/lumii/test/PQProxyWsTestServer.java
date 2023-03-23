@@ -5,9 +5,6 @@ import lv.lumii.httpws.WsServer;
 import lv.lumii.httpws.WsSink;
 import lv.lumii.qkd.InjectableQKD;
 import lv.lumii.qkd.QkdProperties;
-import lv.lumii.pqc.InjectablePQC;
-import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
-import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
@@ -18,7 +15,6 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
-import java.security.Security;
 import java.util.Optional;
 
 public class PQProxyWsTestServer {
@@ -63,9 +59,9 @@ public class PQProxyWsTestServer {
     public static void main(String[] args) throws Exception {
 
         QkdProperties qkdProperties = new QkdProperties(mainDirectory);
-        SSLContext ctx = qkdProperties.serverSslContext();
+        SSLContext ctx = qkdProperties.user2SslContext();
 
-        int port = qkdProperties.serverUri().getPort();
+        int port = qkdProperties.user2Uri().getPort();
 
         System.out.println("Ws test server port="+port);
         WsServer srv = new WsServer(

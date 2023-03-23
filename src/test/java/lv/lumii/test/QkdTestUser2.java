@@ -48,9 +48,9 @@ public class QkdTestUser2 {
     public static void main(String[] args) throws Exception {
 
         QkdProperties qkdProperties = new QkdProperties(mainDirectory);
-        SSLContext ctx = qkdProperties.serverSslContext();
+        SSLContext ctx = qkdProperties.user2SslContext();
 
-        int port = qkdProperties.serverUri().getPort();
+        int port = qkdProperties.user2Uri().getPort();
 
         System.out.println("User2 server port=" + port);
         WsServer srv = new WsServer(

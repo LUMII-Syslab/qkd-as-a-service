@@ -65,7 +65,7 @@ public class PQProxyHttpTestServer {
     public static void main(String[] args) throws Exception {
 
         QkdProperties qkdProperties = new QkdProperties(mainDirectory);
-        SSLContext ctx = qkdProperties.serverSslContext();
+        SSLContext ctx = qkdProperties.user2SslContext();
 
         System.out.println("Http test server port="+qkdProperties.port());
         HttpServer srv = new HttpServer(
@@ -77,7 +77,7 @@ public class PQProxyHttpTestServer {
                     if ("https".equals(qkdProperties.remoteUri().getScheme()))
                         client = HttpClient
                                 .newBuilder()
-                                .sslContext(qkdProperties.serverSslContext())
+                                .sslContext(qkdProperties.user2SslContext())
                                 .build();
                     else
                         client = HttpClient

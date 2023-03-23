@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.Key;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
 
 public class ServerKey {
 
@@ -49,8 +50,8 @@ public class ServerKey {
         return this.keyStore.value();
     }
 
-    /*public Certificate[] certificateChain() throws Exception {
+    public Certificate[] certificateChain() throws Exception {
         Certificate[] arr = this.keyStore.value().getCertificateChain(this.alias);
         return arr;
-    }*/
+    }
 }
