@@ -14,9 +14,9 @@ echo "===> Checking/generating the Centis client PQC key pair..."
 
 echo "===> Checking/generating the PQC CA (for Aija, Brencis, User1, User2) key pair..."
 [ -d $CA_DIR/ca ] || $CA_DIR/ca_init.sh ca sphincssha256128frobust $MY_DIR/pqc-ca.cnf
-echo "===> Checking/generating the User 1 and 2 client PQC key pairs..."
+echo "===> Checking/generating the User 1 and 2 PQC key pairs..."
 [ -d $CA_DIR/user1 ] || $CA_DIR/new_client_key.sh ca user1 $MY_DIR/pqc-user1.cnf
-[ -d $CA_DIR/user2 ] || $CA_DIR/new_client_key.sh ca user2 $MY_DIR/pqc-user2.cnf
+[ -d $CA_DIR/user2 ] || $CA_DIR/new_server_key.sh ca user2 $MY_DIR/pqc-user2.cnf
 
 echo "===> Checking/generating the Aija and Brencis server PQC key pairs..."
 [ -d $CA_DIR/aija ] || $CA_DIR/new_server_key.sh ca aija $MY_DIR/pqc-aija.cnf

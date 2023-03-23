@@ -6,4 +6,4 @@ prompt = no
 countryName            = LV
 localityName           = Riga
 organizationName       = IMCS,UL
-commonName             = IMCS,UL PQC QaaS User 1
+commonName             = IMCS,UL QaaS User 1 (Client)

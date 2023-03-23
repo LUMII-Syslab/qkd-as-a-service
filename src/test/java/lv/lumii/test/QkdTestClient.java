@@ -62,11 +62,11 @@ public class QkdTestClient {
         ctx = SSLContext.getInstance("TLS");
         tmf = TrustManagerFactory.getInstance("SunX509");
 
-        tmf.init(props.trustStore());
+        tmf.init(props.caTrustStore());
         ctx.init(null, tmf.getTrustManagers(), SecureRandom.getInstanceStrong());
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(props.remoteUri())
+                .uri(props.serverUri())
                 //.version(HttpClient.Version.HTTP_2)
                 .GET()
                 .build();

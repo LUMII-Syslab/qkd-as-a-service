@@ -1,6 +1,8 @@
 package lv.lumii.qkd;
 
+import lv.lumii.keys.ClientKey;
 import lv.lumii.keys.ServerKey;
+import nl.altindag.ssl.SSLFactory;
 import org.cactoos.scalar.Sticky;
 import org.cactoos.scalar.Unchecked;
 import org.slf4j.Logger;
@@ -15,8 +17,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Optional;
 import java.util.Properties;
 
 public class QkdProperties {
@@ -52,24 +54,9 @@ public class QkdProperties {
         return f.getAbsolutePath();
     }
 
-    public URI remoteUri() throws Exception {
-        String host = properties.value().getProperty("host", "localhost");
-        host = "https://"+host+":"+port();
-        return new URI(host);
-    }
-
-    public int port() throws Exception {
-        int defaultPort = 443;
-        String s = properties.value().getProperty("port", defaultPort+"");
-        try {
-            int result = Integer.parseInt(s);
-            if (result<=0)
-                return defaultPort;
-            return result;
-        }
-        catch (Exception e) {
-            return defaultPort;
-        }
+    public URI serverUri() throws Exception {
+        String uri = properties.value().getProperty("serverUri", "wss://localhost:443");
+        return new URI(uri);
     }
 
     public ServerKey serverKey() {
@@ -81,7 +68,7 @@ public class QkdProperties {
         );
     }
 
-    public KeyStore trustStore() throws Exception {
+    public KeyStore caTrustStore() throws Exception {
 
         String fileName = fileNameProperty("caTrustStore", "ca.truststore");
         File f = new File(fileName);
@@ -103,7 +90,7 @@ public class QkdProperties {
         TrustManagerFactory tmf;
         KeyStore ts;
         tmf = TrustManagerFactory.getInstance("SunX509");
-        ts = this.trustStore();
+        ts = this.caTrustStore();
         tmf.init(ts);
 
         SSLContext ctx;
@@ -112,4 +99,24 @@ public class QkdProperties {
         return ctx;
     }
 
+    public ClientKey clientKey() {
+        return new ClientKey(
+                fileNameProperty("clientKeyStore", "client.keystore"),
+                this.properties.value().getProperty("clientKeyStorePassword", "client-keystore-pass"),
+                this.properties.value().getProperty("clientKeyAlias", "client")
+        );
+    }
+
+
+    public Optional<SSLFactory> targetSslFactory() throws Exception {
+            ClientKey myKey = this.clientKey();
+            return Optional.of(
+                    SSLFactory.builder()
+                            .withIdentityMaterial(myKey.key(), myKey.password(), myKey.certificateChain())
+                            .withProtocols("TLSv1.3")
+                            .withTrustMaterial(this.caTrustStore())
+                            .withSecureRandom(SecureRandom.getInstanceStrong())
+                            .withCiphers("TLS_AES_256_GCM_SHA384")
+                            .build());
+    }
 }

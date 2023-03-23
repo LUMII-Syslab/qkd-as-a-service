@@ -52,11 +52,6 @@ public class WsServer {
             public ServerHandshakeBuilder onWebsocketHandshakeReceivedAsServer(WebSocket conn, Draft draft, ClientHandshake request) throws InvalidDataException {
                 ServerHandshakeBuilder b = super.onWebsocketHandshakeReceivedAsServer(conn, draft, request);
 
-
-                /*sslParameters.setWantClientAuth(true);
-                sslParameters.setNeedClientAuth(true);
-                sslParameters.setCipherSuites(new String[] {"TLS_AES_256_GCM_SHA384"});*/
-
                 try {
                     if (sslContext.isPresent()) {
                         Certificate[] certs = conn.getSSLSession().getPeerCertificates();

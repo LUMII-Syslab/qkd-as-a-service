@@ -212,13 +212,15 @@ public class InjectableQKD {
                     return b;
                 });
 
-        InjectedKEMs.injectKEM(oqs_frodo640shake_codepoint, "FrodoKEM-640-SHAKE",
-                (crypto, kemCodePoint, isServer) -> new InjectableFrodoKEMAgreement(crypto, "FrodoKEM-640-SHAKE", isServer));
-
+        // offer QKD as the first KEM
         InjectedKEMs.injectKEM(
                 0xFEFF, // from our paper; from the reserved-for-private-use range, i.e., 0xFE00..0xFEFF for KEMs
                 "QKD-as-a-Service",
                 (crypto, kemCodePoint, isServer) -> new InjectableQaaSKEM(crypto, isServer));
+
+        InjectedKEMs.injectKEM(oqs_frodo640shake_codepoint, "FrodoKEM-640-SHAKE",
+                (crypto, kemCodePoint, isServer) -> new InjectableFrodoKEMAgreement(crypto, "FrodoKEM-640-SHAKE", isServer));
+
 
         BouncyCastleJsseProvider jsseProvider = new BouncyCastleJsseProvider();
         Security.insertProviderAt(jsseProvider, 1);

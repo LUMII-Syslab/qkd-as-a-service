@@ -3,6 +3,7 @@ package lv.lumii.test;
 
 import lv.lumii.httpws.WsServer;
 import lv.lumii.httpws.WsSink;
+import lv.lumii.qkd.InjectableQKD;
 import lv.lumii.qkd.QkdProperties;
 import lv.lumii.pqc.InjectablePQC;
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
@@ -29,13 +30,7 @@ public class PQProxyWsTestServer {
 
     static {
 
-        InjectablePQC.inject(InjectedKEMs.InjectionOrder.AFTER_DEFAULT);//.INSTEAD_DEFAULT); // makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
-
-        /*BouncyCastleJsseProvider jsseProvider = new BouncyCastleJsseProvider();
-        Security.insertProviderAt(jsseProvider, 1);
-
-        BouncyCastlePQCProvider bcProvider = new BouncyCastlePQCProvider(); // BCPQC
-        Security.insertProviderAt(bcProvider, 1);*/
+        InjectableQKD.inject(InjectedKEMs.InjectionOrder.AFTER_DEFAULT);
 
         File f = new File(PQProxyWsTestServer.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();
@@ -70,10 +65,12 @@ public class PQProxyWsTestServer {
         QkdProperties qkdProperties = new QkdProperties(mainDirectory);
         SSLContext ctx = qkdProperties.serverSslContext();
 
-        System.out.println("Ws test server port="+qkdProperties.port());
+        int port = qkdProperties.serverUri().getPort();
+
+        System.out.println("Ws test server port="+port);
         WsServer srv = new WsServer(
                 Optional.of(ctx),
-                qkdProperties.port(),
+                port,
                 (WebSocket client) -> new WsSink() {
 
                     @Override
