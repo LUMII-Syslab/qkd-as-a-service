@@ -72,11 +72,11 @@ To run 'centis' npm has to be installed. Afterwards:
 
 parameters:
 
-1. endpoint id = `0x01`
+0. endpoint id = `0x01` (function ID for `reserveKeyAndGetKeyHalf`)
 
-2. key length
+1. key length
 
-3. crypto nonce
+2. crypto nonce
 
 encoded request example
 
@@ -90,27 +90,27 @@ explanation:
 
 `02` `01` `01`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x01` = 1; ( **endpoint id** )
 
-`02` `02` `01 00`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x0100` = 256; ( **key length** )
+`02` `02` `01 00`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x0100` = 256; ( **key length** in bits )
 
 `02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
 
 ### 0xff: `reserveKeyAndGetHalf` response
 
-returns:
+returns an ASN1Sequence with these items:
 
-1. error code
+0. error code: ASN integer
 
-2. response id = `0xff`
+1. response id: ASN integer = `0xFF` (meaning: `reserveKeyAndGetKeyHalf` response)
 
-3. crypto nonce
+2. crypto nonce: ASN integer
 
-4. key identifier
+3. key identifier: ASN octet string
 
-5. half of key bytes
+4. half of key bytes: ASN octet string
 
-6. hash(the other half)
+5. hash(the other half of the key): ASN octet string
 
-7. hash algorithm id = `0x608648016503040211`
+6. hash algorithm id: ASN Object Identifier, e.g., encoded as `0x608648016503040211`
 
 encoded return example:
 
@@ -134,17 +134,17 @@ explanation:
 
 `04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **hash(the other half)** )
 
-`06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** )
+`06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** ); for SHAKE-128 it is `60 86 48 01 65 03 04 02 11`, which corresponds to 2.16.840.1.101.3.4.2.11
 
 ### 0x02: `getKeyHalf` request
 
-1. endpoint id = `0x01`
+0. endpoint id = `0x02` (function ID for `getKeyHalf)
 
-2. key length
+1. key length
 
-3. key identifier
+2. key identifier
 
-4. crypto nonce
+3. crypto nonce
 
 encoded request example
 
@@ -169,17 +169,17 @@ explanation:
 
 returns:
 
-1. error code
+0. error code
 
-2. response id = `0xff`
+1. response id = `0xFE`
 
-3. crypto nonce
+2. crypto nonce
 
-4. half of key bytes
+3. half of key bytes
 
-5. hash(the other half)
+4. hash(the other half)
 
-6. hash algorithm id = `0x608648016503040211`
+5. hash algorithm id = `0x608648016503040211`
 
 encoded response example:
 
