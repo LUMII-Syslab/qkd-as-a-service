@@ -31,4 +31,4 @@ popd
 :DOS2UNIX_OK
 
 C:\cygwin64\bin\dos2unix -q "%~dp0\new_server_key.sh"
-C:\cygwin64\bin\bash "%~dp0\new_server_key.sh" %1 %2 %3 %4
+C:\cygwin64\bin\bash "%~dp0\new_server_key.sh" %*

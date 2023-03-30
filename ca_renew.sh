@@ -1,9 +1,11 @@
 #!/bin/bash
+
+set -Eeuxo pipefail
 #
 # Generates a new CA key pair to be used for signing server and client certificates.
 # The previous CA key pair (if any) is backed up.
 #
-# Script arguments: ca-name
+# Script arguments: [ca-name]
 #   (no spaces or special symbols, please!)
 #
 # Copyright (c) Institute of Mathematics and Computer Science, University of Latvia
@@ -13,7 +15,7 @@
 
 export PATH=/usr/bin:$PATH
 export DIR=$(dirname $0)
-export CA_NAME=$1
+export CA_NAME=${1:-}
 if [ -z $CA_NAME ]; then
     echo -n "Please, specify the name of your CA [ca]: "
     read INP
@@ -45,4 +47,4 @@ if [ -f $CA_KEY ]; then
   mv $CA_TRUSTSTORE $BACKUP_DIR
 fi
 
-$DIR/ca_init.sh $CA_NAME $SIG_ALG
+$DIR/ca_init.sh $CA_NAME $SIG_ALG $CA_CONFIG_FILE
