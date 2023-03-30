@@ -3,8 +3,11 @@ package org.openquantumsafe;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 public class Common {
@@ -28,8 +31,12 @@ public class Common {
     }
 
     public static void loadNativeLibrary() {
-        // If the library is in the java library path, load it directly. (e.g., -Djava.library.path=src/main/resources)
-        System.out.println("LIBPATH="+System.getProperty("java.library.path"));
+
+        System.loadLibrary("oqs");
+        // ^^^ load liboqs manually from java.library.path;
+        // oqs-jni depends on it but sometimes is not able to load it on MacOS
+        // change by SK
+
         try {
             System.loadLibrary("oqs-jni");
         // Otherwise load the library from the liboqs-java.jar
@@ -43,6 +50,23 @@ public class Common {
                 libName = "oqs-jni.dll";
             }
             URL url = KEMs.class.getResource("/" + libName);
+            if (url == null) {
+                String[] paths = System.getProperty("java.library.path").split(File.pathSeparator);
+                for (String path : paths) {
+                    File f = new File(path+File.separator+libName);
+                    if (f.isFile()) {
+                        try {
+                            url = f.toURI().toURL();
+                            System.load(url.getFile()); // load from full file name
+                            return;
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                        }
+                    }
+                }
+            }
+
+            // try to load from Jar
             File tmpDir;
             try {
                 tmpDir = Files.createTempDirectory("oqs-native-lib").toFile();
