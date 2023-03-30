@@ -224,7 +224,7 @@ public class PQProxy {
 
 
                 return sourceSink;
-            });
+            }, props.description());
             wsServer.start();
         }
         else {

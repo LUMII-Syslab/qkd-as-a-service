@@ -23,6 +23,9 @@ import java.security.cert.Certificate;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import com.diogonunes.jcolor.*;
+import static com.diogonunes.jcolor.Ansi.colorize;
+import static com.diogonunes.jcolor.Attribute.GREEN_TEXT;
 
 public class WsServer {
 
@@ -36,15 +39,18 @@ public class WsServer {
     private Map<WebSocket, WsSink> sourceMessageSinks;
 
     public WsServer(Optional<SSLContext> sslContext, int port, ClientSourceMessageSinkFactory sinkFactory) {
-        System.out.println("New WsServer, port="+port+", ssl="+ sslContext.isPresent());
-        this.wsserver = new Synced<>(new Sticky<>(() -> newConnection(sslContext, port) ));
+        this(sslContext, port, sinkFactory, "New WsServer");
+    }
+    public WsServer(Optional<SSLContext> sslContext, int port, ClientSourceMessageSinkFactory sinkFactory, String description) {
+
+        this.wsserver = new Synced<>(new Sticky<>(() -> newConnection(sslContext, port, description) ));
         this.sinkFactory = sinkFactory;
         this.sourceMessageSinks = new ConcurrentHashMap<>();
     }
 
-    private WebSocketServer newConnection(Optional<SSLContext> sslContext, int port) throws Exception {
+    private WebSocketServer newConnection(Optional<SSLContext> sslContext, int port, String description) throws Exception {
 
-        System.out.println("WsServer (listener) is starting...");
+        System.out.println(colorize(description, GREEN_TEXT())+": port="+port+", ssl="+ sslContext.isPresent());
 
         WebSocketServer wssrv = new WebSocketServer(new InetSocketAddress(port)) {
 
@@ -142,18 +148,13 @@ public class WsServer {
         };
 
         if (sslContext.isPresent()) {
-            //SSLParameters sslParameters = new SSLParameters();
             SSLParameters sslParameters = sslContext.get().getDefaultSSLParameters();
-            //WebSocketServerFactory wsf = new DefaultSSLWebSocketServerFactory(sslContext.get());
 
             sslParameters.setWantClientAuth(true);
             sslParameters.setNeedClientAuth(true);
             sslParameters.setCipherSuites(new String[] {"TLS_AES_256_GCM_SHA384"});
 
             WebSocketServerFactory wsf = new SSLParametersWebSocketServerFactory(sslContext.get(), sslParameters);
-            for (String s : sslContext.get().getSocketFactory().getDefaultCipherSuites()) {
-                System.out.println("WsServer cipher found: " + s);
-            }
             wssrv.setWebSocketFactory(wsf); // adding TLS
         }
 

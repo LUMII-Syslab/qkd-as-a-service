@@ -26,8 +26,6 @@ public class PQProxyWsTestServer {
 
     static {
 
-        InjectableQKD.inject(InjectedKEMs.InjectionOrder.AFTER_DEFAULT);
-
         File f = new File(PQProxyWsTestServer.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();
         mainDirectory = f.getParent();
@@ -46,19 +44,15 @@ public class PQProxyWsTestServer {
         System.setProperty("org.slf4j.simpleLogger.logFile", logFileName);
         logger = LoggerFactory.getLogger(PQProxyWsTestServer.class);
 
-        Provider tlsProvider = null;
-        try {
-            tlsProvider = SSLContext.getInstance("TLS").getProvider();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-        logger.info("Using TLS provider: "+tlsProvider.getName()); // BCJSSE
+
 
     }
 
     public static void main(String[] args) throws Exception {
 
         QkdProperties qkdProperties = new QkdProperties(mainDirectory);
+        InjectableQKD.inject(InjectedKEMs.InjectionOrder.AFTER_DEFAULT, qkdProperties);
+
         SSLContext ctx = qkdProperties.user2SslContext();
 
         int port = qkdProperties.user2Uri().getPort();

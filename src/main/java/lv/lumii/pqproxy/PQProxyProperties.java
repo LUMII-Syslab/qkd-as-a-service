@@ -46,6 +46,8 @@ public class PQProxyProperties {
     private Properties loadPropertiesFile(String fileName) {
         Properties p = new Properties();
 
+        logger.info("Loading PQProxy properties from "+fileName);
+
         try {
             p.load(new BufferedReader(new FileReader(fileName)));
         } catch (IOException e) {
@@ -198,5 +200,9 @@ public class PQProxyProperties {
         else {
             return Optional.empty();
         }
+    }
+
+    public String description() {
+        return properties.value().getProperty("description", "Some Proxy");
     }
 }

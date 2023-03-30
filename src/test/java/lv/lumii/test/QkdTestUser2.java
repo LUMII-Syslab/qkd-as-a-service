@@ -24,8 +24,6 @@ public class QkdTestUser2 {
 
     static {
 
-        InjectableQKD.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT);
-
         File f = new File(QkdTestUser2.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();
         mainDirectory = f.getParent();
@@ -48,6 +46,12 @@ public class QkdTestUser2 {
     public static void main(String[] args) throws Exception {
 
         QkdProperties qkdProperties = new QkdProperties(mainDirectory);
+
+        System.out.println("TLS provider before="+InjectableQKD.getTlsProvider());
+        InjectableQKD.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT, qkdProperties);
+        // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
+        System.out.println("TLS provider after="+InjectableQKD.getTlsProvider());
+
         SSLContext ctx = qkdProperties.user2SslContext();
 
         int port = qkdProperties.user2Uri().getPort();

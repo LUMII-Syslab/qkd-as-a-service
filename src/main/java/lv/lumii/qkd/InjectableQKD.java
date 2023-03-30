@@ -36,14 +36,12 @@ import org.bouncycastle.util.Pack;
 import org.openquantumsafe.KeyEncapsulation;
 import org.openquantumsafe.Pair;
 
+import javax.net.ssl.SSLContext;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
+import java.security.*;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -802,6 +800,16 @@ public class InjectableQKD {
                 InjectableSphincsPlusTlsSigner.verifySignature_oqs(message, bcSignature, pk),
                 InjectableSphincsPlusTlsSigner.verifySignature_bc(message, bcSignature, pk));
 */
+    }
+
+    public static String getTlsProvider() {
+        Provider tlsProvider = null;
+        try {
+            tlsProvider = SSLContext.getInstance("TLS").getProvider();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        return tlsProvider.getName();
     }
 
 }

@@ -11,14 +11,11 @@ import org.java_websocket.handshake.ServerHandshake;
 import javax.net.ssl.SNIHostName;
 import javax.net.ssl.SNIServerName;
 import javax.net.ssl.SSLParameters;
-import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 public class WsClient {
 
@@ -26,8 +23,16 @@ public class WsClient {
         byte[] data() throws Exception;
     }
 
-    public interface ResponseTarget {
+    public interface RequestStringFactory {
+        String data() throws Exception;
+    }
+
+    public interface ResponseDataTarget {
         void consume(byte[] data) throws Exception;
+    }
+
+    public interface ResponseStringTarget {
+        void consume(String data) throws Exception;
     }
 
     public interface ErrorTarget {
@@ -48,7 +53,7 @@ public class WsClient {
      *               after the request, exactly one of fResponse and fError will be called;
      *               however, if an exception occurs during fResponse, fError is also called
      */
-    public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, RequestDataFactory fRequest, ResponseTarget fResponse, ErrorTarget fError) {
+    public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, RequestDataFactory fRequest, ResponseDataTarget fResponse, ErrorTarget fError) {
         this(sslFactory, targetUri, new WsSink() {
             private boolean hasBeenSent = false;
             private boolean hasBeenConsumed = false;
@@ -94,6 +99,70 @@ public class WsClient {
             public void closeWithException(Exception e) {
                 if (!hasBeenConsumed)
                     fError.consumeError(e);
+                // do not send error, since the response data have been already consumed; assume that everything was OK
+            }
+        });
+    }
+
+    /**
+     *
+     * @param sslFactory the optional SSLFactory to use when a TLS web socket is needed
+     * @param targetUri the target URI
+     * @param fRequest the function that creates binary data to be sent as a request
+     * @param fResponse the function that handles the response data;
+     *                  after the request, exactly one of fResponse and fError will be called;
+     *                  however, if an exception occurs during fResponse, fError is also called
+     * @param fError the function that handle the error;
+     *               after the request, exactly one of fResponse and fError will be called;
+     *               however, if an exception occurs during fResponse, fError is also called
+     */
+    public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, RequestStringFactory fRequest, ResponseStringTarget fResponse, ErrorTarget fError) {
+        this(sslFactory, targetUri, new WsSink() {
+            private boolean hasBeenSent = false;
+            private boolean hasBeenConsumed = false;
+            private WebSocket ws = null;
+            @Override
+            public void open(WebSocket ws) {
+                this.ws = ws;
+                try {
+                    ws.send(fRequest.data());
+                    hasBeenSent = true;
+                } catch (Exception e) {
+                    throw new RuntimeException("Could not send data", e); // should close the web socket
+                }
+            }
+
+            @Override
+            public void consumeMessage(String s) {
+                try {
+                    fResponse.consume(s);
+                }
+                catch (Exception e) {
+                    fError.consumeError(e);
+                }
+                hasBeenConsumed = true;
+                assert ws != null; // this.ws must have been initialized on open
+                ws.close();
+            }
+
+            @Override
+            public void consumeMessage(ByteBuffer blob) {
+
+            }
+
+            @Override
+            public void closeGracefully(String details) {
+                if (!hasBeenSent)
+                    fError.consumeError(new Exception("No data had been sent before the connection closed to "+targetUri));
+                else if (!hasBeenConsumed)
+                    fError.consumeError(new Exception("No data received before the connection closed to "+targetUri));
+            }
+
+            @Override
+            public void closeWithException(Exception e) {
+                if (!hasBeenConsumed) {
+                    fError.consumeError(e);
+                }
                 // do not send error, since the response data have been already consumed; assume that everything was OK
             }
         });

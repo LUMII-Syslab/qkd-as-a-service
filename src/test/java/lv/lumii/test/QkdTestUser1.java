@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URLClassLoader;
 import java.nio.ByteBuffer;
 
 public class QkdTestUser1 {
@@ -22,9 +23,6 @@ public class QkdTestUser1 {
     public static String mainDirectory;
 
     static {
-
-        InjectableQKD.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT);
-        // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
 
         File f = new File(WsServer.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();
@@ -46,34 +44,15 @@ public class QkdTestUser1 {
 
         QkdProperties props = new QkdProperties(mainDirectory);
 
-        WsSink replySink = new WsSink() {
-            @Override
-            public void open(WebSocket ws) {
-                System.out.println("REPLY SINK OPEN OK");
-            }
+        System.out.println("TLS provider before1="+InjectableQKD.getTlsProvider());
+        InjectableQKD.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT, props);
+        // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
+        System.out.println("TLS provider after="+InjectableQKD.getTlsProvider());
 
-            @Override
-            public void consumeMessage(String s) {
-                System.out.println("From User2: " + s);
-            }
-
-            @Override
-            public void consumeMessage(ByteBuffer blob) {
-                System.out.println("From User2: binary data of " + blob.array().length + " bytes");
-            }
-
-            @Override
-            public void closeGracefully(String details) {
-                System.out.println("User1: connection closed");
-            }
-
-            @Override
-            public void closeWithException(Exception e) {
-                System.out.println("User1: connection exception");
-            }
-        };
-
-        WsClient wsClient = new WsClient(props.user1SslFactory(), props.user2Uri(), replySink);
+        WsClient wsClient = new WsClient(props.user1SslFactory(), props.user2Uri(),
+                ()-> "Hi, I am User1!",
+                (user2str)-> {System.out.println("User2 replied with: "+user2str);},
+                (ex) -> {System.out.println("Error: "+ex);});
         wsClient.connectBlockingAndRunAsync();
 
     }

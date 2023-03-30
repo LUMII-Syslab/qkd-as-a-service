@@ -58,6 +58,9 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:2.+'
     implementation 'org.slf4j:slf4j-simple:2.+'
 
+    // for colorizing console output
+    implementation group: 'com.diogonunes', name: 'JColor', version: '5.5.1'
+
     // cactoos (for pure OOP)
     implementation 'org.cactoos:cactoos:0.+'
 
