@@ -28,22 +28,22 @@ term_with_title() {
 
 export MY_DIR=`dirname $0`
 pushd $MY_DIR/..
+
 export PROJ_ROOT=$PWD
 #export LD_LIBRARY_PATH=$PROJ_ROOT/.libs:/opt/oqs/lib
 #export DYLD_LIBRARY_PATH=$PROJ_ROOT/.libs:/opt/oqs/lib
-touch src/main/java/lv/lumii/pqproxy/PQProxy.java
+touch src/test/java/lv/lumii/test/QkdTestUser1.java
+touch src/test/java/lv/lumii/test/QkdTestUser2.java
 ./gradlew compileTestJava
 
 export JAVA_CP="$PROJ_ROOT/build/classes/java/main:$PROJ_ROOT/build/classes/java/test:$PROJ_ROOT/.jars/\\\*"
 export JAVA_LP="/opt/oqs/lib:/usr/local/lib:$PROJ_ROOT/.libs"
-export MAIN_CLASS=lv.lumii.pqproxy.PQProxy
 
-export ARGS="-f $PROJ_ROOT/scripts/pqproxy-pqcuser2aija.properties"
-term_with_title "PROXY-TO-AIJA" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS $ARGS"
+export MAIN_CLASS=lv.lumii.test.QkdTestUser1
+term_with_title "USER1" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS"
 
-export ARGS="-f $PROJ_ROOT/scripts/pqproxy-pqcuser2brencis.properties"
-term_with_title "PROXY-TO-BRENCIS" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS $ARGS"
-
-term_with_title "GO AIJA+BRENCIS" "cd $PROJ_ROOT/../qkd-as-a-service/service && go run ."
+export MAIN_CLASS=lv.lumii.test.QkdTestUser2
+#term_with_title "USER2" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS"
 
 popd
+

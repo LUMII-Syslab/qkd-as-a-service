@@ -20,6 +20,12 @@ term() {
   fi
 }
 
+term_with_title() {
+  export TITLE=$1
+  shift
+  term 'echo' '-n' '-e' '\\\\033]0\\;'"$TITLE"'\\\\007' '&&' $@
+}
+
 export MY_DIR=`dirname $0`
 pushd $MY_DIR/..
 
@@ -34,10 +40,10 @@ export JAVA_CP="$PROJ_ROOT/build/classes/java/main:$PROJ_ROOT/build/classes/java
 export JAVA_LP="/opt/oqs/lib:/usr/local/lib:$PROJ_ROOT/.libs"
 
 export MAIN_CLASS=lv.lumii.test.QkdTestUser1
-#term "DYLD_LIBRARYPATH=$JAVA_LP java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS"
+#term_with_title "USER1" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS"
 
 export MAIN_CLASS=lv.lumii.test.QkdTestUser2
-term "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS"
+term_with_title "USER2" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS"
 
 popd
 

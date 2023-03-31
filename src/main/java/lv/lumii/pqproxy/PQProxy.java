@@ -159,6 +159,7 @@ public class PQProxy {
                     @Override
                     public void consumeMessage(ByteBuffer blob) {
                         try {
+                            System.out.println("FORWARDING "+blob.array().length+" bytes");
                             wrappedTargetWsClient.value.wsClient().send(blob);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
@@ -204,6 +205,7 @@ public class PQProxy {
 
                     @Override
                     public void consumeMessage(ByteBuffer blob) {
+                        System.out.println("REPLY FORWARING "+blob.array().length+" bytes");
                         sourceClientWs.send(blob); // send reply (from the target) back to the source
                     }
 
@@ -220,7 +222,7 @@ public class PQProxy {
                     }
                 };
 
-                wrappedTargetWsClient.value = new WsClient(props.targetSslFactory(), props.targetUri(), replySink);
+                wrappedTargetWsClient.value = new WsClient(props.targetSslFactory(), props.targetUri(), replySink, "PQProxy as a client");
 
 
                 return sourceSink;

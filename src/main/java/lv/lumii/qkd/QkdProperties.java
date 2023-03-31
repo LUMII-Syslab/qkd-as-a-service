@@ -150,7 +150,7 @@ public class QkdProperties {
         return Optional.of(
                 SSLFactory.builder()
                         .withIdentityMaterial(
-                                userNo==1?user1key.key():user2key.key(),
+                                userNo==1? user1key.key():user2key.key(),
                                 userNo==1? user1key.password() : user2key.password(),
                                 userNo==1? user1key.certificateChain() : user2key.certificateChain())
                         .withProtocols("TLSv1.3")

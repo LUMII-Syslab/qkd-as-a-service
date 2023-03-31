@@ -45,14 +45,26 @@ public class InjectedKEMs
         injectedKEMs.put(kemCodePoint, info);
     }
 
+    private static final Set<Integer> lockedKEMs = new HashSet<>();
+    public static synchronized void lockKEM(int kemCodePoint) {
+        lockedKEMs.add(kemCodePoint);
+    }
+    public static synchronized void unlockKEM(int kemCodePoint) {
+        lockedKEMs.remove(kemCodePoint);
+    }
+
+    public static synchronized boolean isLockedKEM(int kemCodePoint) {
+        return lockedKEMs.contains(kemCodePoint);
+    }
+
     public static boolean isKEMSupported(int kemCodePoint) {
         return injectedKEMs.containsKey(kemCodePoint);
     }
 
 
-    public static int[] getInjectedKEMsCodePoints() {
+    public static int[] getInjectedKEMsCodePoints() { // does not return locked KEMs
         // key set -> array of int
-        return injectedCodePoints.stream().mapToInt(i->i).toArray();
+        return injectedCodePoints.stream().mapToInt(i->i).filter( i->!isLockedKEM(i) ).toArray();
     }
 
     public static String getInjectedKEMStandardName(int kemCodePoint) {

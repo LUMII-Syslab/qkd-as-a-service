@@ -17,6 +17,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.diogonunes.jcolor.Ansi.colorize;
+import static com.diogonunes.jcolor.Attribute.GREEN_TEXT;
+
 public class WsClient {
 
     public interface RequestDataFactory {
@@ -52,8 +55,9 @@ public class WsClient {
      * @param fError the function that handle the error;
      *               after the request, exactly one of fResponse and fError will be called;
      *               however, if an exception occurs during fResponse, fError is also called
+     * @param description the description of this WsClient
      */
-    public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, RequestDataFactory fRequest, ResponseDataTarget fResponse, ErrorTarget fError) {
+    public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, RequestDataFactory fRequest, ResponseDataTarget fResponse, ErrorTarget fError, String description) {
         this(sslFactory, targetUri, new WsSink() {
             private boolean hasBeenSent = false;
             private boolean hasBeenConsumed = false;
@@ -101,7 +105,7 @@ public class WsClient {
                     fError.consumeError(e);
                 // do not send error, since the response data have been already consumed; assume that everything was OK
             }
-        });
+        }, description);
     }
 
     /**
@@ -115,8 +119,9 @@ public class WsClient {
      * @param fError the function that handle the error;
      *               after the request, exactly one of fResponse and fError will be called;
      *               however, if an exception occurs during fResponse, fError is also called
+     * @param description the description of this WsClient
      */
-    public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, RequestStringFactory fRequest, ResponseStringTarget fResponse, ErrorTarget fError) {
+    public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, RequestStringFactory fRequest, ResponseStringTarget fResponse, ErrorTarget fError, String description) {
         this(sslFactory, targetUri, new WsSink() {
             private boolean hasBeenSent = false;
             private boolean hasBeenConsumed = false;
@@ -152,25 +157,35 @@ public class WsClient {
 
             @Override
             public void closeGracefully(String details) {
-                if (!hasBeenSent)
-                    fError.consumeError(new Exception("No data had been sent before the connection closed to "+targetUri));
-                else if (!hasBeenConsumed)
-                    fError.consumeError(new Exception("No data received before the connection closed to "+targetUri));
+                if (hasBeenConsumed)
+                    return;
+                if (!hasBeenSent) {
+                    fError.consumeError(new Exception("No data had been sent before the connection closed to " + targetUri));
+                    hasBeenConsumed = true;
+                } else if (!hasBeenConsumed) {
+                    fError.consumeError(new Exception("No data received before the connection closed to " + targetUri));
+                    hasBeenConsumed = true;
+                }
             }
 
             @Override
             public void closeWithException(Exception e) {
-                if (!hasBeenConsumed) {
-                    fError.consumeError(e);
+                if (hasBeenConsumed)
+                    return;
+                if (!hasBeenSent) {
+                    fError.consumeError(new Exception(e.getMessage()+", no data sent to url=" + targetUri));
+                    hasBeenConsumed = true;
+                } else if (!hasBeenConsumed) {
+                    fError.consumeError(new Exception(e.getMessage()+", no data received from url=" + targetUri));
+                    hasBeenConsumed = true;
                 }
-                // do not send error, since the response data have been already consumed; assume that everything was OK
             }
-        });
+        }, description);
     }
 
-    public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, WsSink replySink) {
-        System.out.println("New WsClient ssl="+sslFactory.isPresent());
-        this.wsClient = new Synced<>(new Sticky<>(() -> newConnection(sslFactory, targetUri) ));
+    public WsClient(Optional<SSLFactory> sslFactory, URI targetUri, WsSink replySink, String description) {
+        System.out.println(colorize(description, GREEN_TEXT())+": targetUri="+targetUri+", ssl="+ sslFactory.isPresent());
+        this.wsClient = new Sticky<>(() -> newConnection(sslFactory, targetUri) ); // new Synced<>(
         this.replySink = replySink;
     }
 
@@ -182,7 +197,7 @@ public class WsClient {
             protected void onSetSSLParameters(SSLParameters sslParameters) {
                 super.onSetSSLParameters(sslParameters);
                 List<SNIServerName> list = new LinkedList<>();
-                System.out.println("WS CLIENT: setting host name (SNI) to "+targetUri.getHost());
+                System.out.println("WS CLIENT line 200: setting host name (SNI) to "+targetUri.getHost());
                 list.add(new SNIHostName(targetUri.getHost()));
                 sslParameters.setServerNames(list);
                 sslParameters.setWantClientAuth(true);
@@ -237,12 +252,29 @@ public class WsClient {
             if (ok) {
                 new Thread(()-> {
                     try {
-                       // wsClient.value().run();
+                        wsClient.value().run();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 }).start();
+            } else {
+                wsClient.value().close(1001, "Could not connect to "+wsClient.value().getRemoteSocketAddress());
             }
+        } catch (Exception e) {
+        }
+    }
+
+    public void connectAndRunAsync() {
+        try {
+            //wsClient.value().run();
+            //wsClient.value().connect();
+            new Thread(()-> {
+                try {
+                    wsClient.value().run();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }).start();
         } catch (Exception e) {
         }
     }
