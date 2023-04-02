@@ -476,23 +476,8 @@ public abstract class WebSocketServer extends AbstractWebSocket implements Runna
     socket.setTcpNoDelay(isTcpNoDelay());
     socket.setKeepAlive(true);
 
-    //by SK:
-    System.out.println("SSL1 "+socket.getClass().getName());
-    System.out.println("SSL2 "+channel.socket().getClass().getName());
-/*    if (socket instanceof sun.nio.ch.SocketAdaptor) {
-      ((sun.nio.ch.SocketAdaptor) socket)
-    }
-    if (socket instanceof SSLSocket) {
-      SSLSocket sslSocket = (SSLSocket) socket;
-      SSLParameters sslParameters = sslSocket.getSSLParameters();
-      sslParameters.setWantClientAuth(true);
-      sslParameters.setNeedClientAuth(true);
-      sslParameters.setCipherSuites(new String[] {"TLS_AES_256_GCM_SHA384"});
-    }*/
-
     WebSocketImpl w = wsf.createWebSocket(this, drafts);
     Object att = w.getAttachment();
-    System.out.println("SSL4 w="+w.getClass().getName()+"  att="+att);
     w.setSelectionKey(channel.register(selector, SelectionKey.OP_READ, w));
     try {
       w.setChannel(wsf.wrapChannel(channel, w.getSelectionKey()));
