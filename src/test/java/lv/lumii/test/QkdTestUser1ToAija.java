@@ -2,19 +2,15 @@ package lv.lumii.test;
 
 import lv.lumii.httpws.WsClient;
 import lv.lumii.httpws.WsServer;
-import lv.lumii.httpws.WsSink;
 import lv.lumii.qkd.InjectableQKD;
 import lv.lumii.qkd.QkdProperties;
 import org.bouncycastle.tls.injection.kems.InjectedKEMs;
-import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.URLClassLoader;
-import java.nio.ByteBuffer;
 
-public class QkdTestUser1 {
+public class QkdTestUser1ToAija {
 
 
     public static Logger logger; // static initialization
@@ -36,7 +32,7 @@ public class QkdTestUser1 {
 
         String logFileName = mainDirectory + File.separator + "user1.log";
         System.setProperty("org.slf4j.simpleLogger.logFile", logFileName);
-        logger = LoggerFactory.getLogger(QkdTestUser1.class);
+        logger = LoggerFactory.getLogger(QkdTestUser1ToAija.class);
 
     }
 
@@ -49,8 +45,9 @@ public class QkdTestUser1 {
         // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
         System.out.println("TLS provider after="+InjectableQKD.getTlsProvider());
 
-        WsClient wsClient = new WsClient(props.user1SslFactory(), props.user2Uri(),
-                ()-> "Hi, I am User1!",
+        InjectedKEMs.lockKEM(0xFEFF);
+        WsClient wsClient = new WsClient(props.user1SslFactory(), props.aijaUri(),//props.user2Uri(),
+                ()-> "Hi, I am User1!1",
                 (user2str)-> {System.out.println("User2 replied with: "+user2str);},
                 (ex) -> {
             System.out.println("User 2 error: "+ex);

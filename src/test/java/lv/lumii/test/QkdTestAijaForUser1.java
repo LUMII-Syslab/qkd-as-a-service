@@ -3,6 +3,7 @@ package lv.lumii.test;
 
 import lv.lumii.httpws.WsServer;
 import lv.lumii.httpws.WsSink;
+import lv.lumii.pqc.InjectablePQC;
 import lv.lumii.qkd.InjectableQKD;
 import lv.lumii.qkd.QkdProperties;
 import org.bouncycastle.tls.injection.kems.InjectedKEMs;
@@ -15,7 +16,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
-public class QkdTestUser2 {
+public class QkdTestAijaForUser1 {
 
     public static Logger logger; // static initialization
 
@@ -24,7 +25,7 @@ public class QkdTestUser2 {
 
     static {
 
-        File f = new File(QkdTestUser2.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        File f = new File(QkdTestAijaForUser1.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();
         mainDirectory = f.getParent();
 
@@ -40,53 +41,55 @@ public class QkdTestUser2 {
 
         String logFileName = mainDirectory + File.separator + "wsserver.log";
         System.setProperty("org.slf4j.simpleLogger.logFile", logFileName);
-        logger = LoggerFactory.getLogger(QkdTestUser2.class);
+        logger = LoggerFactory.getLogger(QkdTestAijaForUser1.class);
     }
 
     public static void main(String[] args) throws Exception {
 
         QkdProperties qkdProperties = new QkdProperties(mainDirectory);
 
-        System.out.println("TLS provider before="+InjectableQKD.getTlsProvider());
+        /*System.out.println("TLS provider before="+InjectableQKD.getTlsProvider());
         InjectableQKD.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT, qkdProperties);
         // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
-        System.out.println("TLS provider after="+InjectableQKD.getTlsProvider());
+        System.out.println("TLS provider after="+InjectableQKD.getTlsProvider());*/
+        InjectablePQC.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT);
 
         SSLContext ctx = qkdProperties.user2SslContext();
 
-        int port = qkdProperties.user2Uri().getPort();
+        int port = 8001;//qkdProperties.user2Uri().getPort();
 
         System.out.println("User2 server port=" + port);
         WsServer srv = new WsServer(
-                Optional.of(ctx),
+                //Optional.of(ctx),
+                Optional.empty(),
                 port,
                 (WebSocket client) -> new WsSink() {
 
                     @Override
                     public void open(WebSocket ws) {
-                        System.out.println("User 1: connection opened");
-                        client.send("Connected: I am User2!");
+                        System.out.println("AIJA for User 1: connection opened");
+                        client.send("Connected: I am AIJA!");
                     }
 
                     @Override
                     public void consumeMessage(String s) {
-                        System.out.println("From User1: " + s);
-                        client.send("User 2 reply for: [" + s + "]");
+                        System.out.println("AIJA for User1 received string: " + s);
+                        client.send("AIJA reply for: [" + s + "]");
                     }
 
                     @Override
                     public void consumeMessage(ByteBuffer blob) {
-                        System.out.println("From User1: binary data of " + blob.array().length + " bytes");
+                        System.out.println("AIJA for User1 received: binary data of " + blob.array().length + " bytes");
                     }
 
                     @Override
                     public void closeGracefully(String details) {
-                        System.out.println("User2: connection closed");
+                        System.out.println("AIJA: connection closed");
                     }
 
                     @Override
                     public void closeWithException(Exception e) {
-                        System.out.println("User2: connection exception");
+                        System.out.println("AIJA: connection exception");
                     }
                 });
 

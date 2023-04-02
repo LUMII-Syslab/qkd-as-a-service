@@ -44,7 +44,7 @@ public class QkdTestUser1 {
 
         QkdProperties props = new QkdProperties(mainDirectory);
 
-        System.out.println("TLS provider before1="+InjectableQKD.getTlsProvider());
+        System.out.println("TLS provider before="+InjectableQKD.getTlsProvider());
         InjectableQKD.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT, props);
         // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
         System.out.println("TLS provider after="+InjectableQKD.getTlsProvider());
@@ -52,8 +52,11 @@ public class QkdTestUser1 {
         WsClient wsClient = new WsClient(props.user1SslFactory(), props.user2Uri(),
                 ()-> "Hi, I am User1!",
                 (user2str)-> {System.out.println("User2 replied with: "+user2str);},
-                (ex) -> {System.out.println("Error: "+ex);});
+                (ex) -> {
+            System.out.println("User 2 error: "+ex);
+        }, "User1 as a client");
         wsClient.connectBlockingAndRunAsync();
+        //wsClient.connectAndRunAsync();
 
     }
 
