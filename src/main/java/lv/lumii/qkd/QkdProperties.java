@@ -48,9 +48,9 @@ public class QkdProperties {
 
     private String fileNameProperty(String key, String defaultValue) {
         String fileName = this.properties.value().getProperty(key, defaultValue);
-        File f = new File(fileName);
+        File f = new File(mainDirectory+File.separator+fileName); // assume relative file name first
         if (!f.isFile())
-            f = new File(mainDirectory+File.separator+fileName);
+            f = new File(fileName);
         return f.getAbsolutePath();
     }
 
