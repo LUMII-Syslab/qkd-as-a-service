@@ -46,19 +46,19 @@ public class QkdTestAijaForUser1 {
 
     public static void main(String[] args) throws Exception {
 
-        QkdProperties qkdProperties = new QkdProperties(mainDirectory);
+        //QkdProperties qkdProperties = new QkdProperties(mainDirectory);
 
         /*System.out.println("TLS provider before="+InjectableQKD.getTlsProvider());
         InjectableQKD.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT, qkdProperties);
         // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
         System.out.println("TLS provider after="+InjectableQKD.getTlsProvider());*/
-        InjectablePQC.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT);
+        //InjectablePQC.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT);
 
-        SSLContext ctx = qkdProperties.user2SslContext();
+        //SSLContext ctx = qkdProperties.user2SslContext();
 
         int port = 8001;//qkdProperties.user2Uri().getPort();
 
-        System.out.println("User2 server port=" + port);
+        System.out.println("AIJA 1server port=" + port);
         WsServer srv = new WsServer(
                 //Optional.of(ctx),
                 Optional.empty(),
