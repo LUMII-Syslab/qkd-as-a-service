@@ -53,8 +53,13 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.java_websocket.*;
+import org.java_websocket.AbstractWebSocket;
+import org.java_websocket.SocketChannelIOHelper;
+import org.java_websocket.WebSocket;
+import org.java_websocket.WebSocketFactory;
+import org.java_websocket.WebSocketImpl;
+import org.java_websocket.WebSocketServerFactory;
+import org.java_websocket.WrappedByteChannel;
 import org.java_websocket.drafts.Draft;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.exceptions.WrappedIOException;
@@ -64,9 +69,6 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.handshake.Handshakedata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLSocket;
 
 /**
  * <tt>WebSocketServer</tt> is an abstract class that only takes care of the
@@ -475,9 +477,7 @@ public abstract class WebSocketServer extends AbstractWebSocket implements Runna
     Socket socket = channel.socket();
     socket.setTcpNoDelay(isTcpNoDelay());
     socket.setKeepAlive(true);
-
     WebSocketImpl w = wsf.createWebSocket(this, drafts);
-    Object att = w.getAttachment();
     w.setSelectionKey(channel.register(selector, SelectionKey.OP_READ, w));
     try {
       w.setChannel(wsf.wrapChannel(channel, w.getSelectionKey()));

@@ -23,7 +23,22 @@ term() {
 term_with_title() {
   export TITLE=$1
   shift
-  term 'echo' '-n' '-e' '\\\\033]0\\;'"$TITLE"'\\\\007' '&&' $@
+
+  export TERM=/usr/bin/gnome-terminal
+  if [ -f $TERM ]; then
+    term 'echo -n -e \\033]0\;'"$TITLE"'\\007 &&'"$@"
+  else
+    export TERM=/usr/bin/osascript
+    if [ -f $TERM ]; then
+      term 'echo' '-n' '-e' '\\\\033]0\\;'"$TITLE"'\\\\007' '&&' $@
+    else
+      export TERM=/cygdrive/c/Windows/System32/cmd.exe
+      if [ -f $TERM ]; then
+#       $TERM /c start bash -c "$@"
+        $TERM /c start bash -c 'echo -n -e \\033]0\;'"$TITLE"'\\007 &&'"$@"
+      fi
+    fi
+  fi
 }
 
 export MY_DIR=`dirname $0`
@@ -36,7 +51,8 @@ touch src/test/java/lv/lumii/test/QkdTestUser1.java
 touch src/test/java/lv/lumii/test/QkdTestUser2.java
 ./gradlew compileTestJava
 
-export JAVA_CP="$PROJ_ROOT/build/classes/java/main:$PROJ_ROOT/build/classes/java/test:$PROJ_ROOT/.jars/\\\*"
+#export JAVA_CP="$PROJ_ROOT/build/classes/java/main:$PROJ_ROOT/build/classes/java/test:$PROJ_ROOT/.jars/\\\*"
+export JAVA_CP="$PROJ_ROOT/build/classes/java/main:$PROJ_ROOT/build/classes/java/test:$PROJ_ROOT/.jars/\\*"
 export JAVA_LP="/opt/oqs/lib:/usr/local/lib:$PROJ_ROOT/.libs"
 
 export MAIN_CLASS=lv.lumii.test.QkdTestUser1ToAija

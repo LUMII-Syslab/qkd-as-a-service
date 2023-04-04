@@ -9,6 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URL;
+import java.util.Optional;
 
 public class QkdTestUser1ToAija {
 
@@ -46,7 +49,9 @@ public class QkdTestUser1ToAija {
         System.out.println("TLS provider after="+InjectableQKD.getTlsProvider());
 
         InjectedKEMs.lockKEM(0xFEFF);
-        WsClient wsClient = new WsClient(props.user1SslFactory(), props.aijaUri(),//props.user2Uri(),
+        WsClient wsClient = new WsClient(
+                Optional.empty(), new URI("ws://localhost:8001/ws"),
+                //props.user1SslFactory(), props.aijaUri(),
                 ()-> "Hi, I am User1!1",
                 (user2str)-> {System.out.println("User2 replied with: "+user2str);},
                 (ex) -> {
