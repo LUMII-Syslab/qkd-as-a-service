@@ -34,16 +34,17 @@ export PROJ_ROOT=$PWD
 touch src/main/java/lv/lumii/pqproxy/PQProxy.java
 ./gradlew compileTestJava
 
-export JAVA_CP="$PROJ_ROOT/build/classes/java/main:$PROJ_ROOT/build/classes/java/test:$PROJ_ROOT/.jars/\\\*"
+#export JAVA_CP="$PROJ_ROOT/build/classes/java/main:$PROJ_ROOT/build/classes/java/test:$PROJ_ROOT/.jars/\\\*"
+export JAVA_CP="$PROJ_ROOT/build/classes/java/main:$PROJ_ROOT/build/classes/java/test:$PROJ_ROOT/.jars/\\*"
 export JAVA_LP="/opt/oqs/lib:/usr/local/lib:$PROJ_ROOT/.libs"
 export MAIN_CLASS=lv.lumii.pqproxy.PQProxy
 
 export ARGS="-f $PROJ_ROOT/scripts/pqproxy-pqcuser2aija.properties"
-term_with_title "PROXY-TO-AIJA" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS $ARGS"
+$PROJ_ROOT/scripts/term_with_title.sh "PROXY-TO-AIJA" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS $ARGS"
 
 export ARGS="-f $PROJ_ROOT/scripts/pqproxy-pqcuser2brencis.properties"
-term_with_title "PROXY-TO-BRENCIS" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS $ARGS"
+$PROJ_ROOT/scripts/term_with_title.sh "PROXY-TO-BRENCIS" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS $ARGS"
 
-term_with_title "GO AIJA+BRENCIS" "cd $PROJ_ROOT/../qkd-as-a-service/service && go run ."
+$PROJ_ROOT/scripts/term_with_title.sh "GO AIJA+BRENCIS" "cd $PROJ_ROOT/../qkd-as-a-service/service && go run ."
 
 popd
