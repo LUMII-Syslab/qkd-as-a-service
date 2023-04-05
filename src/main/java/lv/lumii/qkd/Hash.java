@@ -29,7 +29,7 @@ public class Hash {
         digestOid = digestOid.toLowerCase().replace("-", "");
 
         Digest d;
-        if ("2.16.840.1.101.3.4.2.11".equals(digestOid) || "shake128".equals(digestOid))
+        if ("2.16.840.1.101.3.4.2.11".equals(digestOid) || "2.16.840.1.101.3.4.2.17".equals(digestOid)  || "shake128".equals(digestOid))
             d = new SHAKEDigest(128);
         else
         if ("2.16.840.1.101.3.4.2.1".equals(digestOid) || "sha256".equals(digestOid))

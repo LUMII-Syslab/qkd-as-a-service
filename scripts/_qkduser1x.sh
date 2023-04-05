@@ -30,6 +30,7 @@ export MY_DIR=`dirname $0`
 pushd $MY_DIR/..
 
 export PROJ_ROOT=$PWD
+echo $PROJ_ROOT root
 #export LD_LIBRARY_PATH=$PROJ_ROOT/.libs:/opt/oqs/lib
 #export DYLD_LIBRARY_PATH=$PROJ_ROOT/.libs:/opt/oqs/lib
 touch src/test/java/lv/lumii/test/QkdTestUser1.java
@@ -37,16 +38,12 @@ touch src/test/java/lv/lumii/test/QkdTestUser2.java
 ./gradlew compileTestJava
 
 #export JAVA_CP="$PROJ_ROOT/build/classes/java/main:$PROJ_ROOT/build/classes/java/test:$PROJ_ROOT/.jars/\\\*"
-export JAVA_CP="$PROJ_ROOT/build/classes/java/main:$PROJ_ROOT/build/classes/java/test:$PROJ_ROOT/.jars/\\*"
+export JAVA_CP="$PROJ_ROOT/build/classes/java/main:$PROJ_ROOT/build/classes/java/test:$PROJ_ROOT/.jars/*"
 export JAVA_LP="/opt/oqs/lib:/usr/local/lib:$PROJ_ROOT/.libs"
 
 export MAIN_CLASS=lv.lumii.test.QkdTestUser1
-#term_with_title "USER1" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS"
+java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS
 
-export MAIN_CLASS=lv.lumii.test.QkdTestUser2
-
-$PROJ_ROOT/scripts/term_with_title.sh "USER2" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS && /bin/bash"
-#term_with_title "USER2" "sleep 10"
 
 popd
 

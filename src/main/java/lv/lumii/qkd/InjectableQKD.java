@@ -220,6 +220,7 @@ public class InjectableQKD {
         Security.insertProviderAt(bcProvider, 1);
     }
 
+
     public static String byteArrayToString(byte[] a) {
         return byteArrayToString(a, "");
     }
@@ -568,6 +569,7 @@ public class InjectableQKD {
             System.out.println("in keyGen");
 
             if (this.isServer()) {
+                InjectedKEMs.lockKEM(0xFEFF); // User2 lock QKD KEM
                 return new Pair<>(new byte[]{}, new byte[]{}); // not needed by the server
             } else {
                 try {
@@ -588,15 +590,19 @@ public class InjectableQKD {
                             },
                             (aijaResponse) -> {
                                 // Step 1< parse reserveKeyAndGetHalf response (ASN.1)
+                                System.out.println("AIJA RESPONSE:\n" +
+                                                byteArrayToString(aijaResponse, " "));
                                 ASN1Primitive respObj1 = new ASN1InputStream(aijaResponse).readObject();
+
+
                                 ASN1Sequence respSeq1 = ASN1Sequence.getInstance(respObj1);
                                 if (respSeq1.size() != 7)
                                     throw new Exception("Invalid sequence length in reserveKeyAndGetHalf response.");
                                 if (ASN1Integer.getInstance(respSeq1.getObjectAt(0)).intValueExact() != 0)
                                     throw new Exception("reserveKeyAndGetHalf response returned an error");
-                                if (ASN1Integer.getInstance(respSeq1.getObjectAt(1)).intValueExact() != 0xFF)
+                                if (ASN1Integer.getInstance(respSeq1.getObjectAt(1)).intValueExact() != -1)
                                     throw new Exception("Invalid reserveKeyAndGetHalf response code");
-                                if (ASN1Integer.getInstance(respSeq1.getObjectAt(2)).longValueExact() != aijaNonce)
+                                if (ASN1Integer.getInstance(respSeq1.getObjectAt(2)).longValueExact() != aijaNonce+1)
                                     throw new Exception("reserveKeyAndGetHalf response returned an invalid nonce");
                                 ASN1OctetString keyId = ASN1OctetString.getInstance(respSeq1.getObjectAt(3));
                                 ASN1OctetString keyLeft = ASN1OctetString.getInstance(respSeq1.getObjectAt(4));
@@ -624,9 +630,9 @@ public class InjectableQKD {
                                                 throw new Exception("Invalid sequence length in getKeyHalf response.");
                                             if (ASN1Integer.getInstance(respSeq2.getObjectAt(0)).intValueExact() != 0)
                                                 throw new Exception("getKeyHalf response returned an error");
-                                            if (ASN1Integer.getInstance(respSeq2.getObjectAt(1)).intValueExact() != 0xFE)
+                                            if (ASN1Integer.getInstance(respSeq2.getObjectAt(1)).intValueExact() != -2)
                                                 throw new Exception("Invalid getKeyHalf response code");
-                                            if (ASN1Integer.getInstance(respSeq2.getObjectAt(2)).longValueExact() != brencisNonce)
+                                            if (ASN1Integer.getInstance(respSeq2.getObjectAt(2)).longValueExact() != brencisNonce+1)
                                                 throw new Exception("getKeyHalf response returned an invalid nonce");
                                             ASN1OctetString keyRight = ASN1OctetString.getInstance(respSeq2.getObjectAt(3));
                                             ASN1OctetString hashLeft = ASN1OctetString.getInstance(respSeq2.getObjectAt(4));
@@ -701,9 +707,9 @@ public class InjectableQKD {
                                 throw new Exception("Invalid sequence length in getKeyHalf response.");
                             if (ASN1Integer.getInstance(respSeq1.getObjectAt(0)).intValueExact() != 0)
                                 throw new Exception("getKeyHalf response returned an error");
-                            if (ASN1Integer.getInstance(respSeq1.getObjectAt(1)).intValueExact() != 0xFE)
+                            if (ASN1Integer.getInstance(respSeq1.getObjectAt(1)).intValueExact() != -2)
                                 throw new Exception("Invalid getKeyHalf response code");
-                            if (ASN1Integer.getInstance(respSeq1.getObjectAt(2)).longValueExact() != aijaNonce)
+                            if (ASN1Integer.getInstance(respSeq1.getObjectAt(2)).longValueExact() != aijaNonce+1)
                                 throw new Exception("getKeyHalf response returned an invalid nonce");
                             ASN1OctetString keyLeft = ASN1OctetString.getInstance(respSeq1.getObjectAt(3));
                             ASN1OctetString hashRight1 = ASN1OctetString.getInstance(respSeq1.getObjectAt(4));
@@ -734,9 +740,9 @@ public class InjectableQKD {
                                             throw new Exception("Invalid sequence length in getKeyHalf response.");
                                         if (ASN1Integer.getInstance(respSeq2.getObjectAt(0)).intValueExact() != 0)
                                             throw new Exception("getKeyHalf response returned an error");
-                                        if (ASN1Integer.getInstance(respSeq2.getObjectAt(1)).intValueExact() != 0xFE)
+                                        if (ASN1Integer.getInstance(respSeq2.getObjectAt(1)).intValueExact() != -2)
                                             throw new Exception("Invalid getKeyHalf response code");
-                                        if (ASN1Integer.getInstance(respSeq2.getObjectAt(2)).longValueExact() != brencisNonce)
+                                        if (ASN1Integer.getInstance(respSeq2.getObjectAt(2)).longValueExact() != brencisNonce+1)
                                             throw new Exception("getKeyHalf response returned an invalid nonce");
                                         ASN1OctetString keyRight = ASN1OctetString.getInstance(respSeq2.getObjectAt(3));
                                         ASN1OctetString hashLeft2 = ASN1OctetString.getInstance(respSeq2.getObjectAt(4));
@@ -786,8 +792,8 @@ public class InjectableQKD {
         @Override
         public byte[] decapsulate(byte[] secretKey, byte[] ciphertext) throws Exception {
 
-            byte[] sharedSecret = new byte[]{};
             if (this.isServer()) {
+                InjectedKEMs.unlockKEM(0xFEFF); // User2 unlock QKD KEM
                 return new byte[]{};
             } else {
                 ASN1Primitive o = new ASN1InputStream(ciphertext).readObject();
@@ -800,11 +806,11 @@ public class InjectableQKD {
                 // comparing the received and expected hash
                 assert new Hash(hashAlgOid, secretKey).equals(fullHash);
 
-                System.out.println("QaaS SECRET KEY at client: " + byteArrayToString(secretKey));
-                System.out.println("QaaS SHARED SECRET at client: " + byteArrayToString(sharedSecret));
+                System.out.println("QaaS SHARED SECRETat client: " + byteArrayToString(secretKey));
+
+                return secretKey;
             }
 
-            return sharedSecret;
         }
     }
 
