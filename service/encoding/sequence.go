@@ -26,7 +26,6 @@ func (s DERSequence) ToByteArray() []byte {
 	length := len(sequence)
 	if length > 127 {
 		lengthOfLength := int(math.Ceil(math.Log2(float64(length))) / 8) // in bytes
-		// fmt.Printf("Length of %d is %d", length, lengthOfLength)
 		res[1] = 0b10000000 | byte(lengthOfLength)
 		res = append(res, utils.IntToBytesWithLength(int64(length), lengthOfLength)...)
 	} else {

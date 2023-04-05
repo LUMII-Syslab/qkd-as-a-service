@@ -1,8 +1,9 @@
 package manager
 
 import (
-	"golang.org/x/crypto/sha3"
 	"qkdc-service/constants"
+
+	"golang.org/x/crypto/sha3"
 )
 
 func (k *KeyManager) getThisHalf(keyId []byte) (thisHalf []byte, errId int) {
@@ -23,7 +24,7 @@ func (k *KeyManager) getOtherHash(keyId []byte) ([]byte, int) {
 
 func (k *KeyManager) getShake128Hash(data []byte) (hash []byte, errId int) {
 	h := sha3.NewShake128()
-	hash = make([]byte, 128)
+	hash = make([]byte, 128/8)
 	_, err := h.Write(data)
 	if err != nil {
 		errId = constants.ErrorInternal
