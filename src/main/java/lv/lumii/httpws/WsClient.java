@@ -252,7 +252,7 @@ public class WsClient {
             if (ok) {
                 new Thread(()-> {
                     try {
-                        wsClient.value().run();
+                        //wsClient.value().run();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
