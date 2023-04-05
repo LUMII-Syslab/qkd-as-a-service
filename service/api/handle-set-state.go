@@ -1,12 +1,14 @@
 package api
 
 import (
-	"github.com/gorilla/websocket"
 	"qkdc-service/constants"
+	"qkdc-service/encoding"
 	"qkdc-service/models"
+
+	"github.com/gorilla/websocket"
 )
 
-func (c *Controller) handleSetStateRequest(conn *websocket.Conn, sequence DERSequence) {
+func (c *Controller) handleSetStateRequest(conn *websocket.Conn, sequence encoding.DERSequence) {
 	request, cNonce, err := parseSetStateRequest(sequence)
 	if err != nil {
 		c.errorLogger.Println(err)
@@ -25,16 +27,16 @@ func (c *Controller) handleSetStateRequest(conn *websocket.Conn, sequence DERSeq
 	}
 }
 
-func parseSetStateRequest(sequence DERSequence) (request *models.SetStateRequest, cNonce int, err error) {
+func parseSetStateRequest(sequence encoding.DERSequence) (request *models.SetStateRequest, cNonce int, err error) {
 	request = &models.SetStateRequest{}
-	err = DecodeIntoVariables(sequence, nil, &request.State, &request.KeyId0, &request.KeyId1, &cNonce)
+	err = encoding.DecodeIntoVariables(sequence, nil, &request.State, &request.KeyId0, &request.KeyId1, &cNonce)
 	return
 }
 
 func encodeSetStateResponse(response *models.SetStateResponse, cNonce int) []byte {
-	res := DERSequence{}
-	res = append(res, CreateIntSeqElement(response.ErrId))
-	res = append(res, CreateIntSeqElement(constants.SetStateResponse))
-	res = append(res, CreateIntSeqElement(cNonce))
+	res := encoding.DERSequence{}
+	res = append(res, encoding.CreateIntSeqElement(response.ErrId))
+	res = append(res, encoding.CreateIntSeqElement(constants.SetStateResponse))
+	res = append(res, encoding.CreateIntSeqElement(cNonce))
 	return res.ToByteArray()
 }

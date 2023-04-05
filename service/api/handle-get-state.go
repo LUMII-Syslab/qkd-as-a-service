@@ -2,12 +2,14 @@ package api
 
 import (
 	"errors"
-	"github.com/gorilla/websocket"
 	"qkdc-service/constants"
+	"qkdc-service/encoding"
 	"qkdc-service/models"
+
+	"github.com/gorilla/websocket"
 )
 
-func (c *Controller) handleGetStateRequest(conn *websocket.Conn, sequence DERSequence) {
+func (c *Controller) handleGetStateRequest(conn *websocket.Conn, sequence encoding.DERSequence) {
 	request, cNonce, err := parseGetStateRequest(sequence)
 	if err != nil {
 		c.errorLogger.Println(err)
@@ -26,7 +28,7 @@ func (c *Controller) handleGetStateRequest(conn *websocket.Conn, sequence DERSeq
 	}
 }
 
-func parseGetStateRequest(seq DERSequence) (request *models.GetStateRequest, cNonce int, err error) {
+func parseGetStateRequest(seq encoding.DERSequence) (request *models.GetStateRequest, cNonce int, err error) {
 	if len(seq) != 2 {
 		err = errors.New("sequence of length 2 was expected")
 		return
@@ -37,17 +39,17 @@ func parseGetStateRequest(seq DERSequence) (request *models.GetStateRequest, cNo
 }
 
 func encodeGetStateResponse(response *models.GetStateResponse, cNonce int) []byte {
-	res := DERSequence{}
-	res = append(res, CreateIntSeqElement(response.ErrId))
-	res = append(res, CreateIntSeqElement(constants.GetStateResponse))
-	res = append(res, CreateIntSeqElement(cNonce))
-	res = append(res, CreateIntSeqElement(response.State))
-	res = append(res, CreateIntSeqElement(response.KeysStored))
-	res = append(res, CreateIntSeqElement(response.Reservable))
-	res = append(res, CreateIntSeqElement(response.KeysServed))
-	res = append(res, CreateIntSeqElement(response.KeysAdded))
-	res = append(res, CreateArrSeqElement(response.KeyId0))
-	res = append(res, CreateArrSeqElement(response.KeyId1))
+	res := encoding.DERSequence{}
+	res = append(res, encoding.CreateIntSeqElement(response.ErrId))
+	res = append(res, encoding.CreateIntSeqElement(constants.GetStateResponse))
+	res = append(res, encoding.CreateIntSeqElement(cNonce))
+	res = append(res, encoding.CreateIntSeqElement(response.State))
+	res = append(res, encoding.CreateIntSeqElement(response.KeysStored))
+	res = append(res, encoding.CreateIntSeqElement(response.Reservable))
+	res = append(res, encoding.CreateIntSeqElement(response.KeysServed))
+	res = append(res, encoding.CreateIntSeqElement(response.KeysAdded))
+	res = append(res, encoding.CreateArrSeqElement(response.KeyId0))
+	res = append(res, encoding.CreateArrSeqElement(response.KeyId1))
 
 	return res.ToByteArray()
 }

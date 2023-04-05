@@ -2,13 +2,15 @@ package api
 
 import (
 	"errors"
-	"github.com/gorilla/websocket"
 	"qkdc-service/constants"
+	"qkdc-service/encoding"
 	"qkdc-service/models"
+
+	"github.com/gorilla/websocket"
 )
 
 // handle request key and get half request
-func (c *Controller) handleRKAGHRequest(conn *websocket.Conn, sequence DERSequence) {
+func (c *Controller) handleRKAGHRequest(conn *websocket.Conn, sequence encoding.DERSequence) {
 	request, cNonce, err := parseRKAGHRequest(sequence)
 	if err != nil {
 		c.errorLogger.Println(err)
@@ -27,7 +29,7 @@ func (c *Controller) handleRKAGHRequest(conn *websocket.Conn, sequence DERSequen
 	}
 }
 
-func parseRKAGHRequest(seq DERSequence) (request *models.RKAGHRequest, cNonce int, err error) {
+func parseRKAGHRequest(seq encoding.DERSequence) (request *models.RKAGHRequest, cNonce int, err error) {
 	if len(seq) != 3 {
 		err = errors.New("sequence of length 3 was expected")
 		return
@@ -38,13 +40,13 @@ func parseRKAGHRequest(seq DERSequence) (request *models.RKAGHRequest, cNonce in
 }
 
 func encodeRKAGHResponse(response *models.RKAGHResponse, cNonce int) []byte {
-	res := DERSequence{}
-	res = append(res, CreateIntSeqElement(response.ErrId))
-	res = append(res, CreateIntSeqElement(constants.ReserveKeyResponse))
-	res = append(res, CreateIntSeqElement(cNonce))
-	res = append(res, CreateArrSeqElement(response.KeyId))
-	res = append(res, CreateArrSeqElement(response.ThisHalf))
-	res = append(res, CreateArrSeqElement(response.OtherHash))
-	res = append(res, CreateObjSeqElement(response.HashAlgId))
+	res := encoding.DERSequence{}
+	res = append(res, encoding.CreateIntSeqElement(response.ErrId))
+	res = append(res, encoding.CreateIntSeqElement(constants.ReserveKeyResponse))
+	res = append(res, encoding.CreateIntSeqElement(cNonce))
+	res = append(res, encoding.CreateArrSeqElement(response.KeyId))
+	res = append(res, encoding.CreateArrSeqElement(response.ThisHalf))
+	res = append(res, encoding.CreateArrSeqElement(response.OtherHash))
+	res = append(res, encoding.CreateObjSeqElement(response.HashAlgId))
 	return res.ToByteArray()
 }

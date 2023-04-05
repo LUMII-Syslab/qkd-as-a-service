@@ -1,4 +1,4 @@
-package api
+package encoding
 
 import (
 	"fmt"
@@ -13,63 +13,12 @@ const (
 	ObjId = 0x06
 )
 
-type SequenceElement struct {
-	id    byte
-	value []byte
-}
-
-func (e SequenceElement) AsInt() int {
-	return utils.BytesToInt(e.value)
-}
-
-func (e SequenceElement) AsBytes() []byte {
-	return e.value
-}
-
-func (e SequenceElement) encode() []byte {
-	res := make([]byte, 2, 2+len(e.value))
-	res[0] = e.id
-	res[1] = byte(len(e.value))
-	res = append(res, e.value...)
-	return res
-}
-
-func CreateIntSeqElement(x interface{}) SequenceElement {
-	res := SequenceElement{}
-	res.id = IntId
-	switch x.(type) {
-	case int:
-		res.value = utils.IntToBytes(int64(x.(int)))
-	case int64:
-		res.value = utils.IntToBytes(x.(int64))
-	case uint64:
-		res.value = utils.IntToBytes(int64(x.(uint64)))
-	default:
-		panic("unsupported type")
-	}
-	return res
-}
-
-func CreateObjSeqElement(o []byte) SequenceElement {
-	res := SequenceElement{}
-	res.id = ObjId
-	res.value = o
-	return res
-}
-
-func CreateArrSeqElement(b []byte) SequenceElement {
-	res := SequenceElement{}
-	res.id = ArrId
-	res.value = b
-	return res
-}
-
 type DERSequence []SequenceElement
 
 func (s DERSequence) ToByteArray() []byte {
 	sequence := make([]byte, 0)
 	for _, v := range s {
-		sequence = append(sequence, v.encode()...)
+		sequence = append(sequence, v.ToByteArray()...)
 	}
 	res := make([]byte, 2, 2+len(sequence))
 	res[0] = SeqId

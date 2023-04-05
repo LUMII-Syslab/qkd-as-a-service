@@ -2,12 +2,14 @@ package api
 
 import (
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
 	"net"
 	"net/http"
 	"qkdc-service/constants"
+	"qkdc-service/encoding"
 	"qkdc-service/manager"
+
+	"github.com/gorilla/websocket"
 )
 
 type Controller struct {
@@ -48,7 +50,7 @@ func (c *Controller) ListenAndServe(APIPort int) {
 				break
 			}
 
-			sequence, err := DecodeDERSequence(body)
+			sequence, err := encoding.DecodeDERSequence(body)
 			if err != nil {
 				c.errorLogger.Println(err)
 				continue
