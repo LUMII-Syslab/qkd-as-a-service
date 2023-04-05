@@ -66,14 +66,22 @@ func CreateArrSeqElement(b []byte) SequenceElement {
 type DERSequence []SequenceElement
 
 func (s DERSequence) ToByteArray() []byte {
-	res := make([]byte, 2)
-	res[0] = SeqId
-	defer func() { res[1] = byte(len(res) - 2) }()
-
+	sequence := make([]byte, 0)
 	for _, v := range s {
-		res = append(res, v.encode()...)
+		sequence = append(sequence, v.encode()...)
+	}
+	res := make([]byte, 2, 2+len(sequence))
+	res[0] = SeqId
+
+	length := len(sequence)
+	if length > 127 {
+		res[1] = 0b10000000 | byte(length>>8)
+		res = append(res, utils.IntToBytes(int64(length))...)
+	} else {
+		res[1] = byte(length)
 	}
 
+	res = append(res, sequence...)
 	return res
 }
 
