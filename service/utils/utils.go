@@ -21,6 +21,25 @@ func IntToBytes(x int64) []byte {
 	return res
 }
 
+func IntToBytesWithLength(x int64, desiredLen int) []byte {
+	res := make([]byte, 0)
+	var mask int64 = (1 << 8) - 1
+	preceeded := false
+	for i := desiredLen-1; i >= 0; i-- {
+		shiftedMask := mask << (8 * i)
+		maskedValue := x & shiftedMask
+		if maskedValue != 0 || preceeded {
+			maskedValue >>= 8 * i
+			res = append(res, byte(maskedValue))
+			preceeded = true
+		}
+	}
+	if len(res) == 0 {
+		res = append(res, 0)
+	}
+	return res
+}
+
 func BytesToInt(b []byte) int {
 	res := 0
 	for _, v := range b {

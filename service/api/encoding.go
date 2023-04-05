@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"math"
 	"qkdc-service/utils"
 )
 
@@ -75,8 +76,10 @@ func (s DERSequence) ToByteArray() []byte {
 
 	length := len(sequence)
 	if length > 127 {
-		res[1] = 0b10000000 | byte(length>>8)
-		res = append(res, utils.IntToBytes(int64(length))...)
+		lengthOfLength := int(math.Ceil(math.Log2(float64(length))) / 8) // in bytes
+		// fmt.Printf("Length of %d is %d", length, lengthOfLength)
+		res[1] = 0b10000000 | byte(lengthOfLength)
+		res = append(res, utils.IntToBytesWithLength(int64(length), lengthOfLength)...)
 	} else {
 		res[1] = byte(length)
 	}
