@@ -4,7 +4,7 @@ by Sergejs Kozlovičs, 2022-2023
 
 ## Prerequisites
 
-1. Install openssl. If you need openssl with PQC algorithms, you can use [our scripts on GitHub](https://github.com/LUMII-Syslab/oqs-haproxy). The installation can be done either in a native Linux/Unix environment or via Cygwin on Windows. By default, it is assumed that your openssl is located at `/opt/oqs/bin/openssl`. If your openssl is somewhere else, edit the `OQS_OPENSSL` variable and (optionally) the `OQS_OPENSSL_REQ_ARGS` (e.g., for specifying the config file for new keys) in `_vars.sh`.
+1. Install openssl. If you need openssl with PQC algorithms, you can use [our scripts on GitHub](https://github.com/LUMII-Syslab/oqs-haproxy). The installation can be done either in a native Linux/Unix environment or via Cygwin on Windows. By default, it is assumed that your openssl is located at `/opt/oqs/bin/openssl`. If your openssl is somewhere else, edit the `OQS_OPENSSL` variable and (optionally) `OQS_OPENSSL_CA_REQ_ARGS`,  `OQS_OPENSSL_CLIENT_REQ_ARGS`, and `OQS_OPENSSL_SERVER_REQ_ARGS` (for specifying additional req arguments) in `_vars.sh`.
 2. JDK16+ (OpenJDK or GraalVM are OK) with paths to its binaries in the `PATH` environment variable. We will need JDK `keytool` to create Java key store and trust store. We need JDK v16+ since it supports some latest hash algorithms that are used in recent file format of the key/trust store.
 
 ## The scripts
