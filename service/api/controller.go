@@ -45,7 +45,7 @@ func (c *Controller) ListenAndServe(APIPort int) {
 		for {
 			_, body, err := conn.ReadMessage()
 			if err != nil {
-				c.errorLogger.Println(err)
+				c.infoLogger.Println(err)
 				_ = conn.Close()
 				break
 			}
