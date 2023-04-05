@@ -29,7 +29,7 @@ public class PQProxy {
 
     static {
 
-        InjectablePQC.inject(InjectedKEMs.InjectionOrder.AFTER_DEFAULT);
+        InjectablePQC.inject(InjectedKEMs.InjectionOrder.BEFORE_DEFAULT);
             // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
 
         File f = new File(WsServer.class.getProtectionDomain().getCodeSource().getLocation().getPath());

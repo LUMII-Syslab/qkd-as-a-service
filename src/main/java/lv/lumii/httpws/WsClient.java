@@ -252,7 +252,7 @@ public class WsClient {
             if (ok) {
                 new Thread(()-> {
                     try {
-                        //wsClient.value().run();
+                        wsClient.value().run();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -266,16 +266,19 @@ public class WsClient {
 
     public void connectAndRunAsync() {
         try {
-            //wsClient.value().run();
-            //wsClient.value().connect();
-            new Thread(()-> {
-                try {
-                    wsClient.value().run();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }).start();
+
+                new Thread(()-> {
+                    try {
+                        boolean ok = wsClient.value().connectBlocking();
+                        if (!ok)
+                            throw new Exception("Could not connectBlocking");
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).start();
+
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
