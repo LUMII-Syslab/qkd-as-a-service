@@ -39,23 +39,22 @@ The types and their respective encodings used in QAAS requests are:
 
 ## QAAS client API
 
-- `reserveKeyAndGetHalf` is used to reserve a key.
+- endpoint `reserveKeyAndGetHalf` reserves a new key from a KDC.
 
-- `getKeyHalf` is used to fetch a reserved key from the other KDC.
+- endpoint `getKeyHalf` fetches a reserved key from the other KDC.
 
 ### 0x01: `reserveKeyAndGetHalf` request
 
 | ordinal |       parameter      |   type  |               description & notes               |
 |:-------:|----------------------|---------|-------------------------------------------------|
 |    1    | endpoint id = `0x01` | integer | Specifies the `reserveKeyAndGetHalf` request.   |
-|    2    | key length = `256`   | integer | Currently only 256 byte key fetching supported. |
+|    2    | key length = `256`   | integer | Currently only 256 byte key fetching is supported. |
 |    3    | crypto nonce         | integer | Value should be between 0 and 2^63-1.           |
 
-0. endpoint id = `0x01` (function ID for `reserveKeyAndGetKeyHalf`)
-
-1. key length
-
-2. crypto nonce
+<details>
+  <summary>encoded request example</summary>
+  <div></div>
+</details>
 
 encoded request example
 
