@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"qkdc-service/constants"
 
 	"github.com/spf13/viper"
 )
@@ -47,7 +46,7 @@ func loadConfig() Configuration {
 	if viper.IsSet("max_key_cnt") {
 		log.Printf("loaded MaxKeyCount = %v from %v\n", res.MaxKeyCount, confFile)
 	} else {
-		res.MaxKeyCount = constants.DefMxReq
+		res.MaxKeyCount = 1000
 		log.Printf("loaded MaxKeyCount = %v from %v\n", res.MaxKeyCount, "defaults")
 	}
 
