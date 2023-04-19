@@ -54,7 +54,6 @@ The types and their respective encodings used in QAAS requests are:
 <details>
   <summary>encoded request example</summary>
   <div>
-encoded request example
 
 ```
 30 0B 02 01 01 02 02 01 00 02 02 30 39
@@ -69,6 +68,9 @@ explanation:
 `02` `02` `01 00`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x0100` = 256; ( **key length** in bits )
 
 `02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
+
+  </div>
+</details>
 
 ### 0xff: `reserveKeyAndGetHalf` response
 
@@ -88,8 +90,6 @@ returns an ASN1Sequence with these items:
 
 6. hash algorithm id: ASN Object Identifier, e.g., encoded as `0x608648016503040211`
 
-  </div>
-</details>
 encoded return example:
 
 ```
