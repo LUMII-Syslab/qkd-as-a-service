@@ -53,9 +53,7 @@ The types and their respective encodings used in QAAS requests are:
 
 <details>
   <summary>encoded request example</summary>
-  <div></div>
-</details>
-
+  <div>
 encoded request example
 
 ```
@@ -90,6 +88,8 @@ returns an ASN1Sequence with these items:
 
 6. hash algorithm id: ASN Object Identifier, e.g., encoded as `0x608648016503040211`
 
+  </div>
+</details>
 encoded return example:
 
 ```
