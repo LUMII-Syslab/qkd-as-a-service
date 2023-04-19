@@ -111,15 +111,16 @@ explanation:
 
 ### 0x02: `getKeyHalf` request
 
-0. endpoint id = `0x02` (function ID for `getKeyHalf)
+| ordinal | parameter | type | description & notes |
+|:-------:|-----------|------|---------------------|
+| 1 | endpoint id = `0x02` | integer | Specifies the `getKeyHalf` request. |
+| 2 | key length = `256` | integer | Currently only 256 byte key fetching is supported. |
+| 3 | key identifier | octet array | |
+| 4 | crypto nonce | integer | Value should be between 0 and 2^63-1. |
 
-1. key length
+<details>
 
-2. key identifier
-
-3. crypto nonce
-
-encoded request example
+<summary>encoded request example</summary>
 
 ```
 30 11 02 01 02 02 02 01 00 04 04 40 af a0 1f 02 02 30 39
@@ -136,6 +137,8 @@ explanation:
 `04` `04` `40 af a0 1f`: byte array (`0x04`) with length `0x04` = 4 bytes; ( **key identifier** )
 
 `02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
+
+</details>
 
 ### 0xfe: `getKeyHalf` response
 
