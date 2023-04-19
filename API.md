@@ -72,6 +72,16 @@ explanation:
 
 ### 0xff: `reserveKeyAndGetHalf` response
 
+| ordinal | parameter | type | description & notes |
+|:-------:|-----------|------|---------------------|
+| 1 | error code | integer | |
+| 2 | response id | integer | |
+| 3 | key identifier | octet array | |
+| 4 | key bytes first half | octet array | |
+| 5 | other byte half hash | octet array | |
+| 6 | hash algorithm id | object identifier | |
+
+
 returns an ASN1Sequence with these items:
 
 0. error code: ASN integer
