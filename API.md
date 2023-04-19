@@ -81,8 +81,9 @@ explanation:
 | 5 | other byte half hash | octet array | |
 | 6 | hash algorithm id | object identifier | |
 
+<details>
 
-encoded return example:
+<summary>encoded response example:</summary>
 
 ```
 30 23 02 01 00 02 01 ff 02 02 a4 55 04 04 28 8b de 07 04 02 21 a1 04 02 01 02 06 09 60 86 48 01 65 03 04 02 11
@@ -105,6 +106,8 @@ explanation:
 `04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **hash(the other half)** )
 
 `06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** ); for SHAKE-128 it is `60 86 48 01 65 03 04 02 11`, which corresponds to 2.16.840.1.101.3.4.2.11
+
+</details>
 
 ### 0x02: `getKeyHalf` request
 
