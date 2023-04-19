@@ -76,10 +76,11 @@ explanation:
 |:-------:|-----------|------|---------------------|
 | 1 | error code | integer | |
 | 2 | response id = `0xff` | integer | Specifies `reserveKeyAndHalf` response. |
+| 3 | crypto nonce | integer | |
 | 3 | key identifier | octet array | |
 | 4 | key bytes first half | octet array | |
 | 5 | other byte half hash | octet array | |
-| 6 | hash algorithm id | object identifier | |
+| 6 | hash algorithm id | object id | |
 
 <details>
 
@@ -147,23 +148,14 @@ explanation:
 |    1    | error code             | integer     |                                                |
 |    2    | response id = `0xfe`   | integer     | Specifies the `getKeyHalf` response. |
 |    3    | crypto nonce           | integer     |                                                |
-|    4    | half of key bytes      | octet array |                                                |
-|    5    | hash of the other half | octet array |                                                |
-|    6    | hash algorithm id      | object id   |                                                |
+|    4    | key bytes second half | octet array |                                                |
+|    5    | other byte half hash | octet array |    |
+|    6    | hash algorithm id      | object id   |  |
 
-0. error code
 
-1. response id = `0xFE`
+<details>
 
-2. crypto nonce
-
-3. half of key bytes
-
-4. hash(the other half)
-
-5. hash algorithm id = `0x608648016503040211`
-
-encoded response example:
+<summary>encoded response example:</summary>
 
 ```
 30 1d 02 01 00 02 01 fe 02 02 30 3a 04 02 e1 5c 04 02 01 02 06 09 60 86 48 01 65 03 04 02 11
@@ -184,6 +176,8 @@ explanation:
 `04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **hash(the other half)** )
 
 `06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** )
+
+</details>
 
 ## QAAS admin API
 
