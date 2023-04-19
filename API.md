@@ -52,8 +52,7 @@ The types and their respective encodings used in QAAS requests are:
 |    3    | crypto nonce         | integer | Value should be between 0 and 2^63-1.           |
 
 <details>
-  <summary>encoded request example</summary>
-  <div>
+<summary>encoded request example</summary>
 
 ```
 30 0B 02 01 01 02 02 01 00 02 02 30 39
@@ -69,7 +68,6 @@ explanation:
 
 `02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
 
-  </div>
 </details>
 
 ### 0xff: `reserveKeyAndGetHalf` response
@@ -142,8 +140,6 @@ explanation:
 
 `02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
 
-</details>
-
 ### 0xfe: `getKeyHalf` response
 
 | ordinal | value                  | type        | description & notes                            |
@@ -188,7 +184,6 @@ explanation:
 `04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **hash(the other half)** )
 
 `06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** )
-</details>
 
 ## QAAS admin API
 
@@ -205,6 +200,7 @@ explanation:
 
 <details>
 <summary>encoded request example:</summary>
+<div>
 
 ```
 30 07 02 01 03 02 02 30 39
