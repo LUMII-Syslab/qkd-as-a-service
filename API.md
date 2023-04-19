@@ -75,28 +75,12 @@ explanation:
 | ordinal | parameter | type | description & notes |
 |:-------:|-----------|------|---------------------|
 | 1 | error code | integer | |
-| 2 | response id | integer | |
+| 2 | response id = `0xff` | integer | Specifies `reserveKeyAndHalf` response. |
 | 3 | key identifier | octet array | |
 | 4 | key bytes first half | octet array | |
 | 5 | other byte half hash | octet array | |
 | 6 | hash algorithm id | object identifier | |
 
-
-returns an ASN1Sequence with these items:
-
-0. error code: ASN integer
-
-1. response id: ASN integer = `0xFF` (meaning: `reserveKeyAndGetKeyHalf` response)
-
-2. crypto nonce: ASN integer
-
-3. key identifier: ASN octet string
-
-4. half of key bytes: ASN octet string
-
-5. hash(the other half of the key): ASN octet string
-
-6. hash algorithm id: ASN Object Identifier, e.g., encoded as `0x608648016503040211`
 
 encoded return example:
 
