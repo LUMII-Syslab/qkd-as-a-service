@@ -72,7 +72,7 @@ Aija and Brencis are launched as non-secure web socket servers (upgraded HTTP). 
 
 * `clavis` - uses the real IDQ Clavis device to collect quantumly distributed keys; in this case, also specify the `clavis_url` property;
 * `pseudorandom` - generates keys randomly (both Aija and Brencis must be launched from the same process, i.e., both `aija_port` and `brencis_port` have to be specified);
-* `filesystem` - takes keys from the file system folder (the folder can be shared); specify the folder path in the `fs_gatherer_dir` property.
+* `filesystem` - takes keys from the file system folder (the folder can be shared); specify the folder path in the `fs_gatherer_dir` property. File names must be in the format `<key-ID>.key` (e.g., `00f2b5c1-0284-4fc9-8d7d-d663f31c7d7c.key`) and the content must be the 256-bit binary key (32 bytes long).
 
 We have prepared a script for launching 4 reverse proxies (2 in front of Aija and 2 in front of Brencis) to enforce PQC connections from Users 1 and 2 and from Centis (Centis has separate proxies since it can control Aija and Brencis; Centis has a specific client key+certificate).
 
