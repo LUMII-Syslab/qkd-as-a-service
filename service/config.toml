@@ -5,8 +5,8 @@ max_key_cnt = 100000
 # can be hosted from the same process
 # if aija or brencis is commented out
 # its qkdc service will not be hosted
-aija_port = 8080
-brencis_port = 8081
+aija_port = 8001
+brencis_port = 8002
 
 # possible gatherers values: "pseudorandom", "clavis", "filesystem"
 gatherer = "pseudorandom"
@@ -22,5 +22,6 @@ fs_gatherer_dir = "/tmp/qkd-mock"
 log_requests = true
 
 # default serving can be true or false.
-# if false, set state request with RUNNING must be made to receive keys.
-default_serving = false
+# if false, set state request with RUNNING must be made to receive keys
+# (that can be done from controlling module named Centis)
+default_serving = true
