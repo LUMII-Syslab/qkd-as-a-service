@@ -17,6 +17,7 @@ import java.nio.channels.spi.SelectorProvider;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Optional;
 
 public class PQProxy {
@@ -42,7 +43,8 @@ public class PQProxy {
             mainExecutable = "java";
         }
 
-        String logFileName = mainDirectory + File.separator + "pqproxy.log";
+        String logFileName = mainDirectory + File.separator + "log"+ File.separator+"pqproxy-"+new Date().getTime()+".log";
+        new File(logFileName).getParentFile().mkdirs();
         System.setProperty("org.slf4j.simpleLogger.logFile", logFileName);
         logger = LoggerFactory.getLogger(PQProxy.class);
 
