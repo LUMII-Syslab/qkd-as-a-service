@@ -39,8 +39,5 @@ echo "===> Checking/generating key pairs for proxy-aija and proxy-brencis..."
 [ -f $MY_DIR/proxy-brencis.pem ] || $CA_DIR/new_server_key.sh proxy-ca proxy-brencis $MY_DIR/proxy-server.cnf
 
 
-[ ! -d $CA_DIR/proxy-client-centis ] || echo "===> PLEASE, INSTALL ${MY_DIR}/proxy-client-centis.pem (.pfx) AS YOUR CLIENT KEY in your non-PQC browser!"
-echo "===> Running HAProxy..."
-echo "     connect to ws://localhost:8000/ws for aija"
-#echo "     connect to ws://localhost:444/ws for brencis"
-#/opt/oqs/sbin/haproxy -dL -V -f haproxy_rsa2oqs.cfg
+[ ! -d $CA_DIR/proxy-client-centis ] || echo "===> PLEASE, INSTALL ${CA_DIR}/proxy-client-centis/proxy-client-centis.pem (.pfx) AS YOUR CLIENT KEY in your non-PQC browser where Centis will be used!"
+[ ! -d $CA_DIR/proxy-ca ] || echo "===> PLEASE, INSTALL ${CA_DIR}/proxy-ca/ca.crt AS A TRUSTED CA FOR WEB-SITES in your non-PQC browser where Centis will be used!"
