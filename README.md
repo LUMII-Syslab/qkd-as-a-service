@@ -25,9 +25,17 @@ The QaaS servers, which are directly attached to Alice and Bob, are called Aija 
 
 The users who wish to establish a secure TLS connection based on a shared key received from QaaS are called User 1 and User 2.
 
+Since not all nodes have out-of-the-box TLS support (in some cases we need TLS with PQC), we introduce additional proxies.
+
+The following figure illustrates all the nodes that participate in the QaaS system:
+
+![qkd-infrastructure](qkd-infrastructure.png)
+
+The QaaS infrastructure ensures secure (green) link between User 1 and User 2 by utilizing the optical fiber QKD system (in the bottom) and multiple classical PQC links.
+
 # Keys and Certificates
 
-Multiple PQC and ECC keys and certificates have to be generated in order for the whole QaaS system could operate in a secure way.
+Multiple PQC and ECC keys and certificates have to be generated in order for the whole QaaS system could operate in a secure way. We use web sockets in our protocols, meaning that keys and certificates ensure the secure web sockets protocol over TLS (`wss`) instead of plain web sockets (`ws`), like `https` is a secure version of `http`.
 
 In order to be able to generate keys and sign certificates, OpenSSL with post-quantum algorithms (from LibOQS) has to be installed. For OpenSSL 1.1.1, use our scripts from https://github.com/LUMII-Syslab/oqs-haproxy. For OpenSSL 3, install oqs-provider from https://github.com/open-quantum-safe/oqs-provider.
 
