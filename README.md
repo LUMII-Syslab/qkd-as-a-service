@@ -43,7 +43,7 @@ Then run:
 scripts/gen-keys.sh
 ```
 
-All the keys (for CA, Aija, Brencis, Centis, users, and proxies) are placed into subfolders within `ca-scripts`. The keys are mostly used by the scripts (from the `scripts` directory). Some (ECC, non-PQC) keys have to be installed in a non-PQC browser, where Centis will be launched (see below).
+All the keys (for CA, Aija, Brencis, Centis, users, and proxies) are placed into subfolders within `ca-scripts`. The keys are mostly used by the scripts (from the `scripts` directory). Some (ECC, non-PQC) keys may be installed in a non-PQC browser, where Centis will be launched (see below).
 
 # Running QaaS (Aija and Brencis)
 
