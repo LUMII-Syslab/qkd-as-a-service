@@ -15,8 +15,6 @@ This project consists of
 
 > The QaaS user library and PQProxy share the same Java code base inside `userlib+pqproxy`.
 
-Please, cite our papers: [the links will be provided later in 2023]
-
 # The Names of the Nodes
 
 Following IDQ Clavis notation, we call QKD devices Alice (the transmitter) and Bob (the receiver).
@@ -148,7 +146,7 @@ If you are paranoic, it is possible to launch Centis in HTTPS mode even if your 
 
 Then edit `scripts/pqproxy-local2pqccentis4aija.properties` and `pqproxy-local2pqccentis4brencis.properties` and specify `sourceTls=true`. Ensure the correct source and target key stores and trust stores are also specified there.
 
-# User Library Usage Example
+# User Library Usage Example (Users 1 and 2)
 
 Currently, we provide Java source code for sample implementations of User 1 (the TLS client) and User 2 (the TLS server). The symmetric TLS key is obtained from Aija and Brencis by means of the Butterfly Protocol from our paper.
 
