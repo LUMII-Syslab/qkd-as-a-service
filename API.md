@@ -55,7 +55,7 @@ The types and their respective encodings used in QAAS requests are:
 <summary>encoded request example</summary>
 
 ```
-30 0B 02 01 01 02 02 01 00 02 02 30 39
+30 0b 02 01 01 02 02 01 00 02 02 30 39
 ```
 
 explanation:
@@ -87,28 +87,19 @@ explanation:
 <summary>encoded response example:</summary>
 
 ```
-30 23 02 01 00 02 01 ff 02 02 a4 55 04 04 28 8b de 07 04 02 21 a1 04 02 01 02 06 09 60 86 48 01 65 03 04 02 11
+30 5b 02 01 00 02 01 ff 02 02 30 3a 04 20 f0 ee 71 0b dd 47 79 3c b9 f6 a5 f1 af f4 2b 4d a4 24 28 6a 5c eb a2 91 f3 9e f1 16 96 57 af 14 04 10 8d cf be 25 0f 1c 06 6d 93 21 0d d0 2d a3 c4 d5 04 10 3d 53 11 a5 37 ba 6f 66 d2 ce 29 11 46 bb c1 ca 06 09 60 86 48 01 65 03 04 02 11
 ```
 
-explanation:
-
-`30` `23`: sequence type (`0x30`) with length `0x23` = 35 bytes;
-
-`02` `01` `00`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x00` = 0; ( **error code** )
-
-`02` `01` `ff`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0xff` = -1; ( **response id** )
-
-`02` `02` `a4 55`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0xa455` = 42069; ( **crypto nonce** )
-
-`04` `04` `28 8b de 07`: byte array (`0x04`) with length `0x04` = 4 bytes; ( **key identifier** )
-
-`04` `02` `21 a1`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **half of key bytes** )
-
-`04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **hash(the other half)** )
-
-`06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** ); for SHAKE-128 it is `60 86 48 01 65 03 04 02 11`, which corresponds to 2.16.840.1.101.3.4.2.11
-
-</details>
+```
+SEQUENCE (7 elem)
+  INTEGER 0
+  INTEGER -1
+  INTEGER 12346
+  OCTET STRING (32 byte) F0EE710BDD47793CB9F6A5F1AFF42B4DA424286A5CEBA291F39EF1169657AF14
+  OCTET STRING (16 byte) 8DCFBE250F1C066D93210DD02DA3C4D5
+  OCTET STRING (16 byte) 3D5311A537BA6F66D2CE291146BBC1CA
+  OBJECT IDENTIFIER 2.16.840.1.101.3.4.2.17 shake128len (NIST Algorithm)
+```
 
 ### 0x02: `getKeyHalf` request
 
