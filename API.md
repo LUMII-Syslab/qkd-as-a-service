@@ -47,9 +47,9 @@ The types and their respective encodings used in QAAS requests are:
 
 | ordinal |       parameter      |   type  |               description & notes               |
 |:-------:|----------------------|---------|-------------------------------------------------|
-|    1    | endpoint id = `0x01` | integer | Specifies the `reserveKeyAndGetHalf` request.   |
-|    2    | key length = `256`   | integer | Currently only 256 byte key fetching is supported. |
-|    3    | crypto nonce         | integer | Value should be between 0 and 2^63-1.           |
+|    0    | endpoint id = `0x01` | integer | Specifies the `reserveKeyAndGetHalf` request.   |
+|    1    | key length = `256`   | integer | Currently only 256 byte key fetching is supported. |
+|    2    | crypto nonce         | integer | Value should be between 0 and 2^63-1.           |
 
 <details>
 <summary>encoded request example</summary>
@@ -74,9 +74,9 @@ explanation:
 
 | ordinal | parameter | type | description & notes |
 |:-------:|-----------|------|---------------------|
-| 1 | error code | integer | |
-| 2 | response id = `0xff` | integer | Specifies `reserveKeyAndHalf` response. |
-| 3 | crypto nonce | integer | |
+| 0 | error code | integer | |
+| 1 | response id = `0xff` | integer | Specifies `reserveKeyAndHalf` response. |
+| 2 | crypto nonce | integer | |
 | 3 | key identifier | octet array | |
 | 4 | key bytes first half | octet array | |
 | 5 | other byte half hash | octet array | |
@@ -114,10 +114,10 @@ explanation:
 
 | ordinal | parameter | type | description & notes |
 |:-------:|-----------|------|---------------------|
-| 1 | endpoint id = `0x02` | integer | Specifies the `getKeyHalf` request. |
-| 2 | key length = `256` | integer | Currently only 256 byte key fetching is supported. |
-| 3 | key identifier | octet array | |
-| 4 | crypto nonce | integer | Value should be between 0 and 2^63-1. |
+| 0 | endpoint id = `0x02` | integer | Specifies the `getKeyHalf` request. |
+| 1 | key length = `256` | integer | Currently only 256 byte key fetching is supported. |
+| 2 | key identifier | octet array | |
+| 3 | crypto nonce | integer | Value should be between 0 and 2^63-1. |
 
 <details>
 
@@ -145,12 +145,12 @@ explanation:
 
 | ordinal | value                  | type        | description & notes                            |
 |:-------:|------------------------|-------------|------------------------------------------------|
-|    1    | error code             | integer     |                                                |
-|    2    | response id = `0xfe`   | integer     | Specifies the `getKeyHalf` response. |
-|    3    | crypto nonce           | integer     |                                                |
-|    4    | key bytes second half | octet array |                                                |
-|    5    | other byte half hash | octet array |    |
-|    6    | hash algorithm id      | object id   |  |
+|    0    | error code             | integer     |                                                |
+|    1    | response id = `0xfe`   | integer     | Specifies the `getKeyHalf` response. |
+|    2    | crypto nonce           | integer     |                                                |
+|    3    | key bytes second half | octet array |                                                |
+|    4    | other byte half hash | octet array |    |
+|    5    | hash algorithm id      | object id   |  |
 
 
 <details>
@@ -189,8 +189,8 @@ explanation:
 
 | ordinal | parameter           | type    | description & notes                   |
 |:-------:|---------------------|---------|---------------------------------------|
-|    1    | endoint id = `0x03` | integer |                                       |
-|    2    | crypto nonce        | integer | Value should be between 0 and 2^63-1. |
+|    0    | endoint id = `0x03` | integer |                                       |
+|    1    | crypto nonce        | integer | Value should be between 0 and 2^63-1. |
 
 <details>
 <summary>encoded request example:</summary>
@@ -214,12 +214,12 @@ explanation:
 
 | ordinal | value                | type        | description & notes                |
 |:-------:|----------------------|-------------|------------------------------------|
-|    1    | error code           | integer     |                                    |
-|    2    | response id = `0xfd` | integer     | Specifies the `getState` response. |
-|    3    | crypto nonce         | integer     |                                    |
-|    4    | KDC state id         | integer     |                                    |
-|    5    | oldest even key id   | octet array |                                    |
-|    6    | oldest odd key id    | octet array |                                    |
+|    0    | error code           | integer     |                                    |
+|    1    | response id = `0xfd` | integer     | Specifies the `getState` response. |
+|    2    | crypto nonce         | integer     |                                    |
+|    3    | KDC state id         | integer     |                                    |
+|    4    | oldest even key id   | octet array |                                    |
+|    5    | oldest odd key id    | octet array |                                    |
 
 <details>
 <summary>encoded response example</summary>
