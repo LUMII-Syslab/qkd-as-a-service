@@ -75,7 +75,7 @@ explanation:
 | ordinal | parameter | type | description & notes |
 |:-------:|-----------|------|---------------------|
 | 0 | error code | integer | |
-| 1 | response id = `0xff` | integer | Specifies `reserveKeyAndHalf` response. |
+| 1 | response id = `0xff` | integer | Specifies `reserveKeyAndHalf` response. 0xff denotes -1. |
 | 2 | crypto nonce | integer | |
 | 3 | key identifier | octet array | |
 | 4 | key bytes first half | octet array | |
@@ -146,7 +146,7 @@ explanation:
 | ordinal | value                  | type        | description & notes                            |
 |:-------:|------------------------|-------------|------------------------------------------------|
 |    0    | error code             | integer     |                                                |
-|    1    | response id = `0xfe`   | integer     | Specifies the `getKeyHalf` response. |
+|    1    | response id = `0xfe`   | integer     | Specifies the `getKeyHalf` response. 0xfe denotes -2. |
 |    2    | crypto nonce           | integer     |                                                |
 |    3    | key bytes second half | octet array |                                                |
 |    4    | other byte half hash | octet array |    |
