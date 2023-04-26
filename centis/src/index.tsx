@@ -78,7 +78,7 @@ function App() {
                     <div className="alert alert-danger alert-dismissible fade show col mx-2 my-3" role="alert">
                         Neizdevās savienoties ar Brencis.</div>}
                 {(aijaConnError || brencisConnError) &&
-                    <button className="btn btn-warning col-3 me-3 my-3" onClick={testConnections}>
+                    <button className="btn btn-warning col-3 me-3 my-3 rounded" onClick={testConnections}>
                         Pārbaudīt savienojumu <i className={`bi bi-arrow-clockwise ${testingConnections && "spinner-border"}`}></i></button>}
             </div>
             {(!aijaConnError && !brencisConnError) && !testingConnections &&
