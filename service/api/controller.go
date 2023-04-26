@@ -15,14 +15,16 @@ import (
 type Controller struct {
 	infoLogger  *log.Logger
 	errorLogger *log.Logger
+	debugLogger *log.Logger
 	manager     *manager.KeyManager
 	upgrader    websocket.Upgrader
 }
 
-func NewController(infoLogger *log.Logger, errorLogger *log.Logger, manager *manager.KeyManager) *Controller {
+func NewController(infoLogger *log.Logger, errorLogger *log.Logger, debugLogger *log.Logger, manager *manager.KeyManager) *Controller {
 	return &Controller{
 		infoLogger:  infoLogger,
 		errorLogger: errorLogger,
+		debugLogger: debugLogger,
 		manager:     manager,
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
@@ -45,7 +47,6 @@ func (c *Controller) ListenAndServe(APIPort int) {
 		for {
 			_, body, err := conn.ReadMessage()
 			if err != nil {
-				c.infoLogger.Println(err)
 				_ = conn.Close()
 				break
 			}
@@ -60,6 +61,7 @@ func (c *Controller) ListenAndServe(APIPort int) {
 				c.errorLogger.Println("sequence of length zero received")
 				continue
 			}
+
 			requestId := sequence[0].AsInt()
 
 			switch requestId {

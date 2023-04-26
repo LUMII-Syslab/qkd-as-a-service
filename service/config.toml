@@ -19,7 +19,8 @@ fs_gatherer_dir = "/tmp/qkd-mock"
 
 
 # logging every request may be useful for debugging
-log_requests = true
+log_info = true
+log_debug = false
 
 # default serving can be true or false.
 # if false, set state request with RUNNING must be made to receive keys.

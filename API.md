@@ -47,9 +47,9 @@ The types and their respective encodings used in QAAS requests are:
 
 | ordinal |       parameter      |   type  |               description & notes               |
 |:-------:|----------------------|---------|-------------------------------------------------|
-|    0    | endpoint id = `0x01` | integer | Specifies the `reserveKeyAndGetHalf` request.   |
-|    1    | key length = `256`   | integer | Currently only 256 byte key fetching is supported. |
-|    2    | crypto nonce         | integer | Value should be between 0 and 2^63-1.           |
+| 0 | endpoint id = `0x01`| integer | Specifies the `reserveKeyAndGetHalf` request.   |
+| 1 | key length = `256`  | integer | Currently only 256 byte key fetching is supported. |
+| 2 | crypto nonce        | integer | Value should be between 0 and 2^63-1.           |
 
 <details>
 <summary>encoded request example</summary>

@@ -6,6 +6,7 @@ import (
 	"qkdc-service/models"
 
 	"github.com/gorilla/websocket"
+	"github.com/jedib0t/go-pretty/text"
 )
 
 func (c *Controller) handleSetStateRequest(conn *websocket.Conn, sequence encoding.DERSequence) {
@@ -15,12 +16,16 @@ func (c *Controller) handleSetStateRequest(conn *websocket.Conn, sequence encodi
 		return
 	}
 
-	c.infoLogger.Printf("%#02x request  cNonce=%v: %+v", constants.SetStateRequest, cNonce, *request)
+	c.infoLogger.Printf("%v SetState request with cnonce=%v", text.FgGreen.Sprintf("%#02x", constants.SetStateRequest), cNonce)
+	c.debugLogger.Printf("request cnonce=%v: %+v", cNonce, *request)
+
 	response := c.manager.SetState(request)
 
 	cNonce += 1
 
-	c.infoLogger.Printf("%#02x response cNonce=%v: %+v", constants.SetStateResponse, cNonce, *response)
+	c.infoLogger.Printf("%v SetState response with cnonce=%v", text.FgGreen.Sprintf("%#02x", constants.SetStateResponse), cNonce)
+	c.debugLogger.Printf("response cnonce=%v: %+v", cNonce, *response)
+
 	err = conn.WriteMessage(websocket.BinaryMessage, encodeSetStateResponse(response, cNonce))
 	if err != nil {
 		c.errorLogger.Println(err)

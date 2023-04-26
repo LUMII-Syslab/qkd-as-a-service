@@ -7,6 +7,7 @@ import (
 	"qkdc-service/models"
 
 	"github.com/gorilla/websocket"
+	"github.com/jedib0t/go-pretty/text"
 )
 
 // handle request key and get half request
@@ -17,12 +18,16 @@ func (c *Controller) handleGKHRequest(conn *websocket.Conn, sequence encoding.DE
 		return
 	}
 
-	c.infoLogger.Printf("%#02x request  cNonce=%v: %+v", constants.GetKeyHalfRequest, cNonce, *request)
+	c.infoLogger.Printf("%v G.K.H. request with cnonce=%v", text.FgGreen.Sprintf("%#02x", constants.GetKeyHalfRequest), cNonce)
+	c.debugLogger.Printf("request cnonce=%v: %+v", cNonce, *request)
+
 	response := c.manager.GetKeyHalf(request)
 
 	cNonce += 1
 
-	c.infoLogger.Printf("%#02x response cNonce=%v: %+v", constants.GetKeyHalfResponse, cNonce, *response)
+	c.infoLogger.Printf("%v G.K.H.response with cnonce=%v", text.FgGreen.Sprintf("%#02x", constants.GetKeyHalfResponse), cNonce)
+	c.debugLogger.Printf("response cnonce=%v: %+v", cNonce, *response)
+
 	err = conn.WriteMessage(websocket.BinaryMessage, encodeGKHResponse(response, cNonce))
 	if err != nil {
 		c.errorLogger.Println(err)
