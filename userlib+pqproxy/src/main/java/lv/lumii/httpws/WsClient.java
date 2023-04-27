@@ -200,39 +200,41 @@ public class WsClient {
                 System.out.println("WS CLIENT line 200: setting host name (SNI) to "+targetUri.getHost());
                 list.add(new SNIHostName(targetUri.getHost()));
                 sslParameters.setServerNames(list);
-                sslParameters.setWantClientAuth(true);
-                sslParameters.setNeedClientAuth(true);
+                if (sslFactory.isPresent()) {
+                    sslParameters.setWantClientAuth(true);
+                    sslParameters.setNeedClientAuth(true);
+                }
 
                 sslParameters.setCipherSuites(new String[] {"TLS_AES_256_GCM_SHA384"});
             }
 
             @Override
             public void onOpen(ServerHandshake serverHandshake) {
-                System.out.println("WS CLIENT: OPENED");
+                System.out.println("WS CLIENT: "+this.uri+" OPENED");
                 replySink.open(this);
             }
 
             @Override
             public void onMessage(String s) {
-                System.out.println("WS CLIENT: TXT MSG received ["+s+"]");
+                System.out.println("WS CLIENT: "+this.uri+" TXT MSG received ["+s+"]");
                 replySink.consumeMessage(s);
             }
 
             @Override
             public void onMessage(ByteBuffer blob) {
-                System.out.println("WS CLIENT: BYTE MSG received ["+blob.array().length+" bytes]");
+                System.out.println("WS CLIENT: "+this.uri+" BYTE MSG received ["+blob.array().length+" bytes]");
                 replySink.consumeMessage(blob);
             }
 
             @Override
             public void onClose(int i, String s, boolean b) {
-                System.out.println("WS CLIENT: CLOSED WS ["+s+"]");
+                System.out.println("WS CLIENT: "+this.uri+" CLOSED WS ["+s+"]");
                 replySink.closeGracefully(s);
             }
 
             @Override
             public void onError(Exception e) {
-                System.out.println("WS CLIENT: Error "+e.getMessage());
+                System.out.println("WS CLIENT: "+this.uri+" Error "+e.getMessage());
                 replySink.closeWithException(e);
             }
 
@@ -249,10 +251,11 @@ public class WsClient {
     public void connectBlockingAndRunAsync() {
         try {
             boolean ok = wsClient.value().connectBlocking();
+            //wsClient.value().r
             if (ok) {
                 new Thread(()-> {
                     try {
-                        wsClient.value().run();
+                        //wsClient.value().run();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

@@ -127,7 +127,8 @@ public class WsServer {
             public void onClose(WebSocket ws, int code, String details, boolean byRemoteHost) {
                 System.out.println("WsServer close code=" + code+ " details:"+details);
                 WsSink sink = sourceMessageSinks.remove(ws);
-                sink.closeGracefully(details);
+                if (sink != null)
+                    sink.closeGracefully(details);
             }
 
             @Override
