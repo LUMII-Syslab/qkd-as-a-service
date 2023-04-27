@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"qkdc-service/constants"
 
 	"github.com/spf13/viper"
 )
@@ -19,7 +18,8 @@ type Configuration struct {
 	ClavisURL     string `mapstructure:"clavis_url"`
 	FSGathererDir string `mapstructure:"fs_gatherer_dir"`
 
-	LogRequests bool `mapstructure:"log_requests"`
+	LogInfo  bool `mapstructure:"log_info"`
+	LogDebug bool `mapstructure:"log_debug"`
 
 	DefaultServing bool `mapstructure:"default_serving"`
 }
@@ -47,7 +47,7 @@ func loadConfig() Configuration {
 	if viper.IsSet("max_key_cnt") {
 		log.Printf("loaded MaxKeyCount = %v from %v\n", res.MaxKeyCount, confFile)
 	} else {
-		res.MaxKeyCount = constants.DefMxReq
+		res.MaxKeyCount = 1000
 		log.Printf("loaded MaxKeyCount = %v from %v\n", res.MaxKeyCount, "defaults")
 	}
 
@@ -67,11 +67,18 @@ func loadConfig() Configuration {
 		log.Printf("loaded APIPort = %v from %v\n", res.BrencisAPiPort, "defaults")
 	}
 
-	if viper.IsSet("log_requests") {
-		log.Printf("loaded LogRequests = %v from %v\n", res.LogRequests, confFile)
+	if viper.IsSet("log_info") {
+		log.Printf("loaded LogInfo = %v from %v\n", res.LogInfo, confFile)
 	} else {
-		res.LogRequests = false
-		log.Printf("loaded LogRequests = %v from %v\n", res.LogRequests, "defaults")
+		res.LogInfo = false
+		log.Printf("loaded LogInfo = %v from %v\n", res.LogInfo, "defaults")
+	}
+
+	if viper.IsSet("log_debug") {
+		log.Printf("loaded LogDebug = %v from %v\n", res.LogInfo, confFile)
+	} else {
+		res.LogDebug = false
+		log.Printf("loaded LogDebug = %v from %v\n", res.LogDebug, "defaults")
 	}
 
 	if res.AijaAPIPort == res.BrencisAPiPort {

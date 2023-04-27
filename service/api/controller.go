@@ -2,25 +2,29 @@ package api
 
 import (
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
 	"net"
 	"net/http"
 	"qkdc-service/constants"
+	"qkdc-service/encoding"
 	"qkdc-service/manager"
+
+	"github.com/gorilla/websocket"
 )
 
 type Controller struct {
 	infoLogger  *log.Logger
 	errorLogger *log.Logger
+	debugLogger *log.Logger
 	manager     *manager.KeyManager
 	upgrader    websocket.Upgrader
 }
 
-func NewController(infoLogger *log.Logger, errorLogger *log.Logger, manager *manager.KeyManager) *Controller {
+func NewController(infoLogger *log.Logger, errorLogger *log.Logger, debugLogger *log.Logger, manager *manager.KeyManager) *Controller {
 	return &Controller{
 		infoLogger:  infoLogger,
 		errorLogger: errorLogger,
+		debugLogger: debugLogger,
 		manager:     manager,
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
@@ -43,12 +47,11 @@ func (c *Controller) ListenAndServe(APIPort int) {
 		for {
 			_, body, err := conn.ReadMessage()
 			if err != nil {
-				c.errorLogger.Println(err)
 				_ = conn.Close()
 				break
 			}
 
-			sequence, err := DecodeDERSequence(body)
+			sequence, err := encoding.DecodeDERSequence(body)
 			if err != nil {
 				c.errorLogger.Println(err)
 				continue
@@ -58,6 +61,7 @@ func (c *Controller) ListenAndServe(APIPort int) {
 				c.errorLogger.Println("sequence of length zero received")
 				continue
 			}
+
 			requestId := sequence[0].AsInt()
 
 			switch requestId {

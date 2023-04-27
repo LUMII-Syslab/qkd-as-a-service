@@ -28,10 +28,20 @@ export function bytesToSpacedHexOctets(data: Uint8Array): string {
 }
 
 export function ASNDERToList(seq): (number | Uint8Array)[] {
+    let result = [];
     try {
-        let it = 2;
-        let data = [];
-        while (it < 2 + seq[1]) {
+        let length = seq[1];
+        let start = 2;
+        if(seq[1] & 0b10000000) {
+            let lengthOfLength = seq[1] & 0b01111111;
+            length = 0;
+            for (let i = 0; i < lengthOfLength; i++) {
+                length <<= 8;
+                length += seq[2 + i];
+            }
+            start = 2 + lengthOfLength;
+        }
+        for(let it = start; it < start + length;) {
             if (seq[it] === 0x02) { // an integer follows
                 it++;
                 let int_len = seq[it++];
@@ -40,7 +50,7 @@ export function ASNDERToList(seq): (number | Uint8Array)[] {
                     int <<= 8;
                     int += seq[it++];
                 }
-                data.push(int);
+                result.push(int);
             } else if (seq[it] === 0x04 || seq[it] === 0x06) {
                 it++;
                 let arr_len = seq[it++];
@@ -48,16 +58,16 @@ export function ASNDERToList(seq): (number | Uint8Array)[] {
                 for (let i = 0; i < arr_len; i++) {
                     res[i] = seq[it++];
                 }
-                data.push(res);
+                result.push(res);
             } else {
                 console.error("ERROR converting DER to list", seq[it]);
-                return;
+                return [];
             }
         }
-        return data;
+        return result;
     } catch (e) {
         console.error("ERROR converting DER to list", e);
-        return;
+        return [];
     }
 }
 
