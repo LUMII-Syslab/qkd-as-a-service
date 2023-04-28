@@ -37,6 +37,6 @@ export ARGS="-f $MYDIR/pqproxy-pqccentis2brencis.properties"
 $MYDIR/term_with_title.sh "CENTIS-PROXY-TO-BRENCIS" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS $ARGS"
 
 # Launching both Aija and Brencis
-$MYDIR/term_with_title.sh "GO AIJA+BRENCIS" "cd $MYDIR/..//service && go run ."
+$MYDIR/term_with_title.sh "GO AIJA+BRENCIS" "cd $MYDIR/..//service && go mod tidy && go run ."
 
 popd
