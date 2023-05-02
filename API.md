@@ -136,7 +136,7 @@ SEQUENCE (4 elem)
 |:-------:|------------------------|-------------|------------------------------------------------|
 |    0    | error code             | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
 |    1    | response id = `0xfe`   | integer     | Specifies the `getKeyHalf` response. `0xfe` denotes -2. |
-|    2    | crypto nonce           | integer     |                                                |
+|    2    | crypto nonce           | integer     | Requests's crypto nonce + 1. |
 |    3    | key bytes second half | octet array |                                                |
 |    4    | other byte half hash | octet array |    |
 |    5    | hash algorithm id      | object id   |  |
@@ -196,7 +196,7 @@ SEQUENCE (2 elem)
 |:-------:|----------------------|-------------|------------------------------------|
 |    0    | error code           | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
 |1 | response id = `0xfd` | integer  | Specifies the `getState` response. `0xfd` Denotes -3. |
-|    2    | crypto nonce         | integer     |                                    |
+|    2    | crypto nonce         | integer     |  Requests's crypto nonce + 1.  |
 |    3    | KDC state code  | integer     | See  |
 | 4 | currently stored | integer | The size of key queue. |
 | 5 | currently reservable | integer | No. of keys with KDC's respective parity. |
@@ -261,7 +261,7 @@ SEQUENCE (5 elem)
 |:-------:|----------------------|-------------|------------------------------------|
 |    0    | error code           | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
 | 1 | response id = `0xfc` | integer | Specifies the `setState` response. `0xfc` Denotes -4. |
-|    2    | crypto nonce         | integer     |                                    |
+|    2    | crypto nonce         | integer     |  Requests's crypto nonce + 1. |
 
 <details>
 <summary>encoded response example</summary
