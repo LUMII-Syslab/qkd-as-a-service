@@ -4,7 +4,7 @@ export default function InputKeyId0({request, setRequest}){
             <input type="text" defaultValue={request.keyId0}
                    className="form-control"
                    onChange={(event) => {
-                       setRequest({...request, KeyId0: event.target.value})
+                       setRequest({...request, evenKeyId: event.target.value})
                    }}/>
             <label>Key Id 0</label>
         </div>

@@ -14,7 +14,6 @@
     - [0x03: `getState` request](#0x03-getstate-request)
     - [0xfd: `getState` response](#0xfd-getstate-response)
     - [0x04: `setState` request](#0x04-setstate-request)
-    - [0x05:`getStatistics` request](#0x05getstatistics-request)
   - [Error codes \& Other constants](#error-codes--other-constants)
   - [QAAS software structure \& operation](#qaas-software-structure--operation)
     - [Key Gathering](#key-gathering)
@@ -235,11 +234,26 @@ SEQUENCE (10 elem)
 
 <details>
 <summary>encoded request example</summary>
+
+```
+30 4e 02 01 04 02 01 00 04 20 83 24 d2 59 d6 0f 0b 13 0e b0 c7 49 a9 67 62 02 d4 e1 41 cc 60 be 81 6e 1a 82 53 29 57 62 3a 03 04 20 47 97 af ff 7d 36 13 e6 c6 94 9d 8f 2e 42 4e 15 27 aa 77 66 18 4f f0 cb 36 07 09 83 13 76 21 83 02 02 30 39
+```
+
+```
+SEQUENCE (5 elem)
+Offset: 0
+Length: 2+78
+(constructed)
+Value:
+(5 elem)
+  INTEGER 4
+  INTEGER 0
+  OCTET STRING (32 byte) 8324D259D60F0B130EB0C749A9676202D4E141CC60BE816E1A82532957623A03
+  OCTET STRING (32 byte) 4797AFFF7D3613E6C6949D8F2E424E1527AA7766184FF0CB3607098313762183
+  INTEGER 12345
+```
+
 </details>
-
-### 0x05:`getStatistics` request
-
-TODO
 
 ## Error codes & Other constants
 
