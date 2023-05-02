@@ -33,7 +33,7 @@ export default function StatisticsChart() {
             {label: 'keys served', data: [], tension: 0.3, borderColor: '#8e44ad', backgroundColor: '#9b59b6'}]
     } as ChartData<"line", any[], any>);
 
-    let [updating, setUpdating] = useState(true);
+    let [updating, setUpdating] = useState(false);
 
     useEffect(() => {
         let reservableChart = new Chart(reservableChartRef.current as ChartItem, {
