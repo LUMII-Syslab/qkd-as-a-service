@@ -29,12 +29,12 @@ Each element of the sequence consists of its `type`, `length` and `value`.
 The types and their respective encodings used in QAAS requests are:
 
 
-| type              | encoding  |
-|-------------------|------|
-| SEQUENCE OF       | 0X30 |
-| INTEGER           | 0X02 |
-| OCTET ARRAY       | 0X04 |
-| OBJECT IDENTIFIER | 0X06 |
+| type              | encoding |
+| ----------------- | -------- |
+| SEQUENCE OF       | 0X30     |
+| INTEGER           | 0X02     |
+| OCTET ARRAY       | 0X04     |
+| OBJECT IDENTIFIER | 0X06     |
 
 The online ASN.1 javascript decoder might be helpful for debugging: [https://lapo.it/asn1js/](https://lapo.it/asn1js/).
 
@@ -47,11 +47,11 @@ The online ASN.1 javascript decoder might be helpful for debugging: [https://lap
 
 ### 0x01: `reserveKeyAndGetHalf` request
 
-| ordinal |       parameter      |   type  |               description & notes               |
-|:-------:|----------------------|---------|-------------------------------------------------|
-| 0 | endpoint id = `0x01`| integer | Specifies the `reserveKeyAndGetHalf` request.   |
-| 1 | key length = `256`  | integer | Currently only 256 byte key fetching is supported. |
-| 2 | crypto nonce        | integer | Value should be random and between 0 and 2^63-1. |
+| ordinal | parameter            | type    | description & notes                                |
+| :-----: | -------------------- | ------- | -------------------------------------------------- |
+|    0    | endpoint id = `0x01` | integer | Specifies the `reserveKeyAndGetHalf` request.      |
+|    1    | key length = `256`   | integer | Currently only 256 byte key fetching is supported. |
+|    2    | crypto nonce         | integer | Value should be random and between 0 and 2^63-1.   |
 
 <details>
 <summary>encoded request example</summary>
@@ -74,15 +74,15 @@ explanation:
 
 ### 0xff: `reserveKeyAndGetHalf` response
 
-| ordinal | parameter | type | description & notes |
-|:-------:|-----------|------|---------------------|
-| 0 | error code | integer | See [Error codes \& State codes](#error-codes--state-codes). |
-| 1 | response id = `0xff` | integer | Specifies `reserveKeyAndHalf` response. `0xff` denotes -1. |
-| 2 | crypto nonce | integer |  Requests' crypto nonce + 1.   |
-| 3 | key identifier | octet array | |
-| 4 | key bytes first half | octet array | |
-| 5 | other byte half hash | octet array | |
-| 6 | hash algorithm id | object id | |
+| ordinal | parameter            | type        | description & notes                                          |
+| :-----: | -------------------- | ----------- | ------------------------------------------------------------ |
+|    0    | error code           | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
+|    1    | response id = `0xff` | integer     | Specifies `reserveKeyAndHalf` response. `0xff` denotes -1.   |
+|    2    | crypto nonce         | integer     | Requests' crypto nonce + 1.                                  |
+|    3    | key identifier       | octet array |                                                              |
+|    4    | key bytes first half | octet array |                                                              |
+|    5    | other byte half hash | octet array |                                                              |
+|    6    | hash algorithm id    | object id   |                                                              |
 
 <details>
 
@@ -107,12 +107,12 @@ SEQUENCE (7 elem)
 
 ### 0x02: `getKeyHalf` request
 
-| ordinal | parameter | type | description & notes |
-|:-------:|-----------|------|---------------------|
-| 0 | endpoint id = `0x02` | integer | Specifies the `getKeyHalf` request. |
-| 1 | key length = `256` | integer | Currently only 256 byte key fetching is supported. |
-| 2 | key identifier | octet array | |
-| 3 | crypto nonce | integer | Value should be random and between 0 and 2^63-1. |
+| ordinal | parameter            | type        | description & notes                                |
+| :-----: | -------------------- | ----------- | -------------------------------------------------- |
+|    0    | endpoint id = `0x02` | integer     | Specifies the `getKeyHalf` request.                |
+|    1    | key length = `256`   | integer     | Currently only 256 byte key fetching is supported. |
+|    2    | key identifier       | octet array |                                                    |
+|    3    | crypto nonce         | integer     | Value should be random and between 0 and 2^63-1.   |
 
 <details>
 
@@ -134,14 +134,14 @@ SEQUENCE (4 elem)
 
 ### 0xfe: `getKeyHalf` response
 
-| ordinal | value                  | type        | description & notes                            |
-|:-------:|------------------------|-------------|------------------------------------------------|
-|    0    | error code             | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
-|    1    | response id = `0xfe`   | integer     | Specifies the `getKeyHalf` response. `0xfe` denotes -2. |
-|    2    | crypto nonce           | integer     | Requests' crypto nonce + 1. |
-|    3    | key bytes second half | octet array |                                                |
-|    4    | other byte half hash | octet array |    |
-|    5    | hash algorithm id      | object id   |  |
+| ordinal | value                 | type        | description & notes                                          |
+| :-----: | --------------------- | ----------- | ------------------------------------------------------------ |
+|    0    | error code            | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
+|    1    | response id = `0xfe`  | integer     | Specifies the `getKeyHalf` response. `0xfe` denotes -2.      |
+|    2    | crypto nonce          | integer     | Requests' crypto nonce + 1.                                  |
+|    3    | key bytes second half | octet array |                                                              |
+|    4    | other byte half hash  | octet array |                                                              |
+|    5    | hash algorithm id     | object id   |                                                              |
 
 
 <details>
@@ -172,9 +172,9 @@ SEQUENCE (6 elem)
 
 ### 0x03: `getState` request
 
-| ordinal | parameter           | type    | description & notes                   |
-|:-------:|---------------------|---------|---------------------------------------|
-|    0    | endoint id = `0x03` | integer | Specifies the `getState` request.  |
+| ordinal | parameter           | type    | description & notes                              |
+| :-----: | ------------------- | ------- | ------------------------------------------------ |
+|    0    | endoint id = `0x03` | integer | Specifies the `getState` request.                |
 |    1    | crypto nonce        | integer | Value should be random and between 0 and 2^63-1. |
 
 <details>
@@ -194,18 +194,18 @@ SEQUENCE (2 elem)
 
 ### 0xfd: `getState` response
 
-| ordinal | value                | type        | description & notes                |
-|:-------:|----------------------|-------------|------------------------------------|
+| ordinal | value                | type        | description & notes                                          |
+| :-----: | -------------------- | ----------- | ------------------------------------------------------------ |
 |    0    | error code           | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
-|1 | response id = `0xfd` | integer  | Specifies the `getState` response. `0xfd` Denotes -3. |
-|    2    | crypto nonce         | integer     |  Requests' crypto nonce + 1.  |
-|    3    | KDC state code  | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
-| 4 | currently stored | integer | The size of key queue. |
-| 5 | currently reservable | integer | No. of keys with KDC's respective parity. |
-| 6 | keys served in total | integer | |
-| 7 | keys added in total | integer | |
-|    8    | oldest even key id   | octet array |                                    |
-|    9    | oldest odd key id    | octet array |                                    |
+|    1    | response id = `0xfd` | integer     | Specifies the `getState` response. `0xfd` Denotes -3.        |
+|    2    | crypto nonce         | integer     | Requests' crypto nonce + 1.                                  |
+|    3    | KDC state code       | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
+|    4    | currently stored     | integer     | The size of key queue.                                       |
+|    5    | currently reservable | integer     | No. of keys with KDC's respective parity.                    |
+|    6    | keys served in total | integer     |                                                              |
+|    7    | keys added in total  | integer     |                                                              |
+|    8    | oldest even key id   | octet array |                                                              |
+|    9    | oldest odd key id    | octet array |                                                              |
 
 <details>
 <summary>encoded response example</summary>
@@ -231,13 +231,13 @@ SEQUENCE (10 elem)
 
 ### 0x04: `setState` request
 
-| ordinal | parameter           | type    | description & notes                   |
-|:-------:|---------------------|---------|---------------------------------------|
-|    0    | endoint id = `0x04` | integer | Specifies the `getState` request.  |
-|    1    | state code            | integer | Either 0 (stop and clear all keys) or 2 (start). |
-|    2    | oldest even key id  | octet array | |
-|    3    | oldest odd key id   | octet array | |
-|    4    | crypto nonce        | integer | Value should be random and between 0 and 2^63-1. |
+| ordinal | parameter           | type        | description & notes                              |
+| :-----: | ------------------- | ----------- | ------------------------------------------------ |
+|    0    | endoint id = `0x04` | integer     | Specifies the `getState` request.                |
+|    1    | state code          | integer     | Either 0 (stop and clear all keys) or 2 (start). |
+|    2    | oldest even key id  | octet array |                                                  |
+|    3    | oldest odd key id   | octet array |                                                  |
+|    4    | crypto nonce        | integer     | Value should be random and between 0 and 2^63-1. |
 
 <details>
 <summary>encoded request example</summary>
@@ -259,11 +259,11 @@ SEQUENCE (5 elem)
 
 ### 0xfc: `setState` response
 
-| ordinal | value                | type        | description & notes                |
-|:-------:|----------------------|-------------|------------------------------------|
-|    0    | error code           | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
-| 1 | response id = `0xfc` | integer | Specifies the `setState` response. `0xfc` Denotes -4. |
-|    2    | crypto nonce         | integer     |  Requests' crypto nonce + 1. |
+| ordinal | value                | type    | description & notes                                          |
+| :-----: | -------------------- | ------- | ------------------------------------------------------------ |
+|    0    | error code           | integer | See [Error codes \& State codes](#error-codes--state-codes). |
+|    1    | response id = `0xfc` | integer | Specifies the `setState` response. `0xfc` Denotes -4.        |
+|    2    | crypto nonce         | integer | Requests' crypto nonce + 1.                                  |
 
 <details>
 <summary>encoded response example</summary
