@@ -195,11 +195,15 @@ SEQUENCE (2 elem)
 | ordinal | value                | type        | description & notes                |
 |:-------:|----------------------|-------------|------------------------------------|
 |    0    | error code           | integer     |                                    |
-|    1    | response id = `0xfd` | integer     | Specifies the `getState` response. `0xfd` Denotes -3. |
+|1 | response id = `0xfd` | integer  | Specifies the `getState` response. `0xfd` Denotes -3. |
 |    2    | crypto nonce         | integer     |                                    |
-|    3    | KDC state id         | integer     |                                    |
-|    4    | oldest even key id   | octet array |                                    |
-|    5    | oldest odd key id    | octet array |                                    |
+|    3    | KDC state code  | integer     | 0 for EMPTY, 1 for RECEIVING and 2 for RUNNING. |
+| 4 | keys currently stored | integer | |
+| 5 | currently reservable | integer | |
+| 6 | keys served in total | integer | |
+| 7 | keys added in total | integer | |
+|    8    | oldest even key id   | octet array |                                    |
+|    9    | oldest odd key id    | octet array |                                    |
 
 <details>
 <summary>encoded response example</summary>
@@ -256,7 +260,7 @@ SEQUENCE (5 elem)
 | ordinal | value                | type        | description & notes                |
 |:-------:|----------------------|-------------|------------------------------------|
 |    0    | error code           | integer     |                                    |
-|    1    | response id = `0xfc` | integer     | Specifies the `setState` response. `0xfc` Denotes -4. |
+| 1 | response id = `0xfc` | integer | Specifies the `setState` response. `0xfc` Denotes -4. |
 |    2    | crypto nonce         | integer     |                                    |
 
 <details>
