@@ -49,7 +49,7 @@ The types and their respective encodings used in QAAS requests are:
 |:-------:|----------------------|---------|-------------------------------------------------|
 | 0 | endpoint id = `0x01`| integer | Specifies the `reserveKeyAndGetHalf` request.   |
 | 1 | key length = `256`  | integer | Currently only 256 byte key fetching is supported. |
-| 2 | crypto nonce        | integer | Value should be between 0 and 2^63-1.           |
+| 2 | crypto nonce        | integer | Value should be random and between 0 and 2^63-1. |
 
 <details>
 <summary>encoded request example</summary>
@@ -101,6 +101,8 @@ SEQUENCE (7 elem)
   OBJECT IDENTIFIER 2.16.840.1.101.3.4.2.17 shake128len (NIST Algorithm)
 ```
 
+</details>
+
 ### 0x02: `getKeyHalf` request
 
 | ordinal | parameter | type | description & notes |
@@ -115,20 +117,16 @@ SEQUENCE (7 elem)
 <summary>encoded request example</summary>
 
 ```
-30 11 02 01 02 02 02 01 00 04 04 40 af a0 1f 02 02 30 39
+30 2d 02 01 02 02 02 01 00 04 20 b6 0e a6 5c 0a 8e 55 2d 4e 24 3c 7b 93 ff 39 a5 82 94 f6 b9 a9 90 6f 70 90 24 52 2d 51 bf a2 c2 02 02 30 39
 ```
 
-explanation:
-
-`30` `11`: sequence type (`0x30`) with length `0x11` = 17 bytes;
-
-`02` `01` `02`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x02` = 2; ( **endpoint id** )
-
-`02` `02` `01 00`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x0100` = 256; ( **key length** )
-
-`04` `04` `40 af a0 1f`: byte array (`0x04`) with length `0x04` = 4 bytes; ( **key identifier** )
-
-`02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
+```
+SEQUENCE (4 elem)
+  INTEGER 2
+  INTEGER 256
+  OCTET STRING (32 byte) B60EA65C0A8E552D4E243C7B93FF39A58294F6B9A9906F709024522D51BFA2C2
+  INTEGER 12345
+```
 
 </details>
 
@@ -149,24 +147,18 @@ explanation:
 <summary>encoded response example:</summary>
 
 ```
-30 39 02 01 00 02 01 fe 02 02 30 3a 04 10 85 0e 6c 1a 4f ac 51 da 8d d3 03 7a 77 ad c4 e0 04 10 73 37 44 1b 7d d3 93 64 c7 80 df db 2b 09 bd 60 06 09 60 86 48 01 65 03 04 02 11
+30 39 02 01 00 02 01 fe 02 02 30 3a 04 10 7a 5b f1 09 30 bd 83 7d a7 4e 71 64 10 00 c0 6f 04 10 69 c3 cb f2 b7 98 59 ab 69 17 d3 76 d4 d3 9d df 06 09 60 86 48 01 65 03 04 02 11
 ```
 
-explanation:
-
-`30` `1d`: sequence type (`0x30`) with length `0x1d` = 29 bytes;
-
-`02` `01` `00`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x00` = 0; ( **error code** )
-
-`02` `01` `fe`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0xfe` = -2; ( **response id** )
-
-`02` `02` `30 3a`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x303a` = 12346; ( **crypto nonce** )
-
-`04` `02` `e1 5c`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **half of key bytes** )
-
-`04` `02` `01 02`: byte array (`0x04`) with length `0x02` = 2 bytes; ( **hash(the other half)** )
-
-`06` `09` `60 86 48 01 65 03 04 02 11`: object identifier (`0x06`) with length `0x09` = 9 bytes; ( **hash algorithm id** )
+```
+SEQUENCE (6 elem)
+  INTEGER 0
+  INTEGER -2
+  INTEGER 12346
+  OCTET STRING (16 byte) 7A5BF10930BD837DA74E71641000C06F
+  OCTET STRING (16 byte) 69C3CBF2B79859AB6917D376D4D39DDF
+  OBJECT IDENTIFIER 2.16.840.1.101.3.4.2.17 shake128len (NIST Algorithm)
+```
 
 </details>
 
@@ -180,24 +172,21 @@ explanation:
 
 | ordinal | parameter           | type    | description & notes                   |
 |:-------:|---------------------|---------|---------------------------------------|
-|    0    | endoint id = `0x03` | integer |                                       |
+|    0    | endoint id = `0x03` | integer | Specifies the `getState` request.  |
 |    1    | crypto nonce        | integer | Value should be between 0 and 2^63-1. |
 
 <details>
 <summary>encoded request example:</summary>
-<div>
 
 ```
 30 07 02 01 03 02 02 30 39
 ```
 
-explanation:
-
-`30` `07`: sequence type (`0x30`) with length `0x07` = 7 bytes;
-
-`02` `01` `03`: integer type (`0x02`) with length `0x01` = 1 bytes, value: `0x03` = 3; ( **endpoint id** )
-
-`02` `02` `30 39`: integer type (`0x02`) with length `0x02` = 2 bytes, value: `0x3039` = 12345; ( **crypto nonce** )
+```
+SEQUENCE (2 elem)
+  INTEGER 3
+  INTEGER 12345
+```
 
 </details>
 
@@ -214,7 +203,24 @@ explanation:
 
 <details>
 <summary>encoded response example</summary>
-TODO
+```
+30 62 02 01 00 02 01 fd 02 02 30 3a 02 01 02 02 03 01 86 a0 02 02 c2 b1 02 01 04 02 03 06 19 a3 04 20 fc 77 92 ac 49 de 6d 4d 84 1c f7 52 38 5a f0 c5 75 04 78 4e 07 89 19 33 cf c2 65 53 84 9a 48 83 04 20 8e 11 ff 8e 87 44 0b 04 2c 5d a8 06 b8 b5 e0 f8 6d ab 7a 33 33 48 81 7b 3b 59 44 6e 39 64 4d fc
+```
+
+```
+SEQUENCE (10 elem)
+  INTEGER 0
+  INTEGER -3
+  INTEGER 12346
+  INTEGER 2
+  INTEGER 100000
+  INTEGER -15695
+  INTEGER 4
+  INTEGER 399779
+  OCTET STRING (32 byte) FC7792AC49DE6D4D841CF752385AF0C57504784E07891933CFC26553849A4883
+  OCTET STRING (32 byte) 8E11FF8E87440B042C5DA806B8B5E0F86DAB7A333348817B3B59446E39644DFC
+```
+
 </details>
 
 ### 0x04: `setState` request
