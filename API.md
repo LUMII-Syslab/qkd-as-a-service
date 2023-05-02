@@ -15,7 +15,7 @@
     - [0xfd: `getState` response](#0xfd-getstate-response)
     - [0x04: `setState` request](#0x04-setstate-request)
     - [0xfc: `setState` response](#0xfc-setstate-response)
-  - [Error codes \& Other constants](#error-codes--other-constants)
+  - [Error codes \& State codes](#error-codes--state-codes)
   - [QAAS software structure \& operation](#qaas-software-structure--operation)
     - [Key Gathering](#key-gathering)
     - [Handling `reserveKeyAndGetHalf` requests](#handling-reservekeyandgethalf-requests)
@@ -74,7 +74,7 @@ explanation:
 
 | ordinal | parameter | type | description & notes |
 |:-------:|-----------|------|---------------------|
-| 0 | error code | integer | |
+| 0 | error code | integer | See [Error codes \& State codes](#error-codes--state-codes). |
 | 1 | response id = `0xff` | integer | Specifies `reserveKeyAndHalf` response. `0xff` denotes -1. |
 | 2 | crypto nonce | integer | |
 | 3 | key identifier | octet array | |
@@ -134,7 +134,7 @@ SEQUENCE (4 elem)
 
 | ordinal | value                  | type        | description & notes                            |
 |:-------:|------------------------|-------------|------------------------------------------------|
-|    0    | error code             | integer     |                                                |
+|    0    | error code             | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
 |    1    | response id = `0xfe`   | integer     | Specifies the `getKeyHalf` response. `0xfe` denotes -2. |
 |    2    | crypto nonce           | integer     |                                                |
 |    3    | key bytes second half | octet array |                                                |
@@ -194,12 +194,12 @@ SEQUENCE (2 elem)
 
 | ordinal | value                | type        | description & notes                |
 |:-------:|----------------------|-------------|------------------------------------|
-|    0    | error code           | integer     |                                    |
+|    0    | error code           | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
 |1 | response id = `0xfd` | integer  | Specifies the `getState` response. `0xfd` Denotes -3. |
 |    2    | crypto nonce         | integer     |                                    |
-|    3    | KDC state code  | integer     | 0 for EMPTY, 1 for RECEIVING and 2 for RUNNING. |
-| 4 | keys currently stored | integer | |
-| 5 | currently reservable | integer | |
+|    3    | KDC state code  | integer     | See  |
+| 4 | currently stored | integer | The size of key queue. |
+| 5 | currently reservable | integer | No. of keys with KDC's respective parity. |
 | 6 | keys served in total | integer | |
 | 7 | keys added in total | integer | |
 |    8    | oldest even key id   | octet array |                                    |
@@ -259,7 +259,7 @@ SEQUENCE (5 elem)
 
 | ordinal | value                | type        | description & notes                |
 |:-------:|----------------------|-------------|------------------------------------|
-|    0    | error code           | integer     |                                    |
+|    0    | error code           | integer     | See [Error codes \& State codes](#error-codes--state-codes). |
 | 1 | response id = `0xfc` | integer | Specifies the `setState` response. `0xfc` Denotes -4. |
 |    2    | crypto nonce         | integer     |                                    |
 
@@ -284,7 +284,7 @@ Value:
 
 </details>
 
-## Error codes & Other constants
+## Error codes & State codes
 
 error codes: 
 
@@ -293,6 +293,13 @@ error codes:
 - ErrorNotRunning  = 2
 - ErrorInternal    = 3
 - ErrorInvalidReq  = 4
+
+state codes:
+
+- EMPTY = 0
+- RECEIVING = 1
+- RUNNING = 2
+
 
 ## QAAS software structure & operation
 
