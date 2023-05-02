@@ -110,7 +110,7 @@ SEQUENCE (7 elem)
 | 0 | endpoint id = `0x02` | integer | Specifies the `getKeyHalf` request. |
 | 1 | key length = `256` | integer | Currently only 256 byte key fetching is supported. |
 | 2 | key identifier | octet array | |
-| 3 | crypto nonce | integer | Value should be between 0 and 2^63-1. |
+| 3 | crypto nonce | integer | Value should be random and between 0 and 2^63-1. |
 
 <details>
 
@@ -173,7 +173,7 @@ SEQUENCE (6 elem)
 | ordinal | parameter           | type    | description & notes                   |
 |:-------:|---------------------|---------|---------------------------------------|
 |    0    | endoint id = `0x03` | integer | Specifies the `getState` request.  |
-|    1    | crypto nonce        | integer | Value should be between 0 and 2^63-1. |
+|    1    | crypto nonce        | integer | Value should be random and between 0 and 2^63-1. |
 
 <details>
 <summary>encoded request example:</summary>
@@ -225,7 +225,17 @@ SEQUENCE (10 elem)
 
 ### 0x04: `setState` request
 
-TODO
+| ordinal | parameter           | type    | description & notes                   |
+|:-------:|---------------------|---------|---------------------------------------|
+|    0    | endoint id = `0x04` | integer | Specifies the `getState` request.  |
+|    1    | state id            | integer | |
+|    2    | oldest even key id  | octet array | |
+|    3    | oldest odd key id   | octet array | |
+|    4    | crypto nonce        | integer | Value should be random and between 0 and 2^63-1. |
+
+<details>
+<summary>encoded request example</summary>
+</details>
 
 ### 0x05:`getStatistics` request
 
