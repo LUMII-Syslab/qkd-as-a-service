@@ -288,8 +288,6 @@ Value:
 
 ## Error codes & State codes
 
-<div style="display:flex;">
-
 | error code | description & notes                                          |
 | :--------: | ------------------------------------------------------------ |
 |     0      | No error.                                                    |
@@ -303,8 +301,6 @@ Value:
 |     0      | KDC is not running.                                          |
 |     1      | KDC is receiving keys.                                       |
 |     2      | KDC is running.                                              |
-
-</div>
 
 ## QAAS software structure & operation
 
