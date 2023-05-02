@@ -288,20 +288,23 @@ Value:
 
 ## Error codes & State codes
 
-error codes: 
+<div style="display:flex;">
 
-- NoError          = 0
-- ErrorKeyNotFound = 1
-- ErrorNotRunning  = 2
-- ErrorInternal    = 3
-- ErrorInvalidReq  = 4
+| error code | description & notes                                          |
+| :--------: | ------------------------------------------------------------ |
+|     0      | No error.                                                    |
+|     1      | Key not found.                                               |
+|     2      | KDC is not running.                                          |
+|     3      | Internal error.                                              |
+|     4      | Invalid request.                                             |
 
-state codes:
+| state code | description & notes                                          |
+| :--------: | ------------------------------------------------------------ |
+|     0      | KDC is not running.                                          |
+|     1      | KDC is receiving keys.                                       |
+|     2      | KDC is running.                                              |
 
-- EMPTY = 0
-- RECEIVING = 1
-- RUNNING = 2
-
+</div>
 
 ## QAAS software structure & operation
 
