@@ -36,6 +36,8 @@ The types and their respective encodings used in QAAS requests are:
 | OCTET ARRAY       | 0X04 |
 | OBJECT IDENTIFIER | 0X06 |
 
+The online ASN.1 javascript decoder might be helpful for debugging: [https://lapo.it/asn1js/](https://lapo.it/asn1js/).
+
 
 ## QAAS client API
 
