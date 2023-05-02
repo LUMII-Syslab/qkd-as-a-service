@@ -74,7 +74,7 @@ explanation:
 | ordinal | parameter | type | description & notes |
 |:-------:|-----------|------|---------------------|
 | 0 | error code | integer | |
-| 1 | response id = `0xff` | integer | Specifies `reserveKeyAndHalf` response. 0xff denotes -1. |
+| 1 | response id = `0xff` | integer | Specifies `reserveKeyAndHalf` response. `0xff` denotes -1. |
 | 2 | crypto nonce | integer | |
 | 3 | key identifier | octet array | |
 | 4 | key bytes first half | octet array | |
@@ -134,7 +134,7 @@ SEQUENCE (4 elem)
 | ordinal | value                  | type        | description & notes                            |
 |:-------:|------------------------|-------------|------------------------------------------------|
 |    0    | error code             | integer     |                                                |
-|    1    | response id = `0xfe`   | integer     | Specifies the `getKeyHalf` response. 0xfe denotes -2. |
+|    1    | response id = `0xfe`   | integer     | Specifies the `getKeyHalf` response. `0xfe` denotes -2. |
 |    2    | crypto nonce           | integer     |                                                |
 |    3    | key bytes second half | octet array |                                                |
 |    4    | other byte half hash | octet array |    |
@@ -194,7 +194,7 @@ SEQUENCE (2 elem)
 | ordinal | value                | type        | description & notes                |
 |:-------:|----------------------|-------------|------------------------------------|
 |    0    | error code           | integer     |                                    |
-|    1    | response id = `0xfd` | integer     | Specifies the `getState` response. |
+|    1    | response id = `0xfd` | integer     | Specifies the `getState` response. `0xfd` Denotes -3. |
 |    2    | crypto nonce         | integer     |                                    |
 |    3    | KDC state id         | integer     |                                    |
 |    4    | oldest even key id   | octet array |                                    |
@@ -241,11 +241,6 @@ SEQUENCE (10 elem)
 
 ```
 SEQUENCE (5 elem)
-Offset: 0
-Length: 2+78
-(constructed)
-Value:
-(5 elem)
   INTEGER 4
   INTEGER 0
   OCTET STRING (32 byte) 8324D259D60F0B130EB0C749A9676202D4E141CC60BE816E1A82532957623A03
