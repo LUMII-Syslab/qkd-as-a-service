@@ -14,6 +14,7 @@
     - [0x03: `getState` request](#0x03-getstate-request)
     - [0xfd: `getState` response](#0xfd-getstate-response)
     - [0x04: `setState` request](#0x04-setstate-request)
+    - [0xfc: `setState` response](#0xfc-setstate-response)
   - [Error codes \& Other constants](#error-codes--other-constants)
   - [QAAS software structure \& operation](#qaas-software-structure--operation)
     - [Key Gathering](#key-gathering)
@@ -246,6 +247,35 @@ SEQUENCE (5 elem)
   OCTET ARRAY (32 byte) 8324D259D60F0B130EB0C749A9676202D4E141CC60BE816E1A82532957623A03
   OCTET ARRAY (32 byte) 4797AFFF7D3613E6C6949D8F2E424E1527AA7766184FF0CB3607098313762183
   INTEGER 12345
+```
+
+</details>
+
+### 0xfc: `setState` response
+
+| ordinal | value                | type        | description & notes                |
+|:-------:|----------------------|-------------|------------------------------------|
+|    0    | error code           | integer     |                                    |
+|    1    | response id = `0xfc` | integer     | Specifies the `setState` response. `0xfc` Denotes -4. |
+|    2    | crypto nonce         | integer     |                                    |
+
+<details>
+<summary>encoded response example</summary
+
+```
+30 0a 02 01 00 02 01 fc 02 02 30 3a
+```
+
+```
+SEQUENCE (3 elem)
+Offset: 0
+Length: 2+10
+(constructed)
+Value:
+(3 elem)
+  INTEGER 0
+  INTEGER -4
+  INTEGER 12346
 ```
 
 </details>
