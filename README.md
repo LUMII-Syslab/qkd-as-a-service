@@ -27,7 +27,7 @@ Since not all nodes have out-of-the-box TLS support (in some cases we need TLS w
 
 The following figure illustrates all the nodes that participate in the QaaS system:
 
-![qkd-infrastructure](qkd-infrastructure.png)
+![qkd-infrastructure](diagrams/qkd-infrastructure.png)
 
 The QaaS infrastructure ensures secure (green) link between User 1 and User 2 by utilizing the optical fiber QKD system (in the bottom) and multiple classical PQC links.
 
@@ -173,4 +173,8 @@ userlib+pqproxy/scripts/user1.sh
 
 # Docs on Internal APIs
 
-Docs on the internal APIs used between QaaS users and servers can be found at [https://github.com/LUMII-Syslab/qkd-as-a-service/blob/master/API.md](https://github.com/LUMII-Syslab/qkd-as-a-service/blob/master/API.md).
+Docs on the internal APIs used between QaaS users and servers can be found at [API.md](API.md).
+
+# Docs on QaaS Service Operation
+
+Docs on the operation of QaaS service can be found at [SERVICE.md](SERVICE.md).
