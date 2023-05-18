@@ -27,7 +27,7 @@ Since not all nodes have out-of-the-box TLS support (in some cases we need TLS w
 
 The following figure illustrates all the nodes that participate in the QaaS system:
 
-![qkd-infrastructure](qkd-infrastructure.png)
+![qkd-infrastructure](diagrams/qkd-infrastructure.png)
 
 The QaaS infrastructure ensures secure (green) link between User 1 and User 2 by utilizing the optical fiber QKD system (in the bottom) and multiple classical PQC links.
 
