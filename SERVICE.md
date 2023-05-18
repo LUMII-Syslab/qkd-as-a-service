@@ -32,7 +32,7 @@ In essence, the operation of QaaS can be classified into three primary scenarios
 
     A 'Y' request requires a reserved key, $K_{rsrv}$. If dictionary $D$ doesn't contain $K_{rsrv}$, an error is returned. However, if $D$ does contain $K_{rsrv}$, and the KDC matches Aija, a response containing $H(K_{left})$ and $K_{right}$ is sent.
 
-**Performance Analysis and Optimizations**
+## Performance Analysis and Optimizations
 
 To ensure optimal performance and minimize errors, it's essential to analyze the system operation and identify potential improvements.
 
