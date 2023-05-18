@@ -173,4 +173,8 @@ userlib+pqproxy/scripts/user1.sh
 
 # Docs on Internal APIs
 
-Docs on the internal APIs used between QaaS users and servers can be found at [https://github.com/LUMII-Syslab/qkd-as-a-service/blob/master/API.md](https://github.com/LUMII-Syslab/qkd-as-a-service/blob/master/API.md).
+Docs on the internal APIs used between QaaS users and servers can be found at [API.md](API.md).
+
+# Docs on QaaS Service Operation
+
+Docs on the operation of QaaS service can be found at [SERVICE.md](SERVICE.md).
