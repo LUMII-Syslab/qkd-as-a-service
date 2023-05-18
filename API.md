@@ -25,7 +25,7 @@
 ## Introduction
 
 Every request and response is an ASN.1 DER encoded sequence of elements.
-Each element of the sequence consists of its `type`, `length` and `value`.
+Each sequence element consists of its `type`, `length` and `value`.
 The types and their respective encodings used in QAAS requests are:
 
 
@@ -304,7 +304,7 @@ Value:
 
 ## QAAS software structure & operation
 
-TODO
+![key manager queue](diagrams/key-manager-queue.png)
 
 ### Key Gathering
 
