@@ -2,12 +2,13 @@ package gatherers
 
 import (
 	"fmt"
-	"github.com/fsnotify/fsnotify"
 	"log"
 	"os"
 	"path/filepath"
 	"sort"
 	"time"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 type FileSystemKeyGatherer struct {
@@ -26,6 +27,9 @@ func (fkg *FileSystemKeyGatherer) Start() error {
 	}
 
 	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		panic(err)
+	}
 
 	err = watcher.Add(fkg.dirPath)
 	if err != nil {

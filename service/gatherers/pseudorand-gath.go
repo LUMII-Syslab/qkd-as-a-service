@@ -10,16 +10,19 @@ type RandomKeyGatherer struct {
 	keyGathererBase
 	keyIdLength  int
 	keyValLength int
+	limitSpeed   bool
 }
 
-func NewRandomKeyGatherer(keyIdLength, keyValLength int) *RandomKeyGatherer {
-	return &RandomKeyGatherer{keyGathererBase{make([]KeyGathererListener, 0), 0}, keyIdLength, keyValLength}
+func NewPseudorandomKeyGatherer(keyIdLength, keyValLength int, limitSpeed bool) *RandomKeyGatherer {
+	return &RandomKeyGatherer{keyGathererBase{make([]KeyGathererListener, 0), 0}, keyIdLength, keyValLength, limitSpeed}
 }
 
 func (kg *RandomKeyGatherer) Start() error {
 	genTicker := time.NewTicker(time.Millisecond)
 	for {
-		<-genTicker.C
+		if kg.limitSpeed {
+			<-genTicker.C
+		}
 		keyId, keyVal := make([]byte, kg.keyIdLength), make([]byte, kg.keyValLength)
 		if _, err := rand.Read(keyId); err != nil {
 			return err
