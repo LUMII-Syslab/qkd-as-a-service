@@ -24,6 +24,10 @@ func BenchmarkPseudorandomGatherer(b *testing.B) {
 	}
 }
 
+func BenchmarkClavisGatherer(b *testing.B) {
+
+}
+
 // 1072153 ns/op
 // 2859 ns/op
 // 3494 ns/op
