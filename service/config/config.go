@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"reflect"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/viper"
@@ -60,11 +61,13 @@ func getDefaultConfig() *Configuration {
 func (c *Configuration) Print() {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleLight)
+	t.SetTitle("Configuration")
 	t.AppendHeader(table.Row{"field name", "value"})
-	t.AppendRows([]table.Row{
-		{},
-		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
-	})
+	v := reflect.ValueOf(*c)
+	typeOfS := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		t.AppendRow(table.Row{typeOfS.Field(i).Name, v.Field(i).Interface()})
+	}
 	t.Render()
-
 }
