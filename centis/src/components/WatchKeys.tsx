@@ -94,7 +94,7 @@ export default function WatchKeys({ config }) {
   ]);
 
   return (
-    <div className="border shadow-sm p-3 my-3">
+    <div className="border shadow-sm p-3 my-3 bg-white">
       <div className={"d-flex flex-row  mb-3 col-12"}>
         <div className="form-floating col-3">
           <input
@@ -122,7 +122,7 @@ export default function WatchKeys({ config }) {
         <input
           type="button"
           id="toggle-monitor"
-          value={watchingKeys ? "STOP MONITORING" : "START MONITORING"}
+          value={watchingKeys ? "Stop Monitoring" : "Start Monitoring"}
           className="btn btn-outline-primary btn-sm ms-1"
           onClick={() => {
             setWatchingKeys(!watchingKeys);

@@ -82,19 +82,27 @@ function App() {
                         Pārbaudīt savienojumu <i className={`bi bi-arrow-clockwise ${testingConnections && "spinner-border"}`}></i></button>}
             </div>
             {(!aijaConnError && !brencisConnError) && !testingConnections &&
-                <>
+                <div className="flex">
                     <ConfigContext.Provider value={config}>
+                        <div>
                         <StatisticsChart/>
                         <KdcSynchronization/>
+                        </div>
+
+                        <div>
                         <h2 className={"mt-5"}>Requests</h2>
                         <ExecReserveKey/>
                         <ExecGetKeyHalf/>
                         <ExecGetState/>
                         <ExecSetState/>
+                        </div>
+
+                        <div>
                         <h2 className={"mt-5"}>Monitoring</h2>
                         <WatchKeys config={config}/>
+                        </div>
                     </ConfigContext.Provider>
-                </>
+                </div>
             }
         </main>
     )

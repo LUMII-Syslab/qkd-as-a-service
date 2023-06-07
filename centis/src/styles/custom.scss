@@ -7,3 +7,16 @@ $btn-border-radius: 0;
 }
 
 @import '../../node_modules/bootstrap-icons/font/bootstrap-icons.css';
+
+
+fieldset {
+  background-color: white;
+}
+
+.btn {
+  text-transform: capitalize;
+}
+
+* {
+  font-family:'Times New Roman', Times, serif
+}

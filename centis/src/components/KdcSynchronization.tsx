@@ -36,6 +36,11 @@ export default function KdcSynchronization() {
             oddKeyId: bytesToHexOctets(aijaGetStateRes.oldestOddKeyId),
             cNonce: 12345
         } as SetStateRequest))
+
+        aijaWs.close()
+        brencisWs.close()
+
+        alert("Keys synchronized")
     }
 
     return (
