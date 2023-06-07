@@ -27,7 +27,7 @@ type App struct {
 
 func NewApp() *App {
 	app := &App{}
-	app.config = config.LoadConfig()
+	app.config = config.LoadConfig("config.toml")
 	app.config.Print()
 
 	switch app.config.Gatherer {

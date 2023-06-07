@@ -27,10 +27,10 @@ type Configuration struct {
 	DefaultServing bool `mapstructure:"default_serving"`
 }
 
-func LoadConfig() *Configuration {
+func LoadConfig(filepath string) *Configuration {
 	conf := getDefaultConfig()
 
-	viper.SetConfigFile("config.toml")
+	viper.SetConfigFile(filepath)
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Panic(err)

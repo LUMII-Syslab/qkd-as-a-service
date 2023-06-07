@@ -1,6 +1,7 @@
 package gatherers
 
 import (
+	"qkdc-service/config"
 	"testing"
 )
 
@@ -14,7 +15,7 @@ func (kgl *keyGathererListener) AddKey(id []byte, val []byte) error {
 }
 
 func BenchmarkPseudorandomGatherer(b *testing.B) {
-	kg := NewPseudorandomKeyGatherer(16, 16, false)
+	kg := NewPseudorandomKeyGatherer(32, 32, false)
 	kgl := &keyGathererListener{make(chan [2]interface{})}
 	kg.PublishTo(kgl)
 	go kg.Start()
@@ -25,13 +26,15 @@ func BenchmarkPseudorandomGatherer(b *testing.B) {
 }
 
 func BenchmarkClavisGatherer(b *testing.B) {
+	conf := config.LoadConfig("../config.toml")
+	conf.Print()
+	kg := NewClavisKeyGatherer(conf.ClavisURL)
+	kgl := &keyGathererListener{make(chan [2]interface{})}
+	kg.PublishTo(kgl)
+	go kg.Start()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		<-kgl.queue
+	}
 
 }
-
-// 1072153 ns/op
-// 2859 ns/op
-// 3494 ns/op
-// 3929 ns/op
-// 2729 ns/op
-// 2718 ns/op
-// 1085647
