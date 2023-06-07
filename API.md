@@ -50,7 +50,7 @@ The online ASN.1 javascript decoder might be helpful for debugging: [https://lap
 | ordinal | parameter            | type    | description & notes                                |
 | :-----: | -------------------- | ------- | -------------------------------------------------- |
 |    0    | endpoint id = `0x01` | integer | Specifies the `reserveKeyAndGetHalf` request.      |
-|    1    | key length = `256`   | integer | Currently only 256 byte key fetching is supported. |
+|    1    | key length = `256`   | integer | Currently only 256-bit key fetching is supported. |
 |    2    | crypto nonce         | integer | Value should be random and between 0 and 2^63-1.   |
 
 <details>
@@ -110,7 +110,7 @@ SEQUENCE (7 elem)
 | ordinal | parameter            | type        | description & notes                                |
 | :-----: | -------------------- | ----------- | -------------------------------------------------- |
 |    0    | endpoint id = `0x02` | integer     | Specifies the `getKeyHalf` request.                |
-|    1    | key length = `256`   | integer     | Currently only 256 byte key fetching is supported. |
+|    1    | key length = `256`   | integer     | Currently only 256-bit key fetching is supported. |
 |    2    | key identifier       | octet array |                                                    |
 |    3    | crypto nonce         | integer     | Value should be random and between 0 and 2^63-1.   |
 
