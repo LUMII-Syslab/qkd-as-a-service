@@ -1,6 +1,7 @@
 package gatherers
 
 import (
+	"log"
 	"qkdc-service/config"
 	"testing"
 )
@@ -28,7 +29,7 @@ func BenchmarkPseudorandomGatherer(b *testing.B) {
 
 func BenchmarkClavisGatherer(b *testing.B) {
 	conf := config.LoadConfig("../config.toml")
-	conf.Print()
+	log.Println("conf.ClavisURL:", conf.ClavisURL)
 	kg := NewClavisKeyGatherer(conf.ClavisURL)
 	kgl := &keyGathererListener{make(chan [2]interface{})}
 	kg.PublishTo(kgl)
@@ -42,7 +43,7 @@ func BenchmarkClavisGatherer(b *testing.B) {
 
 func BenchmarkFilesystemGatherer(b *testing.B) {
 	conf := config.LoadConfig("../config.toml")
-	conf.Print()
+	log.Println("conf.FSGathererDir:", conf.FSGathererDir)
 	kg := NewFileSystemKeyGatherer(conf.FSGathererDir)
 	kgl := &keyGathererListener{make(chan [2]interface{})}
 	kg.PublishTo(kgl)
