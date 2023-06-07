@@ -19,6 +19,7 @@ func BenchmarkPseudorandomGatherer(b *testing.B) {
 	kgl := &keyGathererListener{make(chan [2]interface{})}
 	kg.PublishTo(kgl)
 	go kg.Start()
+	b.Log("b.N:", b.N)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		<-kgl.queue
@@ -32,9 +33,23 @@ func BenchmarkClavisGatherer(b *testing.B) {
 	kgl := &keyGathererListener{make(chan [2]interface{})}
 	kg.PublishTo(kgl)
 	go kg.Start()
+	b.Log("b.N:", b.N)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		<-kgl.queue
 	}
+}
 
+func BenchmarkFilesystemGatherer(b *testing.B) {
+	conf := config.LoadConfig("../config.toml")
+	conf.Print()
+	kg := NewFileSystemKeyGatherer(conf.FSGathererDir)
+	kgl := &keyGathererListener{make(chan [2]interface{})}
+	kg.PublishTo(kgl)
+	go kg.Start()
+	b.Log("b.N:", b.N)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		<-kgl.queue
+	}
 }
