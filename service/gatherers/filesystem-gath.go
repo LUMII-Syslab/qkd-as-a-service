@@ -61,53 +61,69 @@ func (fkg *FileSystemKeyGatherer) Start() error {
 	}
 }
 
+type keyFile struct {
+	fileName string
+	keyId    []byte
+	keyValue []byte
+	modTime  time.Time
+}
+
 func (fkg *FileSystemKeyGatherer) readAndRemoveKeys() error {
 	entries, err := os.ReadDir(fkg.dirPath)
 	if err != nil {
 		return err
 	}
 
-	sort.Slice(entries, func(i, j int) bool {
-		// compare modified date
-		iStat, err := os.Stat(filepath.Join(fkg.dirPath, entries[i].Name()))
-		if err != nil {
-			panic(err)
-		}
-		jStat, err := os.Stat(filepath.Join(fkg.dirPath, entries[j].Name()))
-		if err != nil {
-			panic(err)
-		}
-		return iStat.ModTime().Before(jStat.ModTime())
-	})
-
+	fmt.Println("entry count:", len(entries))
+	fmt.Println("reading entries")
+	var keyFiles []keyFile
 	for _, entry := range entries {
 		if entry.IsDir() {
 			return fmt.Errorf("directory %s contains a subdirectory %s. This is not supported", fkg.dirPath, entry.Name())
 		}
+		fileName := entry.Name()
+		filePath := filepath.Join(fkg.dirPath, fileName)
 
-		//log.Println(entry.Name())
-		entryFilePath := filepath.Join(fkg.dirPath, entry.Name())
-
-		keyVal, err := os.ReadFile(entryFilePath)
-		if len(keyVal) > 128 { // ASN.1 SEQUENCE can't be longer than 128 bytes
-			keyVal = keyVal[:128]
-		}
-
-		if err != nil {
-			return err
-		}
-
-		keyId := []byte(entry.Name())
+		keyId := []byte(fileName)
 		if len(keyId) > 128 { // ASN.1 SEQUENCE can't be longer than 128 bytes
 			keyId = keyId[:128]
 		}
 
-		err = fkg.distributeKey(keyId, keyVal)
+		keyVal, err := os.ReadFile(filePath)
+		if err != nil {
+			return err
+		}
+		if len(keyVal) > 128 { // ASN.1 SEQUENCE can't be longer than 128 bytes
+			keyVal = keyVal[:128]
+		}
+
+		entryStat, err := os.Stat(filePath)
 		if err != nil {
 			return err
 		}
 
-		err = os.Remove(entryFilePath)
+		modTime := entryStat.ModTime()
+
+		keyFiles = append(keyFiles, keyFile{keyId: keyId, keyValue: keyVal, modTime: modTime, fileName: fileName})
+	}
+
+	fmt.Println("sorting entries")
+	sort.Slice(keyFiles, func(i, j int) bool {
+		return keyFiles[i].modTime.Before(keyFiles[j].modTime)
+	})
+
+	for _, keys := range keyFiles {
+		err = fkg.distributeKey(keys.keyId, keys.keyValue)
+		if err != nil {
+			return err
+		}
+
+		filePath := filepath.Join(fkg.dirPath, keys.fileName)
+		if err != nil {
+			return err
+		}
+
+		err = os.Remove(filePath)
 		if err != nil {
 			return err
 		}

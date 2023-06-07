@@ -21,6 +21,7 @@ func BenchmarkPseudorandomGatherer(b *testing.B) {
 	kg.PublishTo(kgl)
 	go kg.Start()
 	b.Log("b.N:", b.N)
+	<-kgl.queue // let the gatherer start
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		<-kgl.queue
@@ -35,6 +36,7 @@ func BenchmarkClavisGatherer(b *testing.B) {
 	kg.PublishTo(kgl)
 	go kg.Start()
 	b.Log("b.N:", b.N)
+	<-kgl.queue // let the gatherer start
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		<-kgl.queue
@@ -49,6 +51,7 @@ func BenchmarkFilesystemGatherer(b *testing.B) {
 	kg.PublishTo(kgl)
 	go kg.Start()
 	b.Log("b.N:", b.N)
+	<-kgl.queue // let the gatherer start
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		<-kgl.queue
