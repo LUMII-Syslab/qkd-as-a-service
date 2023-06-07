@@ -99,9 +99,12 @@ func newBrencis(maxKeyCount uint64, defaultServing bool, infoEndpoint io.Writer,
 }
 
 func monitorKeyManager(keyManager *manager.KeyManager, logger *log.Logger) {
+	lastAdded := uint64(0)
+	TIMEOUT_SECONDS := 10.0
 	for {
-		time.Sleep(time.Second * 10)
+		time.Sleep(time.Second * time.Duration(TIMEOUT_SECONDS))
 		state := keyManager.GetFullState()
-		logger.Printf("state: %+v", state)
+		logger.Printf("reservable: %d; keys served: %d; keys added / s: %.2f", state.ReservableSize, state.KeysServed, float64(state.KeysAdded-lastAdded)/TIMEOUT_SECONDS)
+		lastAdded = state.KeysAdded
 	}
 }
