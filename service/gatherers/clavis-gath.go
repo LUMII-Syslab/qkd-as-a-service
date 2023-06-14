@@ -45,6 +45,7 @@ func (kg *ClavisKeyGatherer) Start() error {
 		if err != nil {
 			log.Panic(err)
 		}
+		log.Println("received message from clavis")
 		var msg []interface{}
 		err = msgpack.Unmarshal(msgB, &msg)
 		if err != nil {
