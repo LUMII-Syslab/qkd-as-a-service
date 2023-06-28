@@ -34,7 +34,7 @@ func NewApp() *App {
 	case "pseudorandom":
 		app.gatherer = gatherers.NewPseudorandomKeyGatherer(32, 32, true)
 	case "clavis":
-		app.gatherer = gatherers.NewClavisKeyGatherer(app.config.ClavisURL)
+		app.gatherer = gatherers.NewZeroMqKeyGatherer(app.config.ClavisURL)
 	case "filesystem":
 		app.gatherer = gatherers.NewFileSystemKeyGatherer(app.config.FSGathererDir)
 	}

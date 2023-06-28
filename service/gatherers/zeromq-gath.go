@@ -8,16 +8,16 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-type ClavisKeyGatherer struct {
+type ZeroMqKeyGatherer struct {
 	keyGathererBase
-	clavisURL string
+	zeroMqUri string
 }
 
-func NewClavisKeyGatherer(clavisURL string) *ClavisKeyGatherer {
-	return &ClavisKeyGatherer{keyGathererBase: keyGathererBase{make([]KeyGathererListener, 0), 0}, clavisURL: clavisURL}
+func NewZeroMqKeyGatherer(clavisURL string) *ZeroMqKeyGatherer {
+	return &ZeroMqKeyGatherer{keyGathererBase: keyGathererBase{make([]KeyGathererListener, 0), 0}, zeroMqUri: clavisURL}
 }
 
-func (kg *ClavisKeyGatherer) Start() error {
+func (kg *ZeroMqKeyGatherer) Start() error {
 	zCtx, err := zmq.NewContext()
 	if err != nil {
 		log.Panicln(err)
@@ -34,14 +34,14 @@ func (kg *ClavisKeyGatherer) Start() error {
 	defer func() { err = zs.Close() }()
 	log.Println("created a new zeromq socket")
 
-	log.Println("attempting to connect to", kg.clavisURL)
-	err = zs.Connect(kg.clavisURL)
+	log.Println("attempting to connect to", kg.zeroMqUri)
+	err = zs.Connect(kg.zeroMqUri)
 	if err != nil {
 		log.Panicln(err)
 	}
-	log.Println("connected zeromq to", kg.clavisURL)
+	log.Println("connected zeromq to", kg.zeroMqUri)
 
-	for i := 0; i < 10; i++ {
+	for {
 		msgB, err := zs.RecvBytes(0)
 		if err != nil {
 			log.Panic(err)
@@ -85,5 +85,4 @@ func (kg *ClavisKeyGatherer) Start() error {
 			return err
 		}
 	}
-	return nil
 }

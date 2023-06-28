@@ -31,7 +31,7 @@ func BenchmarkPseudorandomGatherer(b *testing.B) {
 func BenchmarkClavisGatherer(b *testing.B) {
 	conf := config.LoadConfig("../config.toml")
 	log.Println("conf.ClavisURL:", conf.ClavisURL)
-	kg := NewClavisKeyGatherer(conf.ClavisURL)
+	kg := NewZeroMqKeyGatherer(conf.ClavisURL)
 	kgl := &keyGathererListener{make(chan [2]interface{})}
 	kg.PublishTo(kgl)
 	go kg.Start()
