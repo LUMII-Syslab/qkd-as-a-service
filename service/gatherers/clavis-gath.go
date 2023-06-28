@@ -1,6 +1,7 @@
 package gatherers
 
 import (
+	"encoding/base64"
 	"log"
 
 	zmq "github.com/pebbe/zmq4"
@@ -52,6 +53,7 @@ func (kg *ClavisKeyGatherer) Start() error {
 			log.Panic(err)
 		}
 		if len(msg) != 2 {
+			log.Println("skipping message with invalid length")
 			continue
 		}
 
@@ -74,6 +76,9 @@ func (kg *ClavisKeyGatherer) Start() error {
 				}
 			}
 		}
+
+		encodedString := base64.StdEncoding.EncodeToString(keyVal)
+		log.Println("distributing key", keyId, encodedString)
 
 		err = kg.distributeKey([]byte(keyId), keyVal)
 		if err != nil {
