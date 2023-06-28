@@ -2,11 +2,13 @@
 
 set -Eeuo pipefail
 
+# obtain full path to the directory where this script is located
 export MY_DIR=`dirname $0`
 pushd $MY_DIR
 export MYDIR=$PWD
 echo $MYDIR
 popd
+
 pushd $MY_DIR/../userlib+pqproxy
 export PROJ_ROOT=$PWD
 #export LD_LIBRARY_PATH=$PROJ_ROOT/.libs:/opt/oqs/lib

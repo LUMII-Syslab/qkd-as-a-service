@@ -7,7 +7,10 @@ require (
 	github.com/gammazero/deque v0.2.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
+	github.com/jedib0t/go-pretty/v6 v6.4.6
+	github.com/pebbe/zmq4 v1.2.9
 	github.com/spf13/viper v1.15.0
+	github.com/vmihailenco/msgpack/v5 v5.3.5
 	golang.org/x/crypto v0.6.0
 )
 
@@ -27,6 +30,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.11.3 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect

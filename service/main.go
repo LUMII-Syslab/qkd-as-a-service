@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"qkdc-service/api"
+	"qkdc-service/config"
 	"qkdc-service/gatherers"
 	"qkdc-service/manager"
 	"time"
@@ -13,67 +14,97 @@ import (
 )
 
 func main() {
-	config := loadConfig()
+	app := NewApp()
+	log.Fatal(app.Run())
+}
 
-	var gatherer gatherers.KeyGatherer
-	switch config.Gatherer {
+type App struct {
+	config        *config.Configuration
+	gatherer      gatherers.KeyGatherer
+	infoEndpoint  io.Writer
+	debugEndpoint io.Writer
+}
+
+func NewApp() *App {
+	app := &App{}
+	app.config = config.LoadConfig("config.toml")
+	app.config.Print()
+
+	switch app.config.Gatherer {
 	case "pseudorandom":
-		gatherer = gatherers.NewRandomKeyGatherer(32, 32)
+		app.gatherer = gatherers.NewPseudorandomKeyGatherer(32, 32, true)
 	case "clavis":
-		gatherer = gatherers.NewClavisKeyGatherer(config.ClavisURL)
+		app.gatherer = gatherers.NewZeroMqKeyGatherer(app.config.ClavisURL)
 	case "filesystem":
-		gatherer = gatherers.NewFileSystemKeyGatherer(config.FSGathererDir)
+		app.gatherer = gatherers.NewFileSystemKeyGatherer(app.config.FSGathererDir)
 	}
 
-	var infoEndpoint io.Writer = os.Stdout
-	if !config.LogInfo {
-		infoEndpoint = io.Discard
+	if app.config.LogInfo {
+		app.infoEndpoint = os.Stdout
+	} else {
+		app.infoEndpoint = io.Discard
 	}
 
-	var debugEndpoint io.Writer = os.Stdout
-	if !config.LogDebug {
-		debugEndpoint = io.Discard
+	if app.config.LogDebug {
+		app.debugEndpoint = os.Stdout
+	} else {
+		app.debugEndpoint = io.Discard
 	}
 
-	if config.AijaEnabled {
-		aijaDebugLogger := log.New(debugEndpoint, text.FgYellow.Sprint("AIJA DEBUG\t"), log.Ldate|log.Ltime|log.Lshortfile)
-		aijaKeyManager := manager.NewKeyManager(config.MaxKeyCount, true, aijaDebugLogger, config.DefaultServing)
-		gatherer.PublishTo(aijaKeyManager)
+	return app
+}
 
-		aijaInfoLogger := log.New(infoEndpoint, text.FgBlue.Sprint("AIJA INFO\t"), log.Ldate|log.Ltime)
-		aijaErrorLogger := log.New(os.Stdout, text.FgRed.Sprint("AIJA ERROR\t"), log.Ldate|log.Ltime|log.Lshortfile)
+func (app *App) Run() error {
+	if app.config.AijaEnabled {
+		aijaDebugLogger := log.New(app.debugEndpoint, text.FgYellow.Sprint("AIJA DEBUG\t"), log.Ldate|log.Ltime|log.Lshortfile)
+		aijaInfoLogger := log.New(app.infoEndpoint, text.FgBlue.Sprint("AIJA INFO\t"), log.Ldate|log.Ltime)
+		aijaErrorLogger := log.New(os.Stderr, text.FgRed.Sprint("AIJA ERROR\t"), log.Ldate|log.Ltime|log.Lshortfile)
 
-		controller := api.NewController(aijaInfoLogger, aijaErrorLogger, aijaDebugLogger, aijaKeyManager)
-		go controller.ListenAndServe(config.AijaAPIPort)
-		go func() {
-			for {
-				time.Sleep(time.Second * 10)
-				state := aijaKeyManager.GetFullState()
-				aijaDebugLogger.Printf("state: %+v", state)
-			}
-		}()
+		aija := newAija(app.config.MaxKeyCount, app.config.DefaultServing, app.infoEndpoint, aijaDebugLogger)
+		app.gatherer.PublishTo(aija)
+
+		controller := api.NewController(aijaInfoLogger, aijaErrorLogger, aijaDebugLogger, aija)
+		go controller.ListenAndServe(app.config.AijaAPIPort)
+
+		go monitorKeyManager(aija, aijaInfoLogger)
 	}
 
-	if config.BrencisEnabled {
-		brencisDebugLogger := log.New(debugEndpoint, text.FgYellow.Sprint("BRENCIS DEBUG\t"), log.Ldate|log.Ltime|log.Lshortfile)
-		brencisKeyManager := manager.NewKeyManager(config.MaxKeyCount, false, brencisDebugLogger, config.DefaultServing)
-		gatherer.PublishTo(brencisKeyManager)
+	if app.config.BrencisEnabled {
+		brencisDebugLogger := log.New(app.debugEndpoint, text.FgYellow.Sprint("BRENCIS DEBUG\t"), log.Ldate|log.Ltime|log.Lshortfile)
+		brencisInfoLogger := log.New(app.infoEndpoint, text.FgBlue.Sprint("BRENCIS INFO\t"), log.Ldate|log.Ltime)
+		brencisErrorLogger := log.New(os.Stderr, text.FgRed.Sprint("BRENCIS ERROR\t"), log.Ldate|log.Ltime|log.Lshortfile)
 
-		brencisInfoLogger := log.New(infoEndpoint, text.FgBlue.Sprint("BRENCIS INFO\t"), log.Ldate|log.Ltime)
-		brencisErrorLogger := log.New(os.Stdout, text.FgRed.Sprint("BRENCIS ERROR\t"), log.Ldate|log.Ltime|log.Lshortfile)
+		brencis := newBrencis(app.config.MaxKeyCount, app.config.DefaultServing, app.infoEndpoint, brencisDebugLogger)
+		app.gatherer.PublishTo(brencis)
 
-		controller := api.NewController(brencisInfoLogger, brencisErrorLogger, brencisDebugLogger, brencisKeyManager)
-		go controller.ListenAndServe(config.BrencisAPiPort)
-		go func() {
-			for {
-				time.Sleep(time.Second * 10)
-				state := brencisKeyManager.GetFullState()
-				brencisDebugLogger.Printf("state: %+v", state)
-			}
-		}()
+		controller := api.NewController(brencisInfoLogger, brencisErrorLogger, brencisDebugLogger, brencis)
+		go controller.ListenAndServe(app.config.BrencisAPiPort)
+
+		go monitorKeyManager(brencis, brencisInfoLogger)
 	}
 
 	time.Sleep(time.Millisecond * 100)
 
-	log.Fatal(gatherer.Start())
+	return app.gatherer.Start()
+}
+
+func newAija(maxKeyCount uint64, defaultServing bool, infoEndpoint io.Writer, logger *log.Logger) *manager.KeyManager {
+	aijaKeyManager := manager.NewKeyManager(maxKeyCount, true, logger, defaultServing)
+	return aijaKeyManager
+}
+
+func newBrencis(maxKeyCount uint64, defaultServing bool, infoEndpoint io.Writer, logger *log.Logger) *manager.KeyManager {
+	brencisKeyManager := manager.NewKeyManager(maxKeyCount, false, logger, defaultServing)
+	return brencisKeyManager
+}
+
+func monitorKeyManager(keyManager *manager.KeyManager, logger *log.Logger) {
+	lastAdded := uint64(0)
+	TIMEOUT_SECONDS := 10.0
+	for {
+		time.Sleep(time.Second * time.Duration(TIMEOUT_SECONDS))
+		state := keyManager.GetFullState()
+		logger.Printf("reservable: %d; keys served: %d; keys added / s: %.2f", state.ReservableSize, state.KeysServed, float64(state.KeysAdded-lastAdded)/TIMEOUT_SECONDS)
+		lastAdded = state.KeysAdded
+	}
 }

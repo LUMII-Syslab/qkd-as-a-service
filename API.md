@@ -16,11 +16,6 @@
     - [0x04: `setState` request](#0x04-setstate-request)
     - [0xfc: `setState` response](#0xfc-setstate-response)
   - [Error codes \& State codes](#error-codes--state-codes)
-  - [QAAS software structure \& operation](#qaas-software-structure--operation)
-    - [Key Gathering](#key-gathering)
-    - [Handling `reserveKeyAndGetHalf` requests](#handling-reservekeyandgethalf-requests)
-    - [Handling `getKeyHalf` requests](#handling-getkeyhalf-requests)
-    - [KDC Synchronisation](#kdc-synchronisation)
 
 ## Introduction
 
@@ -50,7 +45,7 @@ The online ASN.1 javascript decoder might be helpful for debugging: [https://lap
 | ordinal | parameter            | type    | description & notes                                |
 | :-----: | -------------------- | ------- | -------------------------------------------------- |
 |    0    | endpoint id = `0x01` | integer | Specifies the `reserveKeyAndGetHalf` request.      |
-|    1    | key length = `256`   | integer | Currently only 256 byte key fetching is supported. |
+|    1    | key length = `256`   | integer | Currently only 256-bit key fetching is supported. |
 |    2    | crypto nonce         | integer | Value should be random and between 0 and 2^63-1.   |
 
 <details>
@@ -110,7 +105,7 @@ SEQUENCE (7 elem)
 | ordinal | parameter            | type        | description & notes                                |
 | :-----: | -------------------- | ----------- | -------------------------------------------------- |
 |    0    | endpoint id = `0x02` | integer     | Specifies the `getKeyHalf` request.                |
-|    1    | key length = `256`   | integer     | Currently only 256 byte key fetching is supported. |
+|    1    | key length = `256`   | integer     | Currently only 256-bit key fetching is supported. |
 |    2    | key identifier       | octet array |                                                    |
 |    3    | crypto nonce         | integer     | Value should be random and between 0 and 2^63-1.   |
 
@@ -302,22 +297,3 @@ Value:
 |     1      | KDC is receiving keys.                                       |
 |     2      | KDC is running.                                              |
 
-## QAAS software structure & operation
-
-![key manager queue](diagrams/key-manager-queue.png)
-
-### Key Gathering
-
-TODO
-
-### Handling `reserveKeyAndGetHalf` requests
-
-TODO
-
-### Handling `getKeyHalf` requests
-
-TODO
-
-### KDC Synchronisation
-
-TODO

@@ -39,18 +39,20 @@ public class WsServer {
     private Map<WebSocket, WsSink> sourceMessageSinks;
 
     public WsServer(Optional<SSLContext> sslContext, int port, ClientSourceMessageSinkFactory sinkFactory) {
-        this(sslContext, port, sinkFactory, "New WsServer");
+        this(sslContext, port, sinkFactory, "New WsServer", null);
     }
-    public WsServer(Optional<SSLContext> sslContext, int port, ClientSourceMessageSinkFactory sinkFactory, String description) {
+    public WsServer(Optional<SSLContext> sslContext, int port, ClientSourceMessageSinkFactory sinkFactory, String description, String targetUri) {
 
-        this.wsserver = new Synced<>(new Sticky<>(() -> newConnection(sslContext, port, description) ));
+        this.wsserver = new Synced<>(new Sticky<>(() -> newConnection(sslContext, port, description, targetUri) ));
         this.sinkFactory = sinkFactory;
         this.sourceMessageSinks = new ConcurrentHashMap<>();
     }
 
-    private WebSocketServer newConnection(Optional<SSLContext> sslContext, int port, String description) throws Exception {
+    private WebSocketServer newConnection(Optional<SSLContext> sslContext, int port, String description, String targetUri) throws Exception {
 
         System.out.println(colorize(description, GREEN_TEXT())+": port="+port+", ssl="+ sslContext.isPresent());
+        if (targetUri!=null)
+            System.out.println(colorize("Target URI", GREEN_TEXT())+": "+targetUri);
 
         WebSocketServer wssrv = new WebSocketServer(new InetSocketAddress(port)) {
 

@@ -14,14 +14,14 @@ export default function QAASRequstConf({config, setConfig}: { config: any, setCo
             <div className="row">
                 <div className="col-12 col-md-4">
                     <div className="form-floating">
-                        <input type="url" placeholder="Aija URL" defaultValue={config.aijaEndpoint}
+                        <input type="text" placeholder="Aija URL" defaultValue={config.aijaEndpoint}
                                className="form-control mb-3" onChange={handleAijaEndpointChange}/>
                         <label>Aija URL</label>
                     </div>
                 </div>
                 <div className="col-12 col-md-4">
                     <div className="form-floating">
-                        <input type="url" placeholder="Brencis URL" defaultValue={config.brencisEndpoint}
+                        <input type="text" placeholder="Brencis URL" defaultValue={config.brencisEndpoint}
                                className="form-control mb-3" onChange={handleBrencisEndpointChange}/>
                         <label>Brencis URL</label>
                     </div>

@@ -4,7 +4,7 @@ export default function InputKeyLength({request, setRequest}) {
             <input type="number" defaultValue={request.keyLength}
                    className="form-control"
                    readOnly disabled/>
-            <label>Key Length</label>
+            <label>Key Length [bits]</label>
         </div>
     )
 }
