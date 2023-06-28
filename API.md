@@ -16,11 +16,6 @@
     - [0x04: `setState` request](#0x04-setstate-request)
     - [0xfc: `setState` response](#0xfc-setstate-response)
   - [Error codes \& State codes](#error-codes--state-codes)
-  - [QAAS software structure \& operation](#qaas-software-structure--operation)
-    - [Key Gathering](#key-gathering)
-    - [Handling `reserveKeyAndGetHalf` requests](#handling-reservekeyandgethalf-requests)
-    - [Handling `getKeyHalf` requests](#handling-getkeyhalf-requests)
-    - [KDC Synchronisation](#kdc-synchronisation)
 
 ## Introduction
 
@@ -302,22 +297,3 @@ Value:
 |     1      | KDC is receiving keys.                                       |
 |     2      | KDC is running.                                              |
 
-## QAAS software structure & operation
-
-![key manager queue](diagrams/key-manager-queue.png)
-
-### Key Gathering
-
-TODO
-
-### Handling `reserveKeyAndGetHalf` requests
-
-TODO
-
-### Handling `getKeyHalf` requests
-
-TODO
-
-### KDC Synchronisation
-
-TODO
