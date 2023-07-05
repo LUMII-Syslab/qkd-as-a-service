@@ -54,8 +54,10 @@ The code from the `service` project is intended to be launched on the servers wi
 In order to install all prerequisites (Golang compiler) on Ubuntu, run:
 
 ```bash
-sudo apt install golang-go
+sudo apt install golang-go libzmq5-dev
 ```
+
+(on older Ubuntu, install `libzmq-dev`).
 
 In order to install prerequisites on macOS, run:
 
@@ -91,10 +93,10 @@ In order to launch **Aija and Brencis in the PQC mode** (i.e., with all 4 proxie
 The script launches several copies of the default terminal app for the OS (`gnome-terminal` on Linux, `Terminal` on macOS, and  `cmd` with Cygwin on Windows).
 
 > In order to launch **Aija and Brencis in the non-secure** web socket **mode** (without proxies), run:
+> 
 > ```bash
 > go run .
 > ```
-
 
 # Running the Administration Panel (Centis)
 
@@ -113,6 +115,7 @@ brew install npm
 ```
 
 Then from the `centis` directory, launch:
+
 ```bash
 npm install
 ```
@@ -130,12 +133,12 @@ The script launches 2 local HTTP-to-PQC/HTTPS proxies. Besides, the script launc
 Since two proxies are launched locally, you can use `ws://localhost:8080/ws` and `ws://localhost:8081/ws` as addresses for Aija and Brencis.
 
 > If you would like to run Centis without proxies, from the `centis` directory, launch:
+> 
 > ```bash
 > npm start
 > ```
+> 
 > Notice that in you will need a PQC-enabled browser built with LibOQS.
-
-
 
 ## Centis Paranoic Mode: HTTPS in a non-PQC browser
 
