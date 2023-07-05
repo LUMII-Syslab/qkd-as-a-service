@@ -33,6 +33,6 @@ export ARGS="-f $MYDIR/pqproxy-local2pqccentis4brencis.properties"
 $MYDIR/term_with_title.sh "CENTIS-FORWARD-PROXY-TO-BRENCIS" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS $ARGS"
 
 # Launching Centis
-$MYDIR/term_with_title.sh "CENTIS BACKEND" "cd $MYDIR/../centis && npm start"
+$MYDIR/term_with_title.sh "CENTIS BACKEND" "cd $MYDIR/../centis && npm install && npm start"
 
 popd
