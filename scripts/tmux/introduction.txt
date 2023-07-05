@@ -1,0 +1,9 @@
+`tmux` is a very powerful terminal multiplexer.
+
+Here's a quick introduction (hotkeys, etc.):
+ - |ctrl+b c| creates a new tmux window;
+ - |ctrl+b n| go to the next window;
+ - |ctrl+b p| go to the previous window;
+ - |ctrl+b ?| goes to window with index ?;
+ - run `tmux kill-session` to exit;
+
