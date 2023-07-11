@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import org.bouncycastle.jsse.BCX509ExtendedKeyManager;
 import org.bouncycastle.jsse.BCX509ExtendedTrustManager;
+import org.bouncycastle.tls.InjectedSigAlgorithms;
 import org.bouncycastle.tls.ProtocolVersion;
 import org.bouncycastle.tls.SignatureAndHashAlgorithm;
 import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsCrypto;
@@ -67,8 +68,7 @@ final class ContextData
 
     List<SignatureSchemeInfo> getSignatureSchemes(Vector<SignatureAndHashAlgorithm> sigAndHashAlgs)
     {
-        List<SignatureSchemeInfo> result = SignatureSchemeInfo.getSignatureSchemes(signatureSchemes, sigAndHashAlgs);
-        return result;
+        return SignatureSchemeInfo.getSignatureSchemes(signatureSchemes, sigAndHashAlgs);
     }
 
     BCX509ExtendedKeyManager getX509KeyManager()

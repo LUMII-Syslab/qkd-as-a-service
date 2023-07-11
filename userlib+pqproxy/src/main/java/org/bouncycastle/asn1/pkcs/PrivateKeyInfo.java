@@ -17,7 +17,9 @@ import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.bc.BCObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.pqc.asn1.PQCObjectIdentifiers;
 import org.bouncycastle.util.BigIntegers;
 
 /**

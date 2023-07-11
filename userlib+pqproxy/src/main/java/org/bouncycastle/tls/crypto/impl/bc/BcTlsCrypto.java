@@ -54,7 +54,6 @@ import org.bouncycastle.tls.crypto.impl.TlsAEADCipher;
 import org.bouncycastle.tls.crypto.impl.TlsBlockCipher;
 import org.bouncycastle.tls.crypto.impl.TlsImplUtils;
 import org.bouncycastle.tls.crypto.impl.TlsNullCipher;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.bouncycastle.util.Arrays;
 
 /**

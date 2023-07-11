@@ -25,10 +25,10 @@ import java.util.*;
 public class InjectedSigAlgorithms
 {
     public static class SigAlgorithmInfo {
-        private String name;
-        private ASN1ObjectIdentifier oid;
-        private int signatureSchemeCodePoint;
-        private SignatureAndHashAlgorithm signatureAndHashAlgorithm;
+        private String _name;
+        private ASN1ObjectIdentifier _oid;
+        private int _signatureSchemeCodePoint;
+        private SignatureAndHashAlgorithm _signatureAndHashAlgorithm;
             // ^^^ Just splits the code point (a 2-byte integer) into two separate bytes:
             //     HighestByte(signatureSchemeCodePoint), LowestByte(signatureSchemeCodePoint).
             //     Actually, the highest (the second) byte does not necessarily correspond to the hash algorithm,
@@ -43,29 +43,29 @@ public class InjectedSigAlgorithms
                             int signatureSchemeCodePoint, // int cryptoHashAlgorithmIndex,
                             BC_ASN1_Converter converter,
                             AsymmetricKeyInfoConverter infoToKeyConverter, SignatureSpiFromPublicKeyFactory sig2spiFactory) {
-            this.name = name;
-            this.oid = oid;
-            this.signatureSchemeCodePoint = signatureSchemeCodePoint;
-            this.signatureAndHashAlgorithm = new SignatureAndHashAlgorithm((short) (signatureSchemeCodePoint >> 8), (short) (signatureSchemeCodePoint & 0xFF));
+            this._name = name;
+            this._oid = oid;
+            this._signatureSchemeCodePoint = signatureSchemeCodePoint;
+            this._signatureAndHashAlgorithm = new SignatureAndHashAlgorithm((short) (signatureSchemeCodePoint >> 8), (short) (signatureSchemeCodePoint & 0xFF));
             this.converter = converter;
             this.infoToKeyConverter = infoToKeyConverter;
             this.sig2spiFactory = sig2spiFactory;
         }
 
         public String name() {
-            return this.name;
+            return this._name;
         }
 
         public ASN1ObjectIdentifier oid() {
-            return this.oid;
+            return this._oid;
         }
 
         public int signatureSchemeCodePoint() {
-            return this.signatureSchemeCodePoint;
+            return this._signatureSchemeCodePoint;
         }
 
         public SignatureAndHashAlgorithm signatureAndHashAlgorithm() {
-            return this.signatureAndHashAlgorithm;
+            return this._signatureAndHashAlgorithm;
         }
 
     }
@@ -168,24 +168,24 @@ public class InjectedSigAlgorithms
 
         @Override
         public void configure(ConfigurableProvider provider) {
-            provider.addAlgorithm("Alg.Alias.Signature."+info.oid, info.name);
-            provider.addAlgorithm("Alg.Alias.Signature.OID."+info.oid, info.name);
+            provider.addAlgorithm("Alg.Alias.Signature."+info.oid(), info.name());
+            provider.addAlgorithm("Alg.Alias.Signature.OID."+info.oid(), info.name());
 
             // remove previous values in order to avoid the duplicate key exception
             if (provider instanceof java.security.Provider) {
                 java.security.Provider p = (java.security.Provider)provider;
-                p.remove("Signature."+info.name);
-                p.remove("Alg.Alias.Signature." + info.oid);
-                p.remove("Alg.Alias.Signature.OID." + info.oid);
+                p.remove("Signature."+info.name());
+                p.remove("Alg.Alias.Signature." + info.oid());
+                p.remove("Alg.Alias.Signature.OID." + info.oid());
             }
             // = provider.addSignatureAlgorithm(provider, "SPHINCSPLUS", PREFIX + "SignatureSpi$Direct", BCObjectIdentifiers.sphincsPlus);
-            provider.addAlgorithm("Signature."+info.name, "org.bouncycastle.tls.injection.signaturespi.DirectSignatureSpi");
-            provider.addAlgorithm("Alg.Alias.Signature." + info.oid, info.name);
-            provider.addAlgorithm("Alg.Alias.Signature.OID." + info.oid, info.name);
+            provider.addAlgorithm("Signature."+info.name(), "org.bouncycastle.tls.injection.signaturespi.DirectSignatureSpi");
+            provider.addAlgorithm("Alg.Alias.Signature." + info.oid(), info.name());
+            provider.addAlgorithm("Alg.Alias.Signature.OID." + info.oid(), info.name());
 
-            registerOid(provider, info.oid, info.name, info.infoToKeyConverter);;
-            registerOidAlgorithmParameters(provider, info.oid, info.name);
-            provider.addKeyInfoConverter(info.oid, info.infoToKeyConverter);
+            registerOid(provider, info.oid(), info.name(), info.infoToKeyConverter);
+            registerOidAlgorithmParameters(provider, info.oid(), info.name());
+            provider.addKeyInfoConverter(info.oid(), info.infoToKeyConverter);
         }
     }
 

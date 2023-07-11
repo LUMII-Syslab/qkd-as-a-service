@@ -3,10 +3,10 @@ package org.bouncycastle.pqc.jcajce.provider.sphincsplus;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.security.PrivateKey;
 
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusPrivateKeyParameters;
 import org.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusPublicKeyParameters;
 import org.bouncycastle.pqc.crypto.util.PrivateKeyFactory;
@@ -16,8 +16,10 @@ import org.bouncycastle.pqc.jcajce.interfaces.SPHINCSPlusPublicKey;
 import org.bouncycastle.pqc.jcajce.spec.SPHINCSPlusParameterSpec;
 import org.bouncycastle.util.Arrays;
 
+import org.bouncycastle.crypto.CipherParameters;
+
 public class BCSPHINCSPlusPrivateKey
-    implements SPHINCSPlusPrivateKey
+    implements PrivateKey, SPHINCSPlusPrivateKey
 {
     private static final long serialVersionUID = 1L;
 
@@ -110,6 +112,7 @@ public class BCSPHINCSPlusPrivateKey
     }
 
     public CipherParameters getKeyParams()  // changed visibility to public #pqc-tls #injection
+    // return type: SPHINCSPlusPrivateKeyParameters or CipherParameters?
     {
         return params;
     }

@@ -110,7 +110,7 @@ public class SPHINCSPlusKeyPairGeneratorSpi
     {
         if (!initialised)
         {
-            param = new SPHINCSPlusKeyGenerationParameters(random, SPHINCSPlusParameters.sha2_256s);
+            param = new SPHINCSPlusKeyGenerationParameters(random, SPHINCSPlusParameters.sha2_256f);
 
             engine.init(param);
             initialised = true;

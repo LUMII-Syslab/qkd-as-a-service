@@ -11,7 +11,6 @@ import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Integers;
 
@@ -1402,25 +1401,9 @@ public class TlsExtensionsUtils
         // adding injected KEMs...
         int[] a = namedGroups;
         int[] b = InjectedKEMs.getInjectedKEMsCodePoints();
-        int resultLength = b.length;
-        if (InjectedKEMs.injectionOrder == InjectedKEMs.InjectionOrder.BEFORE_DEFAULT ||
-                InjectedKEMs.injectionOrder == InjectedKEMs.InjectionOrder.AFTER_DEFAULT)
-            resultLength += a.length;
-        int[] result = new int[resultLength];
+        int[] result = Arrays.copyOf(a, a.length + b.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
 
-        switch (InjectedKEMs.injectionOrder) {
-            case BEFORE_DEFAULT:
-                System.arraycopy(b, 0, result, 0, b.length);
-                System.arraycopy(a, 0, result, b.length, a.length);
-                break;
-            case INSTEAD_DEFAULT:
-                System.arraycopy(b, 0, result, 0, b.length);
-                break;
-            case AFTER_DEFAULT:
-                System.arraycopy(a, 0, result, 0, a.length);
-                System.arraycopy(b, 0, result, a.length, b.length);
-                break;
-        }
         return result;
     }
 

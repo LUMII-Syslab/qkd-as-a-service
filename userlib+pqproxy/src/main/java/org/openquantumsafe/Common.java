@@ -59,7 +59,7 @@ public class Common {
                             url = f.toURI().toURL();
                             System.load(url.getFile()); // load from full file name
                             return;
-                        } catch (Exception exception) {
+                        } catch (Throwable exception) {
                             exception.printStackTrace();
                         }
                     }

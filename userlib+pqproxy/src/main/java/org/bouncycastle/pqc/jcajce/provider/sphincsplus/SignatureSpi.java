@@ -11,6 +11,7 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.NullDigest;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.pqc.InjectablePQC;
 import org.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusSigner;
 
 public class SignatureSpi
@@ -139,7 +140,7 @@ public class SignatureSpi
     {
         public Direct()
         {
-            super(new NullDigest(),new SPHINCSPlusSigner());// new InjectablePQC.InjectableSphincsPlusTlsSigner());// new SPHINCSPlusSigner());
+            super(new NullDigest(), new InjectablePQC.InjectableSphincsPlusTlsSigner());// new SPHINCSPlusSigner());
         }
     }
 }

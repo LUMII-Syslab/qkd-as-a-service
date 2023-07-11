@@ -18,8 +18,6 @@ import org.bouncycastle.jsse.BCSNIServerName;
 import org.bouncycastle.jsse.BCX509Key;
 import org.bouncycastle.tls.*;
 import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsCrypto;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
-import org.bouncycastle.tls.injection.sigalgs.InjectedSigAlgorithms;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.IPAddress;
 import org.bouncycastle.util.encoders.Hex;
@@ -122,15 +120,10 @@ class ProvTlsClient
         Vector<Integer> result = NamedGroupInfo.getSupportedGroupsLocalClient(jsseSecurityParameters.namedGroups);
 
         // adding injected KEMs: #pqc-tls #injection
-        if (InjectedKEMs.injectionOrder == InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT)
-            result.clear();
-
-        int pos=0;
-        if (InjectedKEMs.injectionOrder == InjectedKEMs.InjectionOrder.AFTER_DEFAULT)
-            pos = result.size();
-
+        //result.clear();
+        int i=0;
         for (int kem : InjectedKEMs.getInjectedKEMsCodePoints())
-            result.add(pos++, kem);
+            result.add(i++, kem);
 
         return result;
     }

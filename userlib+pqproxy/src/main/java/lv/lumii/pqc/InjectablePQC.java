@@ -7,10 +7,13 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.digests.NullDigest;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.pqc.crypto.frodo.*;
+import org.bouncycastle.pqc.crypto.sphincsplus.*;
+import org.bouncycastle.pqc.jcajce.interfaces.SPHINCSPlusPrivateKey;
 import org.bouncycastle.pqc.jcajce.provider.sphincsplus.BCSPHINCSPlusPublicKey;
 import org.bouncycastle.pqc.jcajce.provider.sphincsplus.SignatureSpi;
 import org.bouncycastle.tls.crypto.*;
@@ -22,10 +25,6 @@ import org.bouncycastle.tls.injection.sigalgs.InjectedSigVerifiers;
 import org.bouncycastle.tls.injection.sigalgs.InjectedSigners;
 import org.bouncycastle.util.Pack;
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
-import org.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusParameters;
-import org.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusPrivateKeyParameters;
-import org.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusPublicKeyParameters;
-import org.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusSigner;
 import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 import org.bouncycastle.pqc.jcajce.provider.sphincsplus.BCSPHINCSPlusPrivateKey;
 import org.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyFactorySpi;
@@ -67,7 +66,10 @@ public class InjectablePQC {
      */
     //public static final ASN1ObjectIdentifier oqs_sphincsshake256128frobust_oid = new ASN1ObjectIdentifier("1.3.9999.6.7").branch("1");
     //public static final ASN1ObjectIdentifier oqs_sphincssha256256frobust_oid = new ASN1ObjectIdentifier("1.3.9999.6.6").branch("1");
-    public static final ASN1ObjectIdentifier oqs_sphincssha256128frobust_oid = new ASN1ObjectIdentifier("1.3.9999.6.4").branch("1");
+    //public static final ASN1ObjectIdentifier oqs_sphincssha256128frobust_oid = new ASN1ObjectIdentifier("1.3.9999.6.4").branch("1");
+    public static final ASN1ObjectIdentifier oqs_sphincssha2128fsimple_oid = new ASN1ObjectIdentifier("1.3.9999.6.4").branch("13");
+
+
 
     /*
      * RFC 8446 reserved for private use (0xFE00..0xFFFF)
@@ -76,16 +78,18 @@ public class InjectablePQC {
     // ^^^ when compiling OQS openssl 1.1.1, go to openssl/oqs-template/generate.yml and enable this algorithm!
     //     then invoke: python3 oqs-template/generate.py
     //public static final int oqs_sphincssha256256frobust_signaturescheme_codepoint = 0xfe72;
-    public static final int oqs_sphincssha256128frobust_signaturescheme_codepoint = 0xfe5e;
+    //public static final int oqs_sphincssha256128frobust_signaturescheme_codepoint = 0xfe5e;
+    public static final int oqs_sphincssha2128fsimple_signaturescheme_codepoint = 0xfeb3;
     
 
     private static String OQS_SIG_NAME =
             //"SPHINCS+-SHAKE256-128f-robust"
-            "SPHINCS+-SHA256-128f-robust"
+            //"SPHINCS+-SHA256-128f-robust"
+            "SPHINCS+-SHA2-128f-simple"
             ;
     //private static SPHINCSPlusParameters sphincsPlusParameters = SPHINCSPlusParameters.shake256_128f;
     //private static SPHINCSPlusParameters sphincsPlusParameters = SPHINCSPlusParameters.shake_128f;
-    private static SPHINCSPlusParameters sphincsPlusParameters = SPHINCSPlusParameters.sha2_128f;
+    private static SPHINCSPlusParameters sphincsPlusParameters = SPHINCSPlusParameters.sha2_128f_simple;
     private static int sphincsPlusParametersAsInt = SPHINCSPlusParameters.getID(sphincsPlusParameters);
 
     public static void inject(InjectedKEMs.InjectionOrder injectionOrder) {
@@ -95,8 +99,8 @@ public class InjectablePQC {
 
 
         //ASN1ObjectIdentifier sigOid = InjectablePQC.oqs_sphincsshake256128frobust_oid;
-        ASN1ObjectIdentifier sigOid = InjectablePQC.oqs_sphincssha256128frobust_oid;
-        int sigCodePoint = InjectablePQC.oqs_sphincssha256128frobust_signaturescheme_codepoint;
+        ASN1ObjectIdentifier sigOid = InjectablePQC.oqs_sphincssha2128fsimple_oid;
+        int sigCodePoint = InjectablePQC.oqs_sphincssha2128fsimple_signaturescheme_codepoint;
         int sphincsPlusPKLength = 32;
         int sphincsPlusSKLength = 64;
         // ^^^ see: https://github.com/sphincs/sphincsplus
@@ -516,20 +520,54 @@ public class InjectablePQC {
         System.out.println(byteArrayToString(d2));
         System.out.println(byteArrayToString(my2));
 
-        /*
+
         for (String s : org.openquantumsafe.Sigs.get_enabled_sigs()) {
-            //System.out.println("SIG "+s);
+            System.out.println("SIG "+s);
         }
         String pkStr = "8776619e7fc2ca19b0be40157190208680007c01b855256123e2866ae71ad34616af34d2a08542a6fcd8b9ceab9ea4fa4bf640a5cd866f87aad16a971603e173";
         byte[] sk = hexStringToByteArray(pkStr);
         byte[] pk = Arrays.copyOfRange(sk, sk.length-32, sk.length);
+
+
+        org.openquantumsafe.Signature oqsSigner = new org.openquantumsafe.Signature(
+                OQS_SIG_NAME);
+        oqsSigner.generate_keypair();
+        pk = oqsSigner.export_public_key();
+        sk = oqsSigner.export_secret_key();
+        System.out.println("OQS KEYPAIR: "+sk.length+" "+pk.length);
+        System.out.println("OQS PK "+byteArrayToString(pk));
+        System.out.println("OQS SK "+byteArrayToString(sk));
+
+
+        SPHINCSPlusKeyPairGenerator generator = new SPHINCSPlusKeyPairGenerator();
+        SPHINCSPlusKeyGenerationParameters params = new SPHINCSPlusKeyGenerationParameters(new SecureRandom(), InjectablePQC.sphincsPlusParameters);
+        generator.init(params);
+        AsymmetricCipherKeyPair keyPair = generator.generateKeyPair();
+        SPHINCSPlusPublicKeyParameters _pk = (SPHINCSPlusPublicKeyParameters) keyPair.getPublic();
+        SPHINCSPlusPrivateKeyParameters _sk = (SPHINCSPlusPrivateKeyParameters) keyPair.getPrivate();
+
+        //// comment to use LibOQS-generated keys =>
+        pk = _pk.getEncoded();
+        pk = Arrays.copyOfRange(pk, 4, pk.length);
+        sk = _sk.getEncoded();
+        sk = Arrays.copyOfRange(sk, 4, sk.length);
+        System.out.println("BC5 KEYPAIR: "+sk.length+" "+pk.length);
+        System.out.println("BC PK "+byteArrayToString(pk));
+        System.out.println("BC SK "+byteArrayToString(sk));
+        //// <= comment to use LibOQS-generated keys
+
+        // TODO: compile and test with latest liboqs 0.8.1-dev
+        // https://github.com/open-quantum-safe/liboqs/blob/main/RELEASE.md
+
         byte[] message = new byte[] {};// {0, 1, 2};
 
         System.out.printf("Signing message '%s'...\n", byteArrayToString(message));
 
         byte[] oqsSignature = InjectableSphincsPlusTlsSigner.generateSignature_oqs(message, sk);
         byte[] bcSignature = InjectableSphincsPlusTlsSigner.generateSignature_bc(message, sk);
-        System.out.printf("SECRET KEY:\n%s\n", InjectablePQC.byteArrayToString(sk));
+
+        System.out.printf("OQS SIG:\n%s\n", InjectablePQC.byteArrayToString(oqsSignature).length() + " "+byteArrayToString(Arrays.copyOfRange(oqsSignature, 0, 50)));
+        System.out.printf("BC SIG:\n%s\n", InjectablePQC.byteArrayToString(bcSignature).length()+ " "+byteArrayToString(Arrays.copyOfRange(bcSignature, 0, 50)));
 
         //System.out.printf("OQS SIGNATURE:\n%s\n", InjectablePQC.byteArrayToString(oqsSignature));
         System.out.printf("OQS SIGNATURE VERIFY: oqs:%b bc:%b\n",
@@ -539,7 +577,7 @@ public class InjectablePQC {
         System.out.printf("BC SIGNATURE VERIFY: oqs:%b bc:%b\n",
                 InjectableSphincsPlusTlsSigner.verifySignature_oqs(message, bcSignature, pk),
                 InjectableSphincsPlusTlsSigner.verifySignature_bc(message, bcSignature, pk));
-*/
+
     }
 
 }

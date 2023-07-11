@@ -45,9 +45,6 @@ import org.bouncycastle.tls.crypto.TlsStreamSigner;
 import org.bouncycastle.tls.crypto.TlsStreamVerifier;
 import org.bouncycastle.tls.crypto.TlsVerifier;
 import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsCrypto;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
-import org.bouncycastle.tls.injection.kems.KEMAgreementBase;
-import org.bouncycastle.tls.injection.sigalgs.InjectedSigAlgorithms;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Integers;
 import org.bouncycastle.util.Shorts;
@@ -5365,23 +5362,10 @@ public class TlsUtils
             else {
                 // #pqc-tls #injection
                 assert (crypto instanceof JcaTlsCrypto);
-                agreement = InjectedKEMs.getTlsAgreement((JcaTlsCrypto)crypto, supportedGroup, false); // assume we are a client
+                agreement = InjectedKEMs.getTlsAgreement((JcaTlsCrypto)crypto, supportedGroup);
             }
 
-            // #pqc-tls #injection (if-then part)
-            if (agreement instanceof KEMAgreementBase) {
-                KEMAgreementBase kem = (KEMAgreementBase) agreement;
-
-                // implementing client-side KEM: 1.KeyGen (called by kem.publicKey)
-                byte[] pk = kem.publicKey();
-
-                // implementing client-side KEM: sending pk to the server
-                KeyShareEntry clientShare = new KeyShareEntry(supportedGroup, pk);
-
-                clientShares.addElement(clientShare);
-                clientAgreements.put(supportedGroupElement, agreement);
-            }
-            else if (null != agreement)
+            if (null != agreement)
             {
                 byte[] key_exchange = agreement.generateEphemeral();
                 KeyShareEntry clientShare = new KeyShareEntry(supportedGroup, key_exchange);

@@ -14,9 +14,11 @@ import java.util.logging.Logger;
 
 import org.bouncycastle.jsse.java.security.BCAlgorithmConstraints;
 import org.bouncycastle.jsse.java.security.BCCryptoPrimitive;
-import org.bouncycastle.tls.*;
+import org.bouncycastle.tls.InjectedKEMs;
+import org.bouncycastle.tls.NamedGroup;
+import org.bouncycastle.tls.ProtocolVersion;
+import org.bouncycastle.tls.TlsUtils;
 import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsCrypto;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Integers;
 
@@ -296,29 +298,12 @@ class NamedGroupInfo
         {
             // return a concatenation of CANDIDATES_DEFAULT and injected KEMs code points #pqc-tls #injection
             int[] injected = InjectedKEMs.getInjectedKEMsCodePoints();
+            int[] retVal = new int[CANDIDATES_DEFAULT.length+injected.length];
 
-            int newLength = injected.length;
-            if (InjectedKEMs.injectionOrder == InjectedKEMs.InjectionOrder.BEFORE_DEFAULT ||
-                    InjectedKEMs.injectionOrder == InjectedKEMs.InjectionOrder.AFTER_DEFAULT
-            ) {
-                newLength += CANDIDATES_DEFAULT.length;
-            }
-            int[] retVal = new int[newLength];
-
-            switch (InjectedKEMs.injectionOrder) {
-                case BEFORE_DEFAULT:
-                    System.arraycopy(injected, 0, retVal, 0, injected.length);
-                    System.arraycopy(CANDIDATES_DEFAULT, 0, retVal, injected.length, CANDIDATES_DEFAULT.length);
-                    break;
-                case INSTEAD_DEFAULT:
-                    System.arraycopy(injected, 0, retVal, 0, injected.length);
-                    break;
-                case AFTER_DEFAULT:
-                    System.arraycopy(CANDIDATES_DEFAULT, 0, retVal, 0, CANDIDATES_DEFAULT.length);
-                    System.arraycopy(injected, 0, retVal, CANDIDATES_DEFAULT.length, injected.length);
-                    break;
-            }
-
+            for (int i=0; i<CANDIDATES_DEFAULT.length; i++)
+                retVal[i] = CANDIDATES_DEFAULT[i];
+            for (int i=0; i<injected.length; i++)
+                retVal[CANDIDATES_DEFAULT.length + i] = injected[i];
             return retVal;
         }
 
@@ -371,12 +356,6 @@ class NamedGroupInfo
         for (All all : All.values())
         {
             addNamedGroup(isFipsContext, crypto, disableChar2, disableFFDHE, ng, all);
-        }
-
-        // #pqc-tls #injection
-        for (int codePoint : InjectedKEMs.getInjectedKEMsCodePoints()) {
-            NamedGroupInfo ngInfo = new NamedGroupInfo(codePoint, InjectedKEMs.getInjectedKEMStandardName(codePoint), null, true);
-            ng.put(codePoint, ngInfo);
         }
 
         return ng;
@@ -479,83 +458,40 @@ class NamedGroupInfo
         return result;
     }
 
-    //private final All all;
-    // for injection, we cannot use final enum All; we need some dynamic
-    // data structure for storing the corresponding sig scheme info
-    // #pqc-tls #injection
-
-    private final int namedGroup;
-    private final String name;
-    private final String text;
-    private final String jcaAlgorithm;
-    private final String jcaGroup;
-    private final boolean char2;
-    private final boolean supportedPost13;
-    private final boolean supportedPre13;
-    private final int bitsECDH;
-    private final int bitsFFDHE;
+    private final All all;
     private final AlgorithmParameters algorithmParameters;
     private final boolean enabled;
 
     NamedGroupInfo(All all, AlgorithmParameters algorithmParameters, boolean enabled)
     {
-        //this.all = all;
-        // #pqc-tls #injection
-        this.namedGroup = all.namedGroup;
-        this.name = all.name;
-        this.text = all.text;
-        this.jcaAlgorithm = all.jcaAlgorithm;
-        this.jcaGroup = all.jcaGroup;
-        this.char2 = all.char2;
-        this.supportedPost13 = all.supportedPost13;
-        this.supportedPre13 = all.supportedPre13;
-        this.bitsECDH = all.bitsECDH;
-        this.bitsFFDHE = all.bitsFFDHE;
-
-        this.algorithmParameters = algorithmParameters;
-        this.enabled = enabled;
-    }
-
-    NamedGroupInfo(int kemCodePoint, String name, AlgorithmParameters algorithmParameters, boolean enabled)
-    {
-        this.namedGroup = kemCodePoint;
-        this.name = name;
-        this.text = name;
-        this.jcaAlgorithm = name;
-        this.jcaGroup = name;
-        this.char2 = false; // not a curve
-        this.supportedPost13 = true;
-        this.supportedPre13 = true;
-        this.bitsECDH = 0; // not a curve
-        this.bitsFFDHE = 0; // not a curve
-
+        this.all = all;
         this.algorithmParameters = algorithmParameters;
         this.enabled = enabled;
     }
 
     int getBitsECDH()
     {
-        return this.bitsECDH;
+        return all.bitsECDH;
     }
 
     int getBitsFFDHE()
     {
-        return this.bitsFFDHE;
+        return all.bitsFFDHE;
     }
 
     String getJcaAlgorithm()
     {
-        return this.jcaAlgorithm;
+        return all.jcaAlgorithm;
     }
 
     String getJcaGroup()
     {
-        return this.jcaGroup;
+        return all.jcaGroup;
     }
 
     int getNamedGroup()
     {
-        return this.namedGroup;
+        return all.namedGroup;
     }
 
     boolean isActive(BCAlgorithmConstraints algorithmConstraints, boolean post13Active, boolean pre13Active)
@@ -572,18 +508,18 @@ class NamedGroupInfo
 
     boolean isSupportedPost13()
     {
-        return this.supportedPost13;
+        return all.supportedPost13;
     }
 
     boolean isSupportedPre13()
     {
-        return this.supportedPre13;
+        return all.supportedPre13;
     }
 
     @Override
     public String toString()
     {
-        return this.text;
+        return all.text;
     }
 
     private boolean isPermittedBy(BCAlgorithmConstraints algorithmConstraints)

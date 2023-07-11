@@ -17,14 +17,7 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.pqc.asn1.CMCEPrivateKey;
-import org.bouncycastle.pqc.asn1.McElieceCCA2PrivateKey;
-import org.bouncycastle.pqc.asn1.PQCObjectIdentifiers;
-import org.bouncycastle.pqc.asn1.SPHINCS256KeyParams;
-import org.bouncycastle.pqc.asn1.XMSSKeyParams;
-import org.bouncycastle.pqc.asn1.XMSSMTKeyParams;
-import org.bouncycastle.pqc.asn1.XMSSMTPrivateKey;
-import org.bouncycastle.pqc.asn1.XMSSPrivateKey;
+import org.bouncycastle.pqc.asn1.*;
 import org.bouncycastle.pqc.crypto.bike.BIKEParameters;
 import org.bouncycastle.pqc.crypto.bike.BIKEPrivateKeyParameters;
 import org.bouncycastle.pqc.crypto.cmce.CMCEParameters;
@@ -68,10 +61,12 @@ import org.bouncycastle.pqc.crypto.xmss.XMSSPrivateKeyParameters;
 import org.bouncycastle.pqc.crypto.xmss.XMSSUtil;
 import org.bouncycastle.pqc.legacy.crypto.mceliece.McElieceCCA2PrivateKeyParameters;
 import org.bouncycastle.pqc.legacy.crypto.qtesla.QTESLAPrivateKeyParameters;
-import org.bouncycastle.tls.injection.sigalgs.InjectedSigAlgorithms;
+import org.bouncycastle.tls.InjectedKEMs;
+import org.bouncycastle.tls.InjectedSigAlgorithms;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Integers;
 import org.bouncycastle.util.Pack;
+import org.bouncycastle.util.encoders.Hex;
 
 /**
  * Factory for creating private key objects from PKCS8 PrivateKeyInfo objects.
@@ -166,10 +161,10 @@ public class PrivateKeyFactory
         }
         else if (algOID.on(BCObjectIdentifiers.sphincsPlus))
         {
-            byte[] keyEnc = ASN1OctetString.getInstance(keyInfo.parsePrivateKey()).getOctets();
-            SPHINCSPlusParameters spParams = SPHINCSPlusParameters.getParams(Integers.valueOf(Pack.bigEndianToInt(keyEnc, 0)));
+            SPHINCSPLUSPrivateKey spKey = SPHINCSPLUSPrivateKey.getInstance(keyInfo.parsePrivateKey());
+            SPHINCSPlusParameters spParams = Utils.sphincsPlusParamsLookup(keyInfo.getPrivateKeyAlgorithm().getAlgorithm());
 
-            return new SPHINCSPlusPrivateKeyParameters(spParams, Arrays.copyOfRange(keyEnc, 4, keyEnc.length));
+            return new SPHINCSPlusPrivateKeyParameters(spParams, spKey.getSkseed(), spKey.getSkprf(), spKey.getPublicKey().getPkseed(), spKey.getPublicKey().getPkroot());
         }
         else if (algOID.on(BCObjectIdentifiers.picnic))
         {
@@ -215,35 +210,17 @@ public class PrivateKeyFactory
         }
         else if (algOID.on(BCObjectIdentifiers.pqc_kem_kyber))
         {
-            ASN1Sequence keyEnc = ASN1Sequence.getInstance(keyInfo.parsePrivateKey());
+            KyberPrivateKey kyberKey = KyberPrivateKey.getInstance(keyInfo.parsePrivateKey());
+            KyberParameters kyberParams = Utils.kyberParamsLookup(keyInfo.getPrivateKeyAlgorithm().getAlgorithm());
 
-            KyberParameters spParams = Utils.kyberParamsLookup(keyInfo.getPrivateKeyAlgorithm().getAlgorithm());
-
-            int version = ASN1Integer.getInstance(keyEnc.getObjectAt(0)).intValueExact();
-            if (version != 0)
+            KyberPublicKey pubKey = kyberKey.getPublicKey();
+            if(pubKey != null)
             {
-                throw new IOException("unknown private key version: " + version);
+                return new KyberPrivateKeyParameters(kyberParams, kyberKey.getS(), kyberKey.getHpk(), kyberKey.getNonce(),
+                        kyberKey.getPublicKey().getT(), kyberKey.getPublicKey().getRho());
             }
- 
-             if (keyInfo.getPublicKeyData() != null)
-             {
-                 ASN1Sequence pubKey = ASN1Sequence.getInstance(keyInfo.getPublicKeyData().getOctets());
-                 return new KyberPrivateKeyParameters(spParams,
-                     DEROctetString.getInstance(keyEnc.getObjectAt(1)).getOctets(),
-                     DEROctetString.getInstance(keyEnc.getObjectAt(2)).getOctets(),
-                     DEROctetString.getInstance(keyEnc.getObjectAt(3)).getOctets(),
-                     ASN1OctetString.getInstance(pubKey.getObjectAt(0)).getOctets(), // t
-                     ASN1OctetString.getInstance(pubKey.getObjectAt(1)).getOctets()); // rho
-             }
-             else
-             {
-                 return new KyberPrivateKeyParameters(spParams,
-                     ASN1OctetString.getInstance(keyEnc.getObjectAt(1)).getOctets(),
-                     ASN1OctetString.getInstance(keyEnc.getObjectAt(2)).getOctets(),
-                     ASN1OctetString.getInstance(keyEnc.getObjectAt(3)).getOctets(),
-                     null,
-                     null);
-             }
+            return new KyberPrivateKeyParameters(kyberParams, kyberKey.getS(), kyberKey.getHpk(), kyberKey.getNonce(),
+                     null, null);
         }
         else if (algOID.on(BCObjectIdentifiers.pqc_kem_ntrulprime))
         {
@@ -328,53 +305,10 @@ public class PrivateKeyFactory
         }
         else if (algOID.equals(BCObjectIdentifiers.falcon_512) || algOID.equals(BCObjectIdentifiers.falcon_1024))
         {
-            ASN1Encodable keyObj = keyInfo.parsePrivateKey();
-            FalconParameters spParams = Utils.falconParamsLookup(keyInfo.getPrivateKeyAlgorithm().getAlgorithm());
-            ASN1BitString publicKeyData = keyInfo.getPublicKeyData();
+            FalconPrivateKey falconKey = FalconPrivateKey.getInstance(keyInfo.parsePrivateKey());
+            FalconParameters falconParams = Utils.falconParamsLookup(keyInfo.getPrivateKeyAlgorithm().getAlgorithm());
 
-            if (keyObj instanceof ASN1Sequence)
-            {
-                ASN1Sequence keyEnc = ASN1Sequence.getInstance(keyObj);
-
-                int version = ASN1Integer.getInstance(keyEnc.getObjectAt(0)).intValueExact();
-                if (version != 1)
-                {
-                    throw new IOException("unknown private key version: " + version);
-                }
-
-                if (keyInfo.getPublicKeyData() != null)
-                {
-//                ASN1Sequence pubKey = ASN1Sequence.getInstance(keyInfo.getPublicKeyData().getOctets());
-                    return new FalconPrivateKeyParameters(spParams,
-                        ASN1OctetString.getInstance(keyEnc.getObjectAt(1)).getOctets(),
-                        ASN1OctetString.getInstance(keyEnc.getObjectAt(2)).getOctets(),
-                        ASN1OctetString.getInstance(keyEnc.getObjectAt(3)).getOctets(),
-                        publicKeyData.getOctets()); // encT1
-                }
-                else
-                {
-                    return new FalconPrivateKeyParameters(spParams,
-                        ASN1OctetString.getInstance(keyEnc.getObjectAt(1)).getOctets(),
-                        ASN1OctetString.getInstance(keyEnc.getObjectAt(2)).getOctets(),
-                        ASN1OctetString.getInstance(keyEnc.getObjectAt(3)).getOctets(),
-                        null);
-                }
-            }
-            else
-            {
-                // TODO
-                byte[] keyOct = ASN1OctetString.getInstance(keyObj).getOctets();
-                throw new IOException("not supported");
-//                if (publicKeyData != null)
-//                {
-//                    return new FalconPrivateKeyParameters(spParams, new byte[0], new byte[0], new byte[0], publicKeyData.getOctets());
-//                }
-//                else
-//                {
-//
-//                    return new FalconPrivateKeyParameters(spParams, new byte[0], new byte[0], new byte[0], null);
-//                }
-            }
+            return new FalconPrivateKeyParameters(falconParams, falconKey.getf(), falconKey.getG(), falconKey.getF(), falconKey.getPublicKey().getH());
         }
         else if (algOID.on(BCObjectIdentifiers.pqc_kem_bike))
         {
