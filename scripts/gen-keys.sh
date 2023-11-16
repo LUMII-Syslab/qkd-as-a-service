@@ -5,6 +5,11 @@ set -Eeuo pipefail
 export MY_DIR=`dirname $0`
 export CA_DIR=$MY_DIR/../ca-scripts
 
+# dos2unix is needed, if we are invoked from cygwin
+if command -v "dos2unix" &> /dev/null; then
+  dos2unix $CA_DIR/*.sh
+fi
+
 export PQC_SIG_ALG=sphincssha2128fsimple
 # was: sphincssha256128frobust
 
