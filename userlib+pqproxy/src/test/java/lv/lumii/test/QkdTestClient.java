@@ -1,8 +1,7 @@
 package lv.lumii.test;
 
-import lv.lumii.qkd.QkdProperties;
 import lv.lumii.pqc.InjectablePQC;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
+import lv.lumii.qkd.QkdProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,7 @@ public class QkdTestClient {
 
     static {
 
-        InjectablePQC.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT); // makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
+        InjectablePQC.inject(true);
 
         File f = new File(QkdTestClient.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();
@@ -34,11 +33,11 @@ public class QkdTestClient {
 
         // Fix for debug purposes when qkd-client is launched from the IDE:
         if (mainExecutable.replace('\\', '/').endsWith("/build/classes/java/main")) {
-            mainDirectory = mainExecutable.substring(0, mainExecutable.length()-"/build/classes/java/main".length());
+            mainDirectory = mainExecutable.substring(0, mainExecutable.length() - "/build/classes/java/main".length());
             mainExecutable = "java";
         }
 
-        String logFileName = mainDirectory+ File.separator+"qkd.log";
+        String logFileName = mainDirectory + File.separator + "qkd.log";
         System.setProperty("org.slf4j.simpleLogger.logFile", logFileName);
         logger = LoggerFactory.getLogger(QkdTestClient.class);
 
@@ -48,7 +47,7 @@ public class QkdTestClient {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        logger.info("QkdTestClient is using TLS provider: "+tlsProvider.getName()); // BCJSSE
+        logger.info("QkdTestClient is using TLS provider: " + tlsProvider.getName()); // BCJSSE
 
     }
 
@@ -80,7 +79,7 @@ public class QkdTestClient {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("SMART RESPONSE: " + response.body());
-        }catch (Exception e ){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

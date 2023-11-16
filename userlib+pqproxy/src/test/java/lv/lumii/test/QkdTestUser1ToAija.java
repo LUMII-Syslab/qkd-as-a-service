@@ -2,15 +2,16 @@ package lv.lumii.test;
 
 import lv.lumii.httpws.WsClient;
 import lv.lumii.httpws.WsServer;
-import lv.lumii.qkd.InjectableQKD;
+import lv.lumii.pqc.InjectablePQC;
 import lv.lumii.qkd.QkdProperties;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.DERSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URL;
 import java.util.Optional;
 
 public class QkdTestUser1ToAija {
@@ -43,21 +44,40 @@ public class QkdTestUser1ToAija {
 
         QkdProperties props = new QkdProperties(mainDirectory);
 
-        System.out.println("TLS provider before2="+InjectableQKD.getTlsProvider());
-        InjectableQKD.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT, props);
+        InjectablePQC.inject(true);
         // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
-        System.out.println("TLS provider after="+InjectableQKD.getTlsProvider());
 
-        InjectedKEMs.lockKEM(0xFEFF);
-        WsClient wsClient = new WsClient(
+        long ms1 = System.currentTimeMillis();
+        WsClient aija = new WsClient(
+                //props.qaasClientSslFactory(1), props.aijaUri(),
                 Optional.empty(), new URI("ws://localhost:8001/ws"),
-                //props.user1SslFactory(), props.aijaUri(),
+                () -> {
+                    // Step 1> reserveKeyAndGetHalf to Aija
+                    ASN1EncodableVector v = new ASN1EncodableVector();
+                    v.add(new ASN1Integer(1)); // endpoint (function) id
+                    v.add(new ASN1Integer(256)); // key length
+                    v.add(new ASN1Integer(123)); // nonce
+
+                    return new DERSequence(v).getEncoded();
+                },
+                (aijaResponse) -> {
+                    long ms2 = System.currentTimeMillis();
+                    System.out.println("Aija response received; time=" + (ms2 - ms1));
+                },
+                (error) -> {
+                    error.printStackTrace();
+                },
+                "User1 to Aija");
+/*                    WsClient wsClient = new WsClient(
+                //Optional.empty(), new URI("ws://localhost:8001/ws"),
+                props.user1SslFactory(), props.aijaUri(),
                 ()-> "Hi, I am User1!1",
                 (user2str)-> {System.out.println("User2 replied with: "+user2str);},
                 (ex) -> {
             System.out.println("User 2 error: "+ex);
         }, "User1 as a client");
-        wsClient.connectBlockingAndRunAsync();
+        wsClient.connectBlockingAndRunAsync();*/
+        aija.connectBlockingAndRunAsync();
         //wsClient.connectAndRunAsync();
 
     }

@@ -25,6 +25,6 @@ export JAVA_LP="/opt/oqs/lib:/usr/local/lib:$PROJ_ROOT/.libs"
 export MAIN_CLASS=lv.lumii.test.QkdTestUser2
 export ARGS=
 
-$MYDIR/term_with_title.sh "QaaS USER2" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS $ARGS"
+$MYDIR/term_with_title.sh "QaaS USER2" "java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS $ARGS ; bash"
 
 popd

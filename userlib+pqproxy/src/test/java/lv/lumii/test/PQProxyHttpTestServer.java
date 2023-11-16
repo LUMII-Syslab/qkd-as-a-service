@@ -8,7 +8,6 @@ import java.net.http.HttpClient;
 
 import lv.lumii.qkd.QkdProperties;
 import lv.lumii.pqc.InjectablePQC;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ public class PQProxyHttpTestServer {
 
     static {
 
-        InjectablePQC.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT); // makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
+        InjectablePQC.inject(true);
 
         File f = new File(PQProxyHttpTestServer.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();

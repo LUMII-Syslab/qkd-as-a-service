@@ -5,7 +5,6 @@ import lv.lumii.httpws.WsServer;
 import lv.lumii.httpws.WsSink;
 import lv.lumii.qkd.InjectableQKD;
 import lv.lumii.qkd.QkdProperties;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +46,7 @@ public class QkdTestUser2 {
 
         QkdProperties qkdProperties = new QkdProperties(mainDirectory);
 
-        System.out.println("TLS provider before="+InjectableQKD.getTlsProvider());
-        InjectableQKD.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT, qkdProperties);
-        // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
-        System.out.println("TLS provider after="+InjectableQKD.getTlsProvider());
+        InjectableQKD.inject(true, qkdProperties);
 
         SSLContext ctx = qkdProperties.user2SslContext();
 

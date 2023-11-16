@@ -8,6 +8,37 @@ repositories {
     mavenCentral()
 }
 
+tasks.register("bc_clone") {
+    doFirst {
+        def directory = new File('src/bc-java')
+        if (!directory.exists()) {
+            exec {
+                workingDir 'src'
+                commandLine 'git', 'clone', 'https://github.com/LUMII-Syslab/bc-java.git'
+            }
+            exec {
+                workingDir 'src/bc-java'
+                commandLine 'git', 'checkout', 'tls-injection2'
+            }
+        }
+    }
+}
+build.dependsOn(bc_clone)
+
+sourceSets.main {
+    java {
+        srcDirs 'src/main/java',
+                'src/bc-java/core/src/main/java',
+                'src/bc-java/pkix/src/main/java',
+                'src/bc-java/prov/src/main/java',
+                'src/bc-java/tls/src/main/java',
+                'src/bc-java/tls/src/main/jdk1.9/org/bouncycastle/jsse/provider',
+                // ^^^ important that we do not include module-info.java (otherwise, the whole BC module farm is needed)
+                // ^^^ and org/bouncycastle/tls/crypto/impl/jcajce/** (otherwise, there are duplicate class files)
+                'src/bc-java/util/src/main/java'
+    }
+}
+
 compileJava.options.encoding = "UTF-8"
 
 configurations {

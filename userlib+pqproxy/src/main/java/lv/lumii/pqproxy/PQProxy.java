@@ -1,15 +1,18 @@
 package lv.lumii.pqproxy;
 
-import lv.lumii.httpws.*;
+import lv.lumii.httpws.RawTlsServer;
+import lv.lumii.httpws.WsClient;
+import lv.lumii.httpws.WsServer;
+import lv.lumii.httpws.WsSink;
 import lv.lumii.pqc.InjectablePQC;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.*;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.File;
-import java.io.InputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
@@ -30,8 +33,8 @@ public class PQProxy {
 
     static {
 
-        InjectablePQC.inject(InjectedKEMs.InjectionOrder.BEFORE_DEFAULT);
-            // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
+        InjectablePQC.inject(false);
+        // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
 
         File f = new File(WsServer.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         mainExecutable = f.getAbsolutePath();
@@ -43,7 +46,7 @@ public class PQProxy {
             mainExecutable = "java";
         }
 
-        String logFileName = mainDirectory + File.separator + "log"+ File.separator+"pqproxy-"+new Date().getTime()+".log";
+        String logFileName = mainDirectory + File.separator + "log" + File.separator + "pqproxy-" + new Date().getTime() + ".log";
         new File(logFileName).getParentFile().mkdirs();
         System.setProperty("org.slf4j.simpleLogger.logFile", logFileName);
         logger = LoggerFactory.getLogger(PQProxy.class);
@@ -57,74 +60,10 @@ public class PQProxy {
         logger.info("PQProxy is using TLS provider: " + tlsProvider.getName()); // BCJSSE
 
     }
-/*
-    private static KeyManager[] loadKeyManager(PQProxyProperties props) throws Exception {
-        KeyManagerFactory kmfSourceServer = KeyManagerFactory.getInstance("SunX509");
-        ServerKey k = props.sourceServerKey();
-        kmfSourceServer.init(k.keyStore(), k.password());
-        return kmfSourceServer.getKeyManagers();
-    }
 
-    private static TrustManager[] loadAllTrustManagers(PQProxyProperties props) throws Exception {
-        TrustManagerFactory tmfServer, tmfClient;
-        tmfServer = TrustManagerFactory.getInstance("SunX509");
-        tmfServer.init(props.sourceCaTrustStore());
-        tmfClient = TrustManagerFactory.getInstance("SunX509");
-        tmfClient.init(props.targetCaTrustStore());
 
-        TrustManager[] a = tmfServer.getTrustManagers();
-        TrustManager[] b = tmfClient.getTrustManagers();
-
-        // concatenating...
-        TrustManager[] result = new TrustManager[a.length + b.length];
-        System.arraycopy(a, 0, result, 0, a.length);
-        System.arraycopy(b, 0, result, a.length, b.length);
-        return result;
-    }
-*/
-
-    public static SelectableChannel inputStreamToSelectableChannel(InputStream is) throws Exception {
-        Pipe pipe = Pipe.open();
-        Thread pipeThread = new Thread(() -> {
-            try {
-                ByteBuffer buffer = ByteBuffer.allocate(1024);
-                while (is.read(buffer.array()) != -1) {
-                    buffer.flip();
-                    while (buffer.hasRemaining()) {
-                        pipe.sink().write(buffer);
-                    }
-                    buffer.clear();
-                }
-                pipe.sink().close();
-            } catch (Exception e) {
-                // handle exception
-                e.printStackTrace();
-            }
-        });
-        pipeThread.start();
-        return pipe.source();
-    }
     public static void main(String[] args) throws Exception {
-        PQProxyProperties props;
-
-        if (args.length >= 2 && "-f".equals(args[0])) {
-            // -f filename.properties
-            File f = new File(args[1]);
-            props = new PQProxyProperties(f.getParent(), f);
-        } else {
-            // -p prop1=value1 -p prop2=value2...
-            ArrayList<String> nameValues = new ArrayList<>();
-            for (int i = 0; i < args.length; i++) {
-                if ("-p".equals(args[i]) && i + 1 < args.length) {
-                    nameValues.add(args[i + 1]);
-                    i++;
-                }
-            }
-            if (nameValues.isEmpty())
-                props = new PQProxyProperties(mainDirectory);
-            else
-                props = new PQProxyProperties(mainDirectory, nameValues);
-        }
+        PQProxyProperties props = getPqProxyProperties(args);
 
         Optional<SSLContext> ctx = props.sourceServerSslContext();
 
@@ -161,7 +100,7 @@ public class PQProxy {
                     @Override
                     public void consumeMessage(ByteBuffer blob) {
                         try {
-                            System.out.println("FORWARDING "+blob.array().length+" bytes");
+                            System.out.println("FORWARDING " + blob.array().length + " bytes");
                             wrappedTargetWsClient.value.wsClient().send(blob);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
@@ -207,7 +146,7 @@ public class PQProxy {
 
                     @Override
                     public void consumeMessage(ByteBuffer blob) {
-                        System.out.println("REPLY FORWARING "+blob.array().length+" bytes");
+                        System.out.println("REPLY FORWARING " + blob.array().length + " bytes");
                         sourceClientWs.send(blob); // send reply (from the target) back to the source
                     }
 
@@ -230,8 +169,7 @@ public class PQProxy {
                 return sourceSink;
             }, props.description(), props.targetUri().toString());
             wsServer.start();
-        }
-        else {
+        } else {
             RawTlsServer tlsServer = new RawTlsServer(ctx, props.sourcePort(), (sourceSocket) -> {
 
                 Socket targetSocket;
@@ -241,8 +179,7 @@ public class PQProxy {
                             (SSLSocket) factory.createSocket(props.targetUri().getHost(), props.targetUri().getPort());
                     sslTargetSocket.startHandshake();
                     targetSocket = sslTargetSocket;
-                }
-                else {
+                } else {
                     targetSocket = new Socket(props.targetUri().getHost(), props.targetUri().getPort());
                 }
 
@@ -253,14 +190,14 @@ public class PQProxy {
                 sourceChannel.configureBlocking(false);
                 sourceChannel.connect(sourceSocket.getRemoteSocketAddress());
                 //while (!sourceChannel.finishConnect()) {
-                    // Wait for the SocketChannel to finish connecting
+                // Wait for the SocketChannel to finish connecting
                 //}
 
                 targetChannel = SocketChannel.open();
                 targetChannel.configureBlocking(false);
                 targetChannel.connect(targetSocket.getRemoteSocketAddress());
                 //while (!targetChannel.finishConnect()) {
-                    // Wait for the SocketChannel to finish connecting
+                // Wait for the SocketChannel to finish connecting
                 //}
 
 
@@ -278,7 +215,7 @@ public class PQProxy {
 
                 int tries = 0;
 
-                for(;;) {
+                for (; ; ) {
                     //selector.select();
 
                     int readyChannels = selector.selectNow();
@@ -304,8 +241,7 @@ public class PQProxy {
                                     targetChannel.write(buffer);
                                 }
                             }
-                        }
-                        else if (key.channel() == sourceChannel || key.channel() == targetChannel) {
+                        } else if (key.channel() == sourceChannel || key.channel() == targetChannel) {
                             SocketChannel socketChannel = (SocketChannel) key.channel();
                             ByteBuffer buffer = ByteBuffer.allocate(1024);
                             int bytesRead = socketChannel.read(buffer);
@@ -320,61 +256,6 @@ public class PQProxy {
                     selector.selectedKeys().clear();
                 }
 
-/*
-                Selector selector = Selector.open();
-
-                SelectableChannel channel1 = inputStreamToSelectableChannel(sourceSocket.getInputStream());
-                SelectableChannel channel2 = inputStreamToSelectableChannel(targetSocket.getInputStream());
-
-
-                channel1.configureBlocking(false);
-                channel2.configureBlocking(false);
-                channel1.register(selector, SelectionKey.OP_READ);
-                channel2.register(selector, SelectionKey.OP_READ);
-
-*\
-
-
-                int tries = 0;
-                for(;;) {
-
-                    /*int readyChannels = selector.selectNow();
-                    if (readyChannels == 0) {
-                        Thread.sleep(1);
-                        continue;
-                    }*\
-
-                    int n = sourceSocket.getInputStream().available() + targetSocket.getInputStream().available();
-                    if (n==0) {
-                        if (tries > 1000) {
-                            sourceSocket.getInputStream().wait();
-                        }
-                        if (tries > 5000)
-                            break; // Waited too long for data. Will close both sockets.
-
-                        Thread.sleep(1);
-                        tries++;
-                        continue;
-                    }
-                    tries = 0; // reset
-
-                    n = sourceSocket.getInputStream().available();
-                    while (n>0) {
-                        byte[] buf = sourceSocket.getInputStream().readNBytes(n);
-                        targetSocket.getOutputStream().write(buf);
-                        targetSocket.getOutputStream().flush();
-                        n = sourceSocket.getInputStream().available();
-                    }
-                    n = targetSocket.getInputStream().available();
-                    while (n>0) {
-                        byte[] buf = targetSocket.getInputStream().readNBytes(n);
-                        sourceSocket.getOutputStream().write(buf);
-                        sourceSocket.getOutputStream().flush();
-                        n = targetSocket.getInputStream().available();
-                    }
-
-
-                }*/
                 targetSocket.close();
                 sourceSocket.close();
             });
@@ -383,6 +264,30 @@ public class PQProxy {
 
         }
 
+    }
+
+    private static PQProxyProperties getPqProxyProperties(String[] args) {
+        PQProxyProperties props;
+
+        if (args.length >= 2 && "-f".equals(args[0])) {
+            // -f filename.properties
+            File f = new File(args[1]);
+            props = new PQProxyProperties(f.getParent(), f);
+        } else {
+            // -p prop1=value1 -p prop2=value2...
+            ArrayList<String> nameValues = new ArrayList<>();
+            for (int i = 0; i < args.length; i++) {
+                if ("-p".equals(args[i]) && i + 1 < args.length) {
+                    nameValues.add(args[i + 1]);
+                    i++;
+                }
+            }
+            if (nameValues.isEmpty())
+                props = new PQProxyProperties(mainDirectory);
+            else
+                props = new PQProxyProperties(mainDirectory, nameValues);
+        }
+        return props;
     }
 
 

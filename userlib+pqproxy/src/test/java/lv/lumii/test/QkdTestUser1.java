@@ -2,17 +2,12 @@ package lv.lumii.test;
 
 import lv.lumii.httpws.WsClient;
 import lv.lumii.httpws.WsServer;
-import lv.lumii.httpws.WsSink;
 import lv.lumii.qkd.InjectableQKD;
 import lv.lumii.qkd.QkdProperties;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
-import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.URLClassLoader;
-import java.nio.ByteBuffer;
 
 public class QkdTestUser1 {
 
@@ -44,17 +39,19 @@ public class QkdTestUser1 {
 
         QkdProperties props = new QkdProperties(mainDirectory);
 
-        System.out.println("TLS provider before="+InjectableQKD.getTlsProvider());
-        InjectableQKD.inject(InjectedKEMs.InjectionOrder.INSTEAD_DEFAULT, props);
-        // ^^^ makes BouncyCastlePQCProvider the first and BouncyCastleJsseProvider the second
-        System.out.println("TLS provider after="+InjectableQKD.getTlsProvider());
+        InjectableQKD.inject(false, props);
+
+        long ms1 = System.currentTimeMillis();
 
         WsClient wsClient = new WsClient(props.user1SslFactory(), props.user2Uri(),
-                ()-> "Hi, I am User1!",
-                (user2str)-> {System.out.println("User2 replied with: "+user2str);},
+                () -> "Hi, I am User1!",
+                (user2str) -> {
+                    long ms2 = System.currentTimeMillis();
+                    System.out.println("User2 replied with: " + user2str + " time=" + (ms2 - ms1));
+                },
                 (ex) -> {
-            System.out.println("User 2 error: "+ex);
-        }, "User1 as a client");
+                    System.out.println("User 2 error: " + ex);
+                }, "User1 as a client");
         wsClient.connectBlockingAndRunAsync();
         //wsClient.connectAndRunAsync();
 

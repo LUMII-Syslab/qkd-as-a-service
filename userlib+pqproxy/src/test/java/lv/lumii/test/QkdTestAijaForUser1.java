@@ -3,15 +3,10 @@ package lv.lumii.test;
 
 import lv.lumii.httpws.WsServer;
 import lv.lumii.httpws.WsSink;
-import lv.lumii.pqc.InjectablePQC;
-import lv.lumii.qkd.InjectableQKD;
-import lv.lumii.qkd.QkdProperties;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Optional;

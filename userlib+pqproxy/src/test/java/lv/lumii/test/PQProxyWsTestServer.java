@@ -3,9 +3,8 @@ package lv.lumii.test;
 
 import lv.lumii.httpws.WsServer;
 import lv.lumii.httpws.WsSink;
-import lv.lumii.qkd.InjectableQKD;
+import lv.lumii.pqc.InjectablePQC;
 import lv.lumii.qkd.QkdProperties;
-import org.bouncycastle.tls.injection.kems.InjectedKEMs;
 import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +12,6 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
 import java.util.Optional;
 
 public class PQProxyWsTestServer {
@@ -32,18 +29,17 @@ public class PQProxyWsTestServer {
 
         // Fix for debug purposes when qkd-client is launched from the IDE:
         if (mainExecutable.replace('\\', '/').endsWith("/build/classes/java/main")) {
-            mainDirectory = mainExecutable.substring(0, mainExecutable.length()-"/build/classes/java/main".length());
+            mainDirectory = mainExecutable.substring(0, mainExecutable.length() - "/build/classes/java/main".length());
             mainExecutable = "java";
         }
         if (mainExecutable.replace('\\', '/').endsWith("/build/classes/java/test")) {
-            mainDirectory = mainExecutable.substring(0, mainExecutable.length()-"/build/classes/java/test".length());
+            mainDirectory = mainExecutable.substring(0, mainExecutable.length() - "/build/classes/java/test".length());
             mainExecutable = "java";
         }
 
-        String logFileName = mainDirectory+ File.separator+"wsserver.log";
+        String logFileName = mainDirectory + File.separator + "wsserver.log";
         System.setProperty("org.slf4j.simpleLogger.logFile", logFileName);
         logger = LoggerFactory.getLogger(PQProxyWsTestServer.class);
-
 
 
     }
@@ -51,13 +47,13 @@ public class PQProxyWsTestServer {
     public static void main(String[] args) throws Exception {
 
         QkdProperties qkdProperties = new QkdProperties(mainDirectory);
-        InjectableQKD.inject(InjectedKEMs.InjectionOrder.AFTER_DEFAULT, qkdProperties);
+        InjectablePQC.inject(false);
 
         SSLContext ctx = qkdProperties.user2SslContext();
 
         int port = qkdProperties.user2Uri().getPort();
 
-        System.out.println("Ws test server port="+port);
+        System.out.println("Ws test server port=" + port);
         WsServer srv = new WsServer(
                 Optional.of(ctx),
                 port,
@@ -67,7 +63,7 @@ public class PQProxyWsTestServer {
                     public void open(WebSocket ws) {
                         System.out.println("WS test server: connection opened");
                         client.send("Connected: I am WS test server!");
-                        new Thread(()->{
+                        new Thread(() -> {
                             try {
                                 Thread.sleep(1000);
                             } catch (InterruptedException e) {
@@ -79,15 +75,15 @@ public class PQProxyWsTestServer {
 
                     @Override
                     public void consumeMessage(String s) {
-                        System.out.println("WS test server: message received: "+s);
-                        client.send("WS test server reply for: ["+s+"]");
-                        new Thread(()->{
+                        System.out.println("WS test server: message received: " + s);
+                        client.send("WS test server reply for: [" + s + "]");
+                        new Thread(() -> {
                             try {
                                 Thread.sleep(1000);
                             } catch (InterruptedException e) {
                                 throw new RuntimeException(e);
                             }
-                            client.send("WS test server delayed reply for: ["+s+"]");
+                            client.send("WS test server delayed reply for: [" + s + "]");
                         }).start();
                     }
 
