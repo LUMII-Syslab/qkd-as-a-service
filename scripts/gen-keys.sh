@@ -5,15 +5,17 @@ set -Eeuo pipefail
 export MY_DIR=`dirname $0`
 export CA_DIR=$MY_DIR/../ca-scripts
 
+export PQC_SIG_ALG=sphincssha2128fsimple
+# was: sphincssha256128frobust
 
 # initializing PQC CA for Centis and signing Centis client PQC certificate
 echo "===> Checking/generating the PQC CA for Centis key pair..."
-[ -d $CA_DIR/centis-ca ] || $CA_DIR/ca_init.sh centis-ca sphincssha256128frobust $MY_DIR/pqc-centis-ca.cnf
+[ -d $CA_DIR/centis-ca ] || $CA_DIR/ca_init.sh centis-ca $PQC_SIG_ALG $MY_DIR/pqc-centis-ca.cnf
 echo "===> Checking/generating the Centis client PQC key pair..."
 [ -d $CA_DIR/centis ] || $CA_DIR/new_client_key.sh centis-ca centis $MY_DIR/pqc-centis.cnf
 
 echo "===> Checking/generating the PQC CA (for Aija, Brencis, User1, User2) key pair..."
-[ -d $CA_DIR/ca ] || $CA_DIR/ca_init.sh ca sphincssha256128frobust $MY_DIR/pqc-ca.cnf
+[ -d $CA_DIR/ca ] || $CA_DIR/ca_init.sh ca $PQC_SIG_ALG $MY_DIR/pqc-ca.cnf
 echo "===> Checking/generating the User 1 and 2 PQC key pairs..."
 [ -d $CA_DIR/user1 ] || $CA_DIR/new_client_key.sh ca user1 $MY_DIR/pqc-user1.cnf
 [ -d $CA_DIR/user2 ] || $CA_DIR/new_server_key.sh ca user2 $MY_DIR/pqc-user2.cnf
