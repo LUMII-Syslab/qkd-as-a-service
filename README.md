@@ -59,13 +59,22 @@ sudo apt install golang-go libzmq5-dev
 
 (on older Ubuntu, install `libzmq-dev`).
 
+We need golang at least 1.16. If your `go version` shows less, then install Go as follows:
+
+```bash
+sudo add-apt-repository ppa:longsleep/golang-backports -y
+sudo apt upgrade golang
+```
+
 In order to install prerequisites on macOS, run:
 
 ```bash
 brew install golang
 ```
 
-From the `service` directory, launch:
+On Windows, we recommend to use WSL2 and Ubuntu (follow the Ubuntu-related instructions).
+
+Finally, regardless of your OS, from the `service` directory execute `go mod tidy` to install Go packages:
 
 ```bash
 cd service

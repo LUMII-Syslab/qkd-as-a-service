@@ -133,7 +133,7 @@ public class InjectableQaasKEM implements KEM {
                                         assert new Hash(hashAlgLeft, keyLeft).equals(hashLeft);
                                         assert new Hash(hashAlgRight, keyRight).equals(hashRight);
 
-                                        byte[] fullKey = Arrays.copyOf(keyLeft.getOctets(), Math.ceilDiv(KEY_BITS, 8));
+                                        byte[] fullKey = Arrays.copyOf(keyLeft.getOctets(), (int)Math.ceil(KEY_BITS*1.0/8.0));
                                         System.arraycopy(keyRight.getOctets(), 0, fullKey, fullKey.length / 2, fullKey.length / 2);
 
 
@@ -250,7 +250,7 @@ public class InjectableQaasKEM implements KEM {
                                         assert new Hash(hashAlgLeft2, keyLeft).equals(hashLeft);
                                         assert new Hash(hashAlgRight1, keyRight).equals(hashRight);
 
-                                        byte[] fullKey = Arrays.copyOf(keyLeft.getOctets(), Math.ceilDiv(KEY_BITS, 8));
+                                        byte[] fullKey = Arrays.copyOf(keyLeft.getOctets(), (int)Math.ceil(KEY_BITS*1.0/8.0));
                                         System.arraycopy(keyRight.getOctets(), 0, fullKey, fullKey.length / 2, fullKey.length / 2);
 
                                         byte[] fullHash = new Hash(hashAlgLeft2, fullKey).value(); // just choose the same hash algorithm used for the left half

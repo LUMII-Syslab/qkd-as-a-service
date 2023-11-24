@@ -24,6 +24,7 @@ tasks.register("bc_clone") {
     }
 }
 build.dependsOn(bc_clone)
+compileTestJava.dependsOn(bc_clone)
 
 sourceSets.main {
     java {
@@ -76,11 +77,11 @@ else {
     artifactNameWithExt += ".so"
 }
 
-artifacts {
+/*artifacts {
     nativeLibraryAndJars(nativeCompile.outputDirectory.file(artifactNameWithExt)) {
         builtBy nativeCompile
     }
-}
+} */
 
 
 

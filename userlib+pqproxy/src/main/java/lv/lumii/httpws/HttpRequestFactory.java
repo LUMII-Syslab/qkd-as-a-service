@@ -42,8 +42,8 @@ public class HttpRequestFactory {
             builder = builder.POST(HttpRequest.BodyPublishers.ofString(body.toString()));
         else if ("DELETE".equals(requestLine[0]))
             builder = builder.DELETE();
-        else if ("HEAD".equals(requestLine[0]))
-            builder = builder.HEAD();
+//        else if ("HEAD".equals(requestLine[0]))
+//            builder = builder.HEAD();
 
         return builder;
 
