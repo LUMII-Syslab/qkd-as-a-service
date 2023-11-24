@@ -72,7 +72,35 @@ In order to install prerequisites on macOS, run:
 brew install golang
 ```
 
-On Windows, we recommend to use WSL2 and Ubuntu (follow the Ubuntu-related instructions).
+On Windows, we recommend to use WSL2 and Ubuntu. Run
+
+```
+C:\Windows\System32\bash.exe
+```
+
+and follow the Ubuntu-related instructions.
+
+> You will also need to set up port forwarding from Windows to the Go server running under WSL2. To do that, find out the IP of WSL2:
+> 
+> ```
+> C:\Windows\System32\bash.exe -c "ifconfig | grep -o 'inet [^ ]*' | sed -n '1s/.* \([^ ]*\).*/\1/p'"
+> ```
+> 
+> or (if that doesn't work):
+> 
+> ```
+> C:\Windows\System32\bash.exe -c "ifconfig"
+> ```
+> 
+> Then, run `cmd.exe` as administrator, and type:
+> 
+> ```
+> netsh interface portproxy add v4tov4 listenport=[PORT] listenaddress=0.0.0.0 connectport=[PORT] connectaddress=[WSL_IP]
+> ```
+> 
+> for each Go port (default are 8001 for Aija and 8002 for Brencis) and the WSL2 IP obtained above.
+
+
 
 Finally, regardless of your OS, from the `service` directory execute `go mod tidy` to install Go packages:
 

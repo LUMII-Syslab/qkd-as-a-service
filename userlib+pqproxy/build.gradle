@@ -64,7 +64,7 @@ configurations {
 }
 
 String osName = System.getProperty("os.name").toLowerCase()
-String artifactName = "qkduser"
+String artifactName = "qaas"
 String artifactNameWithExt = artifactName
 if (osName.contains("windows")) {
     artifactNameWithExt += ".dll"
