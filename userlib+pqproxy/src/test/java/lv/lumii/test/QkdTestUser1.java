@@ -39,7 +39,7 @@ public class QkdTestUser1 {
 
         QkdProperties props = new QkdProperties(mainDirectory);
 
-        InjectableQKD.inject(false, props);
+        InjectableQKD.inject(props);
 
         long ms1 = System.currentTimeMillis();
 

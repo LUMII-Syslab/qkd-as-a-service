@@ -46,7 +46,7 @@ public class QkdTestUser2 {
 
         QkdProperties qkdProperties = new QkdProperties(mainDirectory);
 
-        InjectableQKD.inject(true, qkdProperties);
+        InjectableQKD.inject(qkdProperties);
 
         SSLContext ctx = qkdProperties.user2SslContext();
 
