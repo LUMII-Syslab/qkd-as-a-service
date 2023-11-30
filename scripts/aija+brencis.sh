@@ -74,6 +74,8 @@ if command -v tmux >/dev/null 2>&1; then
     # Attach to the session
     $MYDIR/term_with_title.sh "aija+brencis.sh" "tmux attach -t aija_brencis"
 else
+    dos2unix $MYDIR/term_with_title_and_dir.sh
+
     # Launching PQC reverse proxies in front of Aija and Brencis (to be accessed from Users 1 and 2)
     export ARGS="-f $MYDIR/pqproxy-pqcuser2aija.properties"
     $MYDIR/term_with_title_and_dir.sh "USERS-REVERSE-PROXY-TO-AIJA" "${MYDIR}${FILE_SEPARATOR}..${FILE_SEPARATOR}service" java -cp $JAVA_CP -Djava.library.path=$JAVA_LP $MAIN_CLASS $ARGS
