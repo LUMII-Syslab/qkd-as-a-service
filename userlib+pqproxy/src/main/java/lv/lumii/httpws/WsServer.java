@@ -38,6 +38,8 @@ public class WsServer {
 
     private Map<WebSocket, WsSink> sourceMessageSinks;
 
+    private boolean isStarted = false;
+
     public WsServer(Optional<SSLContext> sslContext, int port, ClientSourceMessageSinkFactory sinkFactory) {
         this(sslContext, port, sinkFactory, "New WsServer", null);
     }
@@ -131,6 +133,7 @@ public class WsServer {
                 WsSink sink = sourceMessageSinks.remove(ws);
                 if (sink != null)
                     sink.closeGracefully(details);
+                isStarted = false;
             }
 
             @Override
@@ -145,7 +148,7 @@ public class WsServer {
 
             @Override
             public void onStart() {
-
+                isStarted = true;
             }
 
         };
@@ -175,6 +178,10 @@ public class WsServer {
 
     public WebSocketServer wsServer() throws Exception {
         return this.wsserver.value();
+    }
+
+    public boolean isStarted() {
+        return isStarted;
     }
 
 

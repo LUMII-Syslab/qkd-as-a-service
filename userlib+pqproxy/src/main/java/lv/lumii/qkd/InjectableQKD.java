@@ -19,7 +19,7 @@ import java.security.Security;
 public class InjectableQKD {
 
 
-    public static void inject(boolean isUserServer, QkdProperties qkdProperties) {
+    public static void inject(QkdProperties qkdProperties) {
         // PQC signatures are huge; increasing the max handshake size:
         System.setProperty("jdk.tls.maxHandshakeMessageSize", String.valueOf(32768 * 32));
 
@@ -34,7 +34,7 @@ public class InjectableQKD {
         InjectionPoint injectionPoint = InjectionPoint._new();
         injectionPoint.push(pqcAlgs);
 
-        InjectableQaasKEM qaasKEM = new InjectableQaasKEM(isUserServer, qkdProperties, injectionPoint, pqcAlgs);
+        InjectableQaasKEM qaasKEM = new InjectableQaasKEM(qkdProperties, injectionPoint, pqcAlgs);
         qaasKEM.inject(); // will inject after pqcAlgs
 
         BouncyCastleJsseProvider jsseProvider = new BouncyCastleJsseProvider();
