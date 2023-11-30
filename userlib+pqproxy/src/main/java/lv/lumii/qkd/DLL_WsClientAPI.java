@@ -54,7 +54,22 @@ public class DLL_WsClientAPI {
             }
             handle.write(h);
             wsClient.connectBlockingAndRunAsync();
-            return DLL_Common.NULL_BUFFER; // no error
+
+            new Timer((ms) -> {
+                if (ms >= 10000)
+                    return true; // stop waiting
+                try {
+                    if (wsClient.wsClient().isOpen())
+                        return true; // ws opened; stop waiting
+                } catch (Exception e) {
+                }
+                return false; // continue waiting
+            }).startAndWait();
+
+            if (wsClient.wsClient().isOpen())
+                return DLL_Common.NULL_BUFFER; // no error
+            else
+                throw new Exception("Could not connect to the server for too long.");
         } catch (Exception e) {
             handle.write(0);
             return DLL_Common.toCCharPointer("{\"error\":\"Could not connect to the server: " + e.getMessage() + "\"}");
@@ -139,7 +154,7 @@ public class DLL_WsClientAPI {
         }
 
         new Timer((ms) -> {
-            if (ms >= 10001)
+            if (ms >= 10000)
                 return true; // stop waiting
             try {
                 if (wsClient.wsClient().isOpen())
