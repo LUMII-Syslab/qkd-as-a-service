@@ -53,6 +53,8 @@ public class QkdTestUser1 {
                     System.out.println("User 2 error: " + ex);
                 }, "User1 as a client");
         wsClient.connectBlockingAndRunAsync();
+
+        Thread.sleep(5000);
         //wsClient.connectAndRunAsync();
 
     }

@@ -147,6 +147,9 @@ public class QkdProperties {
     public Optional<SSLFactory> qaasClientSslFactory(int userNo) throws Exception {
         ClientKey user1key = this.user1Key();
         ServerKey user2key = this.user2Key();
+        if (this.aijaUri().getScheme().equals("ws") && this.brencisUri().getScheme().equals("ws"))
+            return Optional.empty();
+
         return Optional.of(
                 SSLFactory.builder()
                         .withIdentityMaterial(

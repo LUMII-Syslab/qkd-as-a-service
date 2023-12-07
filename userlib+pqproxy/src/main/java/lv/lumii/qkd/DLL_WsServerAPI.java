@@ -1,47 +1,33 @@
 package lv.lumii.qkd;
 
 
-import lv.lumii.httpws.WsClient;
 import lv.lumii.httpws.WsServer;
-import lv.lumii.httpws.WsSink;
 import org.graalvm.nativeimage.IsolateThread;
-import org.graalvm.nativeimage.UnmanagedMemory;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
-import org.graalvm.nativeimage.c.struct.SizeOf;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CCharPointerPointer;
 import org.graalvm.nativeimage.c.type.CIntPointer;
-import org.graalvm.nativeimage.c.type.CLongPointer;
-import org.graalvm.word.WordFactory;
 import org.java_websocket.WebSocket;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
-import java.io.File;
-import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class DLL_WsServerAPI {
 
-
-    private static Map<Long, WebSocket> wsClientMap = new HashMap<>();
-    private static Map<Long, DLL_WsSink> wsSinkMap = new HashMap<>();
-    private static List<Long> newClients = new LinkedList<>();
-    private static WsServer wsServer = null; // will be assigned on start
-
     private static final Object mapSem = new Object();
+    private static final Map<Long, WebSocket> wsClientMap = new HashMap<>();
+    private static final Map<Long, DLL_WsSink> wsSinkMap = new HashMap<>();
+    private static final List<Long> newClients = new LinkedList<>();
+    private static WsServer wsServer = null; // will be assigned on start
 
     private static long newHandle() {
         long h;
         do {
-            h = Math.round(Math.random() * Long.MAX_VALUE);
+            h = Math.round(Math.random() * Long.MAX_VALUE) + 1;
         } while (wsSinkMap.containsKey(h));
-        return h;
+        return h; // returns a non-existing and non-zero handle
     }
-
 
     @CEntryPoint(name = "qaas_start_ws_server")
     public static CCharPointer qaas_start_ws_server(IsolateThread thread) {
@@ -50,10 +36,11 @@ public class DLL_WsServerAPI {
 
             int port = DLL_Common.props.user2Uri().getPort();
 
+            final WsServer srv;
             synchronized (mapSem) {
                 if (wsServer != null)
                     throw new Exception("You have to stop the server before starting it again.");
-                wsServer = new WsServer(Optional.of(ctx), port, (WebSocket client) -> new DLL_WsSink() {
+                srv = new WsServer(Optional.of(ctx), port, (WebSocket client) -> new DLL_WsSink() {
 
                     @Override
                     public void open(WebSocket ws) {
@@ -67,53 +54,55 @@ public class DLL_WsServerAPI {
                     }
 
                 });
-                wsServer.start();
+                wsServer = srv;
             }
+            srv.start();
             new Timer((ms) -> {
-                if (wsServer.isStarted())
+                if (srv.isStarted())
                     return true; // interrupt waiting
-                if (ms > 5000)
-                    return true; // interrupt waiting
-                return false; // continue waiting
+                return ms > 5000;
             }).startAndWait();
 
-            if (!wsServer.isStarted())
+            if (!srv.isStarted())
                 throw new Exception("Could not start the server for too long.");
             return DLL_Common.NULL_BUFFER;
         } catch (Exception e) {
-            return DLL_Common.toCCharPointer("{\"error\":\"Could start the server: " + e.getMessage() + "\"}");
+            return DLL_Common.toCCharPointer("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
 
     @CEntryPoint(name = "qaas_accept_new_ws_client")
-    public static long qaas_accept_new_ws_client(IsolateThread thread) {
+    public static long qaas_accept_new_ws_client(IsolateThread thread, long waitMs) {
         try {
             synchronized (mapSem) {
                 if (wsServer == null || !wsServer.isStarted()) {
-                    System.out.println("Could not accept client: the server not running");
+                    System.out.println("Could not accept client: the server not running "+wsServer);
                     return -1;
                 }
             }
 
             new Timer((ms) -> {
+                if (ms > waitMs)
+                    return true; // stop waiting
                 synchronized (mapSem) {
                     if (wsServer == null || !wsServer.isStarted())
                         return true; // stop waiting
+                    return !newClients.isEmpty();
                 }
-                return !newClients.isEmpty();
             }).startAndWait();
 
-            if (!newClients.isEmpty()) {
-                long result = newClients.get(0);
-                System.out.println("New client accepted: " + result);
-                newClients.remove(0);
-                return result;
-            } else {
-                System.out.println("Could not accept client: timeout or the server is not running.");
-                return -1;
+            synchronized (mapSem) {
+                if (!newClients.isEmpty()) {
+                    long result = newClients.get(0);
+                    newClients.remove(0);
+                    return result; // will be > 0
+                } else {
+                    System.out.println("Could not accept client: timeout");
+                    return 0; // zero is ok; signals the invoker to wait for another client
+                }
             }
         } catch (Exception e) {
-            return -1;
+            return -2;
         }
     }
 
@@ -136,11 +125,11 @@ public class DLL_WsServerAPI {
                 return true; // stop waiting
             } catch (NoSuchElementException e1) {
                 if (ms >= waitMs) {
-                    result[0] = DLL_Common.toCCharPointer("{\"error\":\"Timeout\"}");
+                    // just return NULL_BUFFER in bufPtr to denote the timeout
                     return true;
                 }
             } catch (ClosedChannelException e) {
-                result[0] = DLL_Common.toCCharPointer("{\"error\":\"Channel closed. "+e.getMessage()+"\"}");
+                result[0] = DLL_Common.toCCharPointer("{\"error\":\"Channel closed. " + e.getMessage() + "\"}");
                 return true;
             }
             return false; // continue waiting
@@ -159,6 +148,7 @@ public class DLL_WsServerAPI {
                 return DLL_Common.NULL_BUFFER; // invalid handle; returning no data
         }
 
+        bufPtr.write(DLL_Common.NULL_BUFFER);
         len.write(0); // will be replaced by an actual length of received data
 
         final CCharPointer[] result = new CCharPointer[1];
@@ -170,13 +160,14 @@ public class DLL_WsServerAPI {
                 CCharPointer buf = DLL_Common.toCCharPointer(bytes);
                 bufPtr.write(buf);
                 len.write(bytes.length);
+                return true; // stop waiting
             } catch (NoSuchElementException e1) {
                 if (ms >= waitMs) {
-                    result[0] = DLL_Common.toCCharPointer("{\"error\":\"Timeout\"}");
+                    // just return NULL_BUFFER in bufPtr to denote the timeout
                     return true;
                 }
             } catch (ClosedChannelException e) {
-                result[0] = DLL_Common.toCCharPointer("{\"error\":\"Channel closed. "+e.getMessage()+"\"}");
+                result[0] = DLL_Common.toCCharPointer("{\"error\":\"Channel closed. " + e.getMessage() + "\"}");
                 return true;
             }
             return false; // continue waiting
@@ -250,7 +241,7 @@ public class DLL_WsServerAPI {
             synchronized (mapSem) {
                 if (wsServer == null || !wsServer.isStarted())
                     throw new Exception("The server is not running");
-                wsServer.wsServer().stop();
+                wsServer.stop();
             }
 
             new Timer((ms) -> {
@@ -258,9 +249,7 @@ public class DLL_WsServerAPI {
                     if (wsServer == null || !wsServer.isStarted())
                         return true; // interrupt waiting
                 }
-                if (ms > 5000)
-                    return true; // interrupt waiting
-                return false; // continue waiting
+                return ms > 5000; // interrupt waiting
             }).startAndWait();
 
             synchronized (mapSem) {

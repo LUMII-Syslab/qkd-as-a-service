@@ -133,7 +133,6 @@ public class WsServer {
                 WsSink sink = sourceMessageSinks.remove(ws);
                 if (sink != null)
                     sink.closeGracefully(details);
-                isStarted = false;
             }
 
             @Override
@@ -164,25 +163,31 @@ public class WsServer {
             wssrv.setWebSocketFactory(wsf); // adding TLS
         }
 
-        //wssrv.set
         wssrv.setConnectionLostTimeout(20);
-        wssrv.start();
         System.out.println("WsServer started and ready.");
 
         return wssrv;
     }
 
     public void start() throws Exception {
-        this.wsserver.value(); // init the value, starts the server automatically
+        this.wsserver.value().start(); // init the value, starts the server automatically
     }
 
-    public WebSocketServer wsServer() throws Exception {
+    /*public WebSocketServer wsServer() throws Exception {
         return this.wsserver.value();
-    }
+    }*/
 
     public boolean isStarted() {
         return isStarted;
     }
 
+    public void stop() {
+        try {
+            this.wsserver.value().stop();
+        } catch (Exception e) {
+
+        }
+        isStarted = false;
+    }
 
 }

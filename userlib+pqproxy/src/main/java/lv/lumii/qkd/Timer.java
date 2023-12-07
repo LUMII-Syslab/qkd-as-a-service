@@ -12,16 +12,21 @@ public class Timer {
         this.condition = condition;
     }
 
+    private long nowMs() {
+        // return System.currentTimeMillis();
+        return System.nanoTime() / 1000000;
+    }
+
     public void startAndWait() {
-        long time0 = System.currentTimeMillis();
+        long time0 = nowMs();
         long msElapsed = 0;
 
         while (!condition.fulfilled(msElapsed)) {
             try {
-                Thread.sleep(10);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
             }
-            msElapsed = System.currentTimeMillis()-time0;
+            msElapsed = nowMs()-time0;
         }
     }
 }

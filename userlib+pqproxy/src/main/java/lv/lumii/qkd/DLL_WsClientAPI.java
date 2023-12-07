@@ -90,12 +90,13 @@ public class DLL_WsClientAPI {
 
         new Timer((ms) -> {
             try {
-                CCharPointer s = DLL_Common.toCCharPointer(wsSink.nextString());
+                String nextS = wsSink.nextString();
+                CCharPointer s = DLL_Common.toCCharPointer(nextS);
                 sPtr.write(s);
                 return true; // stop waiting
             } catch (NoSuchElementException e1) {
                 if (ms >= waitMs) {
-                    result[0] = DLL_Common.toCCharPointer("{\"error\":\"Timeout\"}");
+                    // just return NULL_BUFFER in bufPtr to denote the timeout
                     return true;
                 }
             } catch (ClosedChannelException e) {
@@ -109,7 +110,7 @@ public class DLL_WsClientAPI {
     }
 
     @CEntryPoint(name = "qaas_receive_binary_from_wss_server")
-    public static synchronized CCharPointer qaas_receive_binary_from_wss_server(IsolateThread thread, long handle, long waitMs, CCharPointerPointer bufPtr, CIntPointer len) {
+    public static CCharPointer qaas_receive_binary_from_wss_server(IsolateThread thread, long handle, long waitMs, CCharPointerPointer bufPtr, CIntPointer len) {
         DLL_WsSink wsSink;
 
         synchronized (mapSem) {
@@ -129,9 +130,10 @@ public class DLL_WsClientAPI {
                 CCharPointer buf = DLL_Common.toCCharPointer(bytes);
                 bufPtr.write(buf);
                 len.write(bytes.length);
+                return true; // stop waiting
             } catch (NoSuchElementException e1) {
                 if (ms >= waitMs) {
-                    result[0] = DLL_Common.toCCharPointer("{\"error\":\"Timeout\"}");
+                    // just return NULL_BUFFER in bufPtr to denote the timeout
                     return true;
                 }
             } catch (ClosedChannelException e) {
@@ -145,7 +147,7 @@ public class DLL_WsClientAPI {
     }
 
     @CEntryPoint(name = "qaas_send_string_to_wss_server")
-    public static synchronized CCharPointer qaas_send_string_to_wss_server(IsolateThread thread, long handle, final CCharPointer sPtr) {
+    public static CCharPointer qaas_send_string_to_wss_server(IsolateThread thread, long handle, final CCharPointer sPtr) {
         WsClient wsClient;
         synchronized (mapSem) {
             wsClient = wsClientMap.get(handle);
@@ -174,7 +176,7 @@ public class DLL_WsClientAPI {
     }
 
     @CEntryPoint(name = "qaas_send_binary_to_wss_server")
-    public static synchronized CCharPointer qaas_send_binary_to_wss_server(IsolateThread thread, long handle, final CCharPointer bytes, int len) {
+    public static CCharPointer qaas_send_binary_to_wss_server(IsolateThread thread, long handle, final CCharPointer bytes, int len) {
         WsClient wsClient;
         synchronized (mapSem) {
             wsClient = wsClientMap.get(handle);
@@ -205,7 +207,7 @@ public class DLL_WsClientAPI {
 
     // must be called in the end to free client memory
     @CEntryPoint(name = "qaas_disconnect_from_wss_server")
-    public static synchronized CCharPointer qaas_disconnect_from_wss_server(IsolateThread thread, long handle) {
+    public static CCharPointer qaas_disconnect_from_wss_server(IsolateThread thread, long handle) {
         WsClient wsClient;
         synchronized (mapSem) {
             wsClient = wsClientMap.remove(handle);
