@@ -22,7 +22,6 @@ export PQC_SIG_ALG=sphincsshake128fsimple
 # initializing PQC CA for Centis and signing Centis client PQC certificate
 echo "===> Checking/generating the PQC CA for Centis key pair..."
 [ -d $CA_DIR/centis-ca ] || $CA_DIR/ca_init.sh centis-ca $PQC_SIG_ALG $MY_DIR/pqc-centis-ca.cnf
-exit
 echo "===> Checking/generating the Centis client PQC key pair..."
 [ -d $CA_DIR/centis ] || $CA_DIR/new_client_key.sh centis-ca centis $MY_DIR/pqc-centis.cnf
 
