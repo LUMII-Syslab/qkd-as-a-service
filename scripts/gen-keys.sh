@@ -2,6 +2,11 @@
 
 set -Eeuo pipefail
 
+export DYLD_LIBRARY_PATH=/usr/local/lib
+export PATH=/opt/homebrew/bin:$PATH
+# ^^^ We are adding path to homebrew, since on macOS we advice using its openssl - it works with liboqs provider!
+#     Please, configure oqsprovider in /opt/homebrew/etc/openssl@3/openssl.cnf manually.
+
 export MY_DIR=`dirname $0`
 export CA_DIR=$MY_DIR/../ca-scripts
 
@@ -11,10 +16,13 @@ if command -v "dos2unix" &> /dev/null; then
 fi
 
 export PQC_SIG_ALG=sphincsshake128fsimple
+# must be from:
+#openssl list -signature-algorithms
 
 # initializing PQC CA for Centis and signing Centis client PQC certificate
 echo "===> Checking/generating the PQC CA for Centis key pair..."
 [ -d $CA_DIR/centis-ca ] || $CA_DIR/ca_init.sh centis-ca $PQC_SIG_ALG $MY_DIR/pqc-centis-ca.cnf
+exit
 echo "===> Checking/generating the Centis client PQC key pair..."
 [ -d $CA_DIR/centis ] || $CA_DIR/new_client_key.sh centis-ca centis $MY_DIR/pqc-centis.cnf
 

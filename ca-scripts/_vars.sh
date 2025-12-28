@@ -21,6 +21,13 @@ set -Eeuxo pipefail
 #     SERVER_KEYSTORE_PASS
 
 #export OQS_OPENSSL=/opt/oqs/bin/openssl
+#export OQS_OPENSSL=/opt/homebrew/bin/openssl
+
+if [ "$(uname)" == "Darwin" ]; then
+  export PATH=/opt/homebrew/bin:$PATH
+  # ^^^ try to use openssl from brew on macOS
+fi
+
 export OQS_OPENSSL=`which openssl`
 if [ -z $OQS_OPENSSL ]; then
   OQS_OPENSSL=/usr/local/bin/openssl
