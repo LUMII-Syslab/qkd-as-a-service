@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -Eeuxo pipefail
+set -Eeo pipefail
 #
 # Generates a new CA key pair to be used for signing server and client certificates.
 # If the CA key pair already exists, does nothing.
@@ -111,22 +111,33 @@ echo "export OQS_OPENSSL_SERVER_REQ_ARGS=\"${OQS_OPENSSL_SERVER_REQ_ARGS}\"" >> 
 chmod +x $CA_VARS
 
 echo "Generating CA key pair..."
-${OQS_OPENSSL} req -x509 -new -newkey $SIG_ALG -keyout $CA_KEY -out $CA_CRT -nodes -days $CA_DAYS -config $CA_CONFIG_FILE ${OQS_OPENSSL_CA_REQ_ARGS} ${OQS_OPENSSL_FLAGS}
+${OQS_OPENSSL} req -x509 -new -newkey $SIG_ALG -keyout $CA_KEY -out $CA_CRT -nodes -days $CA_DAYS -config $CA_CONFIG_FILE -extensions v3_ca ${OQS_OPENSSL_CA_REQ_ARGS} ${OQS_OPENSSL_FLAGS}
 cat $CA_CRT >> $ALL_CA_PEM
 
 echo "Converting CA certificate to the DER format..."
 ${OQS_OPENSSL} x509 -in $CA_CRT -inform pem -out $DER_TMP -outform der ${OQS_OPENSSL_FLAGS}
-keytool -v -printcert -file $DER_TMP
-echo "Adding the certificate to the Java trust store ${CA_TRUSTSTORE}..."
-echo yes | keytool -importcert -alias ${CA_ALIAS} -keystore ${CA_TRUSTSTORE} -storepass ${CA_TRUSTSTORE_PASS} -file $DER_TMP
-echo "Adding the certificate to the Java trust store ${ALL_CA_TRUSTSTORE}..."
-echo yes | keytool -importcert -alias ${CA_NAME} -keystore ${ALL_CA_TRUSTSTORE} -storepass ${CA_TRUSTSTORE_PASS} -file $DER_TMP
-rm $DER_TMP
-echo "Validating..."
-keytool -keystore ${CA_TRUSTSTORE} -storepass ${CA_TRUSTSTORE_PASS} -list | grep ${CA_ALIAS}
-echo "All CA-s:"
-keytool -keystore ${ALL_CA_TRUSTSTORE} -storepass ${CA_TRUSTSTORE_PASS} -list
-echo "We are done."
-echo "Deployable files:"
-echo " * ${CA_TRUSTSTORE} - CA trust store in the Java key store format"
-echo "   OR ${CA_CRT} - CA self-signed certificate in the PEM (=Base64 DER) format"
+
+export KEYTOOL=`which keytool`
+if [ -z $KEYTOOL ]; then
+  echo "keytool not found, keeping the .der file as ${CA_TRUSTSTORE}.der"
+  mv $DER_TMP ${CA_TRUSTSTORE}.der
+  echo "We are done."
+  echo "Deployable files:"
+  echo " * ${CA_TRUSTSTORE}.der - CA certificate in the DER format"
+  echo "   OR ${CA_CRT} - CA self-signed certificate in the PEM (=Base64 DER) format"
+else
+  keytool -v -printcert -file $DER_TMP
+  echo "Adding the certificate to the Java trust store ${CA_TRUSTSTORE}..."
+  echo yes | keytool -importcert -alias ${CA_ALIAS} -keystore ${CA_TRUSTSTORE} -storepass ${CA_TRUSTSTORE_PASS} -file $DER_TMP
+  echo "Adding the certificate to the Java trust store ${ALL_CA_TRUSTSTORE}..."
+  echo yes | keytool -importcert -alias ${CA_NAME} -keystore ${ALL_CA_TRUSTSTORE} -storepass ${CA_TRUSTSTORE_PASS} -file $DER_TMP
+  rm $DER_TMP
+  echo "Validating..."
+  keytool -keystore ${CA_TRUSTSTORE} -storepass ${CA_TRUSTSTORE_PASS} -list | grep ${CA_ALIAS}
+  echo "All CA-s:"
+  keytool -keystore ${ALL_CA_TRUSTSTORE} -storepass ${CA_TRUSTSTORE_PASS} -list
+  echo "We are done."
+  echo "Deployable files:"
+  echo " * ${CA_TRUSTSTORE} - CA trust store in the Java key store format"
+  echo "   OR ${CA_CRT} - CA self-signed certificate in the PEM (=Base64 DER) format"
+fi

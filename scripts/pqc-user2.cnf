@@ -6,9 +6,11 @@ prompt = no
 
 [req_distinguished_name]
 countryName            = LV
+stateOrProvinceName    = Riga
 localityName           = Riga
-organizationName       = IMCS,UL
-commonName             = IMCS,UL QaaS User 2 (Server)
+organizationName       = IMCS
+organizationalUnitName = SysLab
+commonName             = User2
 [req_ext]
 subjectAltName = @alt_names
 [v3_req]

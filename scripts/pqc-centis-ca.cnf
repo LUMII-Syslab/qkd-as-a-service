@@ -4,7 +4,13 @@ prompt = no
 
 [req_distinguished_name]
 countryName            = LV
+stateOrProvinceName    = Riga
 localityName           = Riga
-organizationName       = IMCS,UL
-commonName             = IMCS,UL PQC CA for Centis
+organizationName       = IMCS
+organizationalUnitName = SysLab
+commonName             = Butterfly CA for Centis
 
+[v3_ca]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints = CA:true

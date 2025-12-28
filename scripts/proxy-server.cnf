@@ -6,9 +6,11 @@ prompt = no
 
 [req_distinguished_name]
 countryName            = LV
+stateOrProvinceName    = Riga
 localityName           = Riga
-organizationName       = IMCS,UL
-commonName             = IMCS,UL QKD proxy server
+organizationName       = IMCS
+organizationalUnitName = SysLab
+commonName             = ButterflyProxy
 [req_ext]
 subjectAltName = @alt_names
 [v3_req]

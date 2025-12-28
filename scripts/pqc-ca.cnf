@@ -4,7 +4,13 @@ prompt = no
 
 [req_distinguished_name]
 countryName            = LV
+stateOrProvinceName    = Riga
 localityName           = Riga
-organizationName       = IMCS,UL
-commonName             = IMCS,UL PQC CA for QaaS
+organizationName       = IMCS
+organizationalUnitName = SysLab
+commonName             = ButterflyCA
 
+[v3_ca]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints = CA:true

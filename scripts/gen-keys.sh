@@ -10,8 +10,7 @@ if command -v "dos2unix" &> /dev/null; then
   dos2unix $CA_DIR/*.sh
 fi
 
-export PQC_SIG_ALG=sphincssha2128fsimple
-# was: sphincssha256128frobust
+export PQC_SIG_ALG=sphincsshake128fsimple
 
 # initializing PQC CA for Centis and signing Centis client PQC certificate
 echo "===> Checking/generating the PQC CA for Centis key pair..."

@@ -4,6 +4,7 @@ prompt = no
 
 [req_distinguished_name]
 countryName            = LV
+stateOrProvinceName    = Riga
 localityName           = Riga
-organizationName       = IMCS,UL
-commonName             = IMCS,UL QaaS User 1 (Client)
+organizationName       = IMCS
+organizationalUnitName = User1
