@@ -16,7 +16,7 @@ if command -v "dos2unix" &> /dev/null; then
 fi
 
 #export PQC_SIG_ALG=p256_dilithium2
-export PQC_SIG_ALG=sphincsshake128fsimple
+export PQC_SIG_ALG=sphincssha2128fsimple
 # must be from:
 #openssl list -signature-algorithms
 

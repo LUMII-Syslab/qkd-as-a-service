@@ -8,7 +8,8 @@ prompt = no
 countryName            = LV
 localityName           = Riga
 organizationName       = IMCS,UL
-commonName             = IMCS,UL QaaS Aija server
+organizationalUnitName = SysLab
+commonName             = ButterflyAija
 [req_ext]
 subjectAltName = @alt_names
 [v3_req]
